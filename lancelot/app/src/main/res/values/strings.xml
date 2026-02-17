@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lancelot</string>
+    <string name="xposed_description">Spoofer anti-detección (Redmi 9 Lancelot) - Hooks avanzados para evadir fingerprinting</string>
+
+    <!-- Theme -->
+    <string name="theme_name">Lancelot Theme</string>
+</resources>
