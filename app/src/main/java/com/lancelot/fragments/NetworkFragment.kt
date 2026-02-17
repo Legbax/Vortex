@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lancelot.MainHook
 import com.lancelot.SpoofingUtils
+import com.lancelot.PrefsManager
 import com.lancelot.R
 import java.io.File
 
@@ -38,11 +39,6 @@ class NetworkFragment : Fragment() {
 
     private fun setupRecyclerView() {
         val carriers = MainHook.getUsCarriers()
-        // Convert to list of CarrierInfo needed for adapter.
-        // Wait, MainHook.UsCarrier is what we have.
-        // My CarrierAdapter expects CarrierInfo? I named it CarrierInfo in Adapter but UsCarrier in MainHook.
-        // I need to fix CarrierAdapter to use MainHook.UsCarrier or rename.
-        // I'll update CarrierAdapter to use MainHook.UsCarrier.
 
         adapter = CarrierAdapter(carriers) { selectedCarrier ->
             saveCarrierPreference(selectedCarrier)
@@ -54,21 +50,20 @@ class NetworkFragment : Fragment() {
     }
 
     private fun saveCarrierPreference(carrier: MainHook.Companion.UsCarrier) {
-        val prefs = requireContext().getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("mcc_mnc", carrier.mccMnc)
-            putString("sim_operator", carrier.mccMnc)
-            putString("sim_country", "us")
-            apply()
-        }
-        makePrefsWorldReadable()
+        val context = requireContext()
+        // Save encrypted preferences without world-readable permissions
+        PrefsManager.saveString(context, "mcc_mnc", carrier.mccMnc)
+        PrefsManager.saveString(context, "sim_operator", carrier.mccMnc)
+        PrefsManager.saveString(context, "sim_country", "us")
+
+        Toast.makeText(context, "Carrier saved: ${carrier.name}", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadSavedData() {
-        val prefs = requireContext().getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
-        val savedMccMnc = prefs.getString("mcc_mnc", "310260")
+        val context = requireContext()
+        val savedMccMnc = PrefsManager.getString(context, "mcc_mnc", "310260")
 
-        if (savedMccMnc != null) {
+        if (savedMccMnc.isNotEmpty()) {
             adapter.setSelected(savedMccMnc)
 
             // Also display info for this carrier
@@ -86,19 +81,5 @@ class NetworkFragment : Fragment() {
                   "Country: US\n" +
                   "Generated Number: $phoneNumber"
         tvGeneratedInfo.text = info
-    }
-
-    private fun makePrefsWorldReadable() {
-        try {
-            val prefsDir = File(requireContext().applicationInfo.dataDir, "shared_prefs")
-            val prefsFile = File(prefsDir, "spoof_prefs.xml")
-            if (prefsFile.exists()) {
-                prefsFile.setReadable(true, false)
-                prefsDir.setReadable(true, false)
-                Runtime.getRuntime().exec("su -c chmod 644 ${prefsFile.absolutePath}")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 }

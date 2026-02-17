@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex UI Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0B0E14; /* vortex_background */
+            color: #FFFFFF; /* vortex_text_primary */
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .phone-frame {
+            width: 360px;
+            height: 740px;
+            background-color: #0B0E14;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            height: 24px;
+            background-color: transparent;
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 10px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #00E676; /* vortex_accent */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #00E676;
+            margin-right: 12px;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #8F9BB3; /* vortex_text_secondary */
+            font-size: 10px;
+            letter-spacing: 1.5px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            color: #00E676;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00E676;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 5px #00E676;
+        }
+
+        .content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            color: #8F9BB3;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .carrier-card {
+            background-color: #151922; /* vortex_card_background */
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .carrier-card:hover {
+            border-color: #00E676;
+        }
+
+        .carrier-card.selected {
+            border-color: #00E676;
+            background-color: #1A1F2A;
+        }
+
+        .carrier-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 16px;
+        }
+
+        .carrier-info {
+            flex: 1;
+        }
+
+        .carrier-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .carrier-mccmnc {
+            color: #8F9BB3;
+            font-size: 12px;
+        }
+
+        .generated-card {
+            background-color: #151922;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .generated-header {
+            display: flex;
+            align-items: center;
+            color: #8F9BB3;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .generated-content {
+            color: #FFFFFF;
+            font-family: monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .nav-bar {
+            height: 56px;
+            background-color: #080A0F; /* vortex_nav_background */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #151922;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #8F9BB3;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #00E676;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            background-color: currentColor;
+            mask-size: contain;
+            -webkit-mask-size: contain;
+        }
+
+        /* Simple CSS shapes for icons */
+        .icon-network { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+        .icon-status { clip-path: circle(50% at 50% 50%); }
+        .icon-device { clip-path: inset(10% 20% 10% 20%); }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>12:00</span>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">V</div>
+                <div class="title-group">
+                    <span class="title">VORTEX</span>
+                    <span class="subtitle">XPOSED MODULE</span>
+                </div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                ACTIVE
+            </div>
+        </div>
+
+        <!-- Content (Network Fragment) -->
+        <div class="content">
+            <div class="section-header">
+                <span>📶 CARRIER USA</span>
+            </div>
+
+            <!-- List -->
+            <div class="carrier-card">
+                <div class="carrier-dot" style="background-color: #E91E63;"></div>
+                <div class="carrier-info">
+                    <div class="carrier-name">T-Mobile</div>
+                    <div class="carrier-mccmnc">MCC/MNC 310260</div>
+                </div>
+            </div>
+
+            <div class="carrier-card">
+                <div class="carrier-dot" style="background-color: #03A9F4;"></div>
+                <div class="carrier-info">
+                    <div class="carrier-name">AT&T</div>
+                    <div class="carrier-mccmnc">MCC/MNC 310410</div>
+                </div>
+            </div>
+
+            <div class="carrier-card">
+                <div class="carrier-dot" style="background-color: #F44336;"></div>
+                <div class="carrier-info">
+                    <div class="carrier-name">Verizon</div>
+                    <div class="carrier-mccmnc">MCC/MNC 310012</div>
+                </div>
+            </div>
+
+            <div class="carrier-card selected">
+                <div class="carrier-dot" style="background-color: #4CAF50;"></div> <!-- Cricket Green -->
+                <div class="carrier-info">
+                    <div class="carrier-name">Cricket</div>
+                    <div class="carrier-mccmnc">MCC/MNC 310150</div>
+                </div>
+                <div style="color: #00E676;">✔</div>
+            </div>
+
+            <div class="carrier-card">
+                <div class="carrier-dot" style="background-color: #FFEB3B;"></div>
+                <div class="carrier-info">
+                    <div class="carrier-name">Sprint</div>
+                    <div class="carrier-mccmnc">MCC/MNC 310120</div>
+                </div>
+            </div>
+
+            <!-- Generated Info -->
+            <div class="generated-card">
+                <div class="generated-header">
+                    <span>💳 TELEFONÍA GENERADA</span>
+                </div>
+                <div class="generated-content">
+Carrier: Cricket
+MCC/MNC: 310150
+Country: US
+Generated Number: +12105550192
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="nav-bar">
+            <div class="nav-item">
+                <div class="nav-icon icon-status"></div>
+                <span>Status</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon icon-device"></div>
+                <span>Device</span>
+            </div>
+            <div class="nav-item active">
+                <div class="nav-icon icon-network" style="background-color: #00E676;"></div>
+                <span>Network</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon icon-ids" style="clip-path: circle(40%);"></div>
+                <span>IDs</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon icon-location" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);"></div>
+                <span>Location</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

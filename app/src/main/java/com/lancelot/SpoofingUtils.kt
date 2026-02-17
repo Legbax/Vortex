@@ -1,6 +1,7 @@
 package com.lancelot
 
 import java.util.UUID
+import java.util.Random
 
 object SpoofingUtils {
 
@@ -15,21 +16,53 @@ object SpoofingUtils {
         val tac = VALID_TACS.random()
         val serial = (1..6).map { (0..9).random() }.joinToString("")
         val base = tac + serial
-        return base + luhnChecksum(base)
+        val check = luhnChecksum(base)
+        return base + check
     }
 
     fun generateValidIccid(mccMnc: String): String {
         val mnc = if (mccMnc.length >= 6) mccMnc.substring(3) else "260"
+        // Try to match standard issuer length
         val issuer = (10..99).random().toString()
         val prefixPart = "891$mnc$issuer"
 
+        // Target 19 digits usually, sometimes 20. 89 + 1 + 3 + 2 = 8 chars.
+        // Need 10-11 more.
         val accountLen = 18 - prefixPart.length
         val account = (1..accountLen).map { (0..9).random() }.joinToString("")
         val base = prefixPart + account
-        return base + luhnChecksum(base)
+        val check = luhnChecksum(base)
+        return base + check
     }
 
-    fun luhnChecksum(number: String): Int {
+    fun generateValidImsi(mccMnc: String): String {
+        // IMSI = MCC + MNC + MSIN (usually 15 digits total)
+        // MCC=3, MNC=2or3. Total 5 or 6.
+        // Need 9 or 10 random digits.
+        val needed = 15 - mccMnc.length
+        val msin = (1..needed).map { (0..9).random() }.joinToString("")
+        return mccMnc + msin
+    }
+
+    fun isLuhnValid(number: String): Boolean {
+        if (number.isEmpty() || !number.all { it.isDigit() }) return false
+        var sum = 0
+        val len = number.length
+        val parity = len % 2
+        for (i in 0 until len) {
+            var digit = number[i].digitToInt()
+            if (i % 2 == parity) {
+                digit *= 2
+            }
+            if (digit > 9) {
+                digit -= 9
+            }
+            sum += digit
+        }
+        return sum % 10 == 0
+    }
+
+    private fun luhnChecksum(number: String): Int {
         var sum = 0
         for (i in number.indices.reversed()) {
             var digit = number[i].digitToInt()
@@ -42,9 +75,18 @@ object SpoofingUtils {
 
     fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
 
+    fun generateRandomGaid(): String {
+        return "${generateRandomId(8)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(12)}"
+    }
+
+    fun generateRandomSerial(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..12).map { chars.random() }.joinToString("")
+    }
+
     fun generateRandomMac(): String {
         val bytes = ByteArray(6)
-        java.util.Random().nextBytes(bytes)
+        Random().nextBytes(bytes)
         bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte()
         return bytes.joinToString(":") { "%02X".format(it) }
     }
