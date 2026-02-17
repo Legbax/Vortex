@@ -11,6 +11,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.lancelot.PrefsManager
 import com.lancelot.SpoofingUtils
+import com.lancelot.utils.ValidationUtils
 import com.lancelot.R
 
 class IDsFragment : Fragment() {
@@ -154,10 +155,27 @@ class IDsFragment : Fragment() {
     }
 
     private fun saveData() {
+        val imei1 = etImei.text.toString()
+        val imei2 = etImei2.text.toString()
+
+        if (imei1.isNotEmpty() && !ValidationUtils.isValidImei(imei1)) {
+            tilImei.error = "Invalid IMEI (Luhn check failed)"
+            return
+        } else {
+            tilImei.error = null
+        }
+
+        if (imei2.isNotEmpty() && !ValidationUtils.isValidImei(imei2)) {
+            tilImei2.error = "Invalid IMEI (Luhn check failed)"
+            return
+        } else {
+            tilImei2.error = null
+        }
+
         val context = requireContext()
 
-        PrefsManager.saveString(context, "imei", etImei.text.toString())
-        PrefsManager.saveString(context, "imei2", etImei2.text.toString())
+        PrefsManager.saveString(context, "imei", imei1)
+        PrefsManager.saveString(context, "imei2", imei2)
         PrefsManager.saveString(context, "imsi", etImsi.text.toString())
         PrefsManager.saveString(context, "iccid", etIccid.text.toString())
         PrefsManager.saveString(context, "phone_number", etPhone.text.toString())
