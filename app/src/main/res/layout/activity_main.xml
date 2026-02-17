@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lancelot - Device Spoofer"
+            android:text="Lancelot - Stealth Spoofer"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
@@ -23,7 +23,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Device Profile (Android 11 only)"
+            android:text="Device Profile (Android 11)"
             android:textStyle="bold"/>
 
         <Spinner
@@ -32,152 +32,56 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Randomize Actions -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Randomization"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btn_random"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Randomize ALL Fields"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select specific field to randomize:"
+            android:layout_marginTop="8dp"/>
+
+        <Spinner
+            android:id="@+id/sp_random_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_random_selected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Randomize Selected Field"
+            android:layout_marginBottom="16dp"/>
+
         <!-- Device IDs -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Device Identifiers"
+            android:text="Visible Identifiers"
             android:textStyle="bold"
             android:layout_marginTop="8dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Android ID">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_android_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="IMEI 1">
+            android:hint="IMEI (15 digits)">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_imei"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:maxLength="15"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="IMEI 2">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_imei2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="15"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Serial Number">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_serial"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="GAID (Advertising ID)">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_gaid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="SSAID">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_ssaid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="GSF ID">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_gsf_id"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- SIM Info -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SIM Information"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="SIM Operator">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_sim_operator"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="SIM Country (us, mx, etc)">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_sim_country"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="MCC+MNC">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_mcc_mnc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Network -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Network Addresses"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="WiFi MAC">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_wifi_mac"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Bluetooth MAC">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_bluetooth_mac"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Mock Location -->
@@ -194,61 +98,74 @@
             android:layout_height="wrap_content"
             android:text="Enable Mock Location"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Latitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_mock_lat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Longitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_mock_lon"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Altitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_mock_alt"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="24dp">
+            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_randomize"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:text="Randomize"/>
+                android:hint="Latitude">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_mock_lat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/btn_apply"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Apply"/>
+                android:hint="Longitude">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_mock_lon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"/>
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Altitude (m)">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_mock_alt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Accuracy (m)">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_mock_acc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Save &amp; Apply"
+            android:backgroundTint="?attr/colorPrimary"/>
 
     </LinearLayout>
 </ScrollView>

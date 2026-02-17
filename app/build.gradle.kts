@@ -52,7 +52,7 @@ android {
 }
 
 dependencies {
-    // FIX #11: Solo compileOnly para Xposed
+    // Stealth: compileOnly evita empaquetar clases Xposed en el APK
     compileOnly("de.robv.android.xposed:api:82")
 
     // AndroidX Core

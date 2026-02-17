@@ -2,265 +2,253 @@ package com.lancelot
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Base64
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.Switch
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.*
-import androidx.core.content.edit
 import java.io.File
+import java.nio.charset.StandardCharsets
+import java.util.UUID
+import javax.crypto.Cipher
+import javax.crypto.spec.SecretKeySpec
 
 class MainActivity : AppCompatActivity() {
 
-    private val prefs by lazy { getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE) }
-
-    // FIX #6: Solo perfiles Android 11 disponibles
-    private val profiles = listOf(
-        "Redmi 9 (Original)",
-        "Redmi Note 9",
-        "Redmi 9A",
-        "Redmi 9C",
-        "Redmi Note 9S",
-        "Redmi Note 9 Pro",
-        "Redmi Note 8",
-        "Redmi Note 8 Pro",
-        "Redmi Note 10",
-        "Redmi Note 10S",
-        "Redmi 10",
-        "POCO X3 NFC",
-        "POCO X3 Pro",
-        "POCO M3",
-        "POCO M3 Pro 5G",
-        "Mi 10T",
-        "Mi 10T Pro",
-        "Mi 11 Lite",
-        "Mi 11i",
-        "Samsung Galaxy S10",
-        "Samsung Galaxy S10+",
-        "Samsung Galaxy S10e",
-        "Samsung Galaxy S20",
-        "Samsung Galaxy S20+",
-        "Samsung Galaxy S20 FE",
-        "Samsung Galaxy Note 10",
-        "Samsung Galaxy Note 10+",
-        "Samsung Galaxy A51",
-        "Samsung Galaxy A71",
-        "Samsung Galaxy A52",
-        "Samsung Galaxy A72",
-        "Google Pixel 3",
-        "Google Pixel 3 XL",
-        "Google Pixel 4",
-        "Google Pixel 4 XL",
-        "Google Pixel 4a",
-        "Google Pixel 4a 5G",
-        "Google Pixel 5",
-        "OnePlus 7",
-        "OnePlus 7 Pro",
-        "OnePlus 7T",
-        "OnePlus 8",
-        "OnePlus 8 Pro",
-        "OnePlus Nord",
-        "Motorola Moto G9 Plus",
-        "Motorola Moto G Power 2021",
-        "Motorola Edge 20",
-        "Nokia 5.4",
-        "Nokia 8.3 5G",
-        "Sony Xperia 1 II"
-    )
-
-    // FIX #7: NO guardamos model/brand/version separados, solo el perfil
     private lateinit var spProfile: Spinner
-    private lateinit var etAndroidId: EditText
+    private lateinit var btnSave: Button
+    private lateinit var btnRandom: Button
     private lateinit var etImei: EditText
-    private lateinit var etImei2: EditText
-    private lateinit var etSerial: EditText
-    private lateinit var etGaid: EditText
-    private lateinit var etSsaid: EditText
-    private lateinit var etSimOperator: EditText
-    private lateinit var etSimCountry: EditText
-    private lateinit var etMccMnc: EditText
-    private lateinit var etWifiMac: EditText
-    private lateinit var etBluetoothMac: EditText
-    private lateinit var etGsfId: EditText
-
-    // Mock Location
     private lateinit var swMockLocation: Switch
     private lateinit var etMockLat: EditText
     private lateinit var etMockLon: EditText
     private lateinit var etMockAlt: EditText
+    private lateinit var etMockAcc: EditText
+    private lateinit var spRandomField: Spinner
+    private lateinit var btnRandomSelected: Button
+
+    // Clave estática ofuscada (debe coincidir con MainHook)
+    private val KEY_BYTES = byteArrayOf(
+        0x4c, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6f, 0x74,
+        0x53, 0x74, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x31
+    )
+    private val ALGO = "AES"
+
+    private fun encrypt(value: String): String {
+        return try {
+            val key = SecretKeySpec(KEY_BYTES, ALGO)
+            val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+            cipher.init(Cipher.ENCRYPT_MODE, key)
+            val encryptedBytes = cipher.doFinal(value.toByteArray(StandardCharsets.UTF_8))
+            "ENC:" + Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            value // Fallback inseguro si falla
+        }
+    }
+
+    private fun decrypt(encrypted: String?): String? {
+        if (encrypted.isNullOrEmpty()) return null
+        if (!encrypted.startsWith("ENC:")) return encrypted // Compatibilidad
+        return try {
+            val key = SecretKeySpec(KEY_BYTES, ALGO)
+            val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+            cipher.init(Cipher.DECRYPT_MODE, key)
+            val decodedBytes = Base64.decode(encrypted.substring(4), Base64.NO_WRAP)
+            String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // 50 perfiles (debe coincidir con MainHook)
+    private val profiles = listOf(
+        "Google Pixel 5 - Android 11", "Samsung Galaxy A52 - Android 11", "Xiaomi Redmi Note 10 Pro - Android 11",
+        "Sony Xperia 10 III - Android 11", "OnePlus 9 - Android 11", "Motorola Moto G Stylus 5G - Android 11",
+        "Nokia 8.3 5G - Android 11", "Oppo Reno5 - Android 11", "Vivo X60 - Android 11", "Realme 8 Pro - Android 11",
+        "Samsung Galaxy S20 FE - Android 11", "Google Pixel 4a - Android 11", "Samsung Galaxy Note 20 - Android 11",
+        "Xiaomi Mi 11 - Android 11", "Sony Xperia 5 II - Android 11", "OnePlus Nord - Android 11", "LG Velvet - Android 11",
+        "Asus Zenfone 7 - Android 11", "Huawei P40 - Android 11", "Honor 30 - Android 11", "Samsung Galaxy A12 - Android 11",
+        "Google Pixel 4a 5G - Android 11", "Oppo A53 - Android 11", "Vivo Y53s - Android 11", "Realme 7 5G - Android 11",
+        "Xiaomi Redmi Note 9 - Android 11", "Samsung Galaxy M31 - Android 11", "Motorola Edge - Android 11",
+        "Nokia 5.4 - Android 11", "Oppo Find X2 - Android 11", "Vivo V20 - Android 11", "Realme X7 Pro - Android 11",
+        "Samsung Galaxy A32 - Android 11", "Google Pixel 5a - Android 11", "Samsung Galaxy Z Flip - Android 11",
+        "Xiaomi Poco X3 NFC - Android 11", "Sony Xperia 1 II - Android 11", "OnePlus 8T - Android 11", "LG Wing - Android 11",
+        "Asus ROG Phone 3 - Android 11", "Huawei Mate 40 Pro - Android 11", "Honor V40 - Android 11", "Samsung Galaxy A51 - Android 11",
+        "Google Pixel 4 - Android 11", "Samsung Galaxy S10 Lite - Android 11", "Xiaomi Mi 10T Pro - Android 11",
+        "Sony Xperia 5 III - Android 11", "OnePlus Nord 2 - Android 11", "LG Q52 - Android 11", "Asus Zenfone 8 - Android 11"
+    )
+
+    private val randomFields = listOf(
+        "IMEI", "IMEI2", "Serial", "Android ID", "GAID", "SSAID",
+        "WiFi MAC", "Bluetooth MAC", "GSF ID"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initializeViews()
-        setupProfileSpinner()
-        loadSavedValues()
-        setupButtons()
-    }
-
-    private fun initializeViews() {
         spProfile = findViewById(R.id.sp_profile)
-        etAndroidId = findViewById(R.id.et_android_id)
+        btnSave = findViewById(R.id.btn_save)
+        btnRandom = findViewById(R.id.btn_random)
         etImei = findViewById(R.id.et_imei)
-        etImei2 = findViewById(R.id.et_imei2)
-        etSerial = findViewById(R.id.et_serial)
-        etGaid = findViewById(R.id.et_gaid)
-        etSsaid = findViewById(R.id.et_ssaid)
-        etSimOperator = findViewById(R.id.et_sim_operator)
-        etSimCountry = findViewById(R.id.et_sim_country)
-        etMccMnc = findViewById(R.id.et_mcc_mnc)
-        etWifiMac = findViewById(R.id.et_wifi_mac)
-        etBluetoothMac = findViewById(R.id.et_bluetooth_mac)
-        etGsfId = findViewById(R.id.et_gsf_id)
 
         swMockLocation = findViewById(R.id.sw_mock_location)
         etMockLat = findViewById(R.id.et_mock_lat)
         etMockLon = findViewById(R.id.et_mock_lon)
         etMockAlt = findViewById(R.id.et_mock_alt)
+        etMockAcc = findViewById(R.id.et_mock_acc)
+
+        spRandomField = findViewById(R.id.sp_random_field)
+        btnRandomSelected = findViewById(R.id.btn_random_selected)
+
+        setupSpinners()
+        loadPrefs()
+
+        btnSave.setOnClickListener {
+            if (!isValidImei(etImei.text.toString())) {
+                Toast.makeText(this, "IMEI inválido (15 dígitos)", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            savePrefs()
+        }
+
+        btnRandom.setOnClickListener {
+            randomizeAll()
+        }
+
+        btnRandomSelected.setOnClickListener {
+            randomizeSelected()
+        }
     }
 
-    private fun setupProfileSpinner() {
+    private fun setupSpinners() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, profiles)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spProfile.adapter = adapter
 
-        val savedProfile = prefs.getString("profile", "Redmi 9 (Original)")
-        spProfile.setSelection(profiles.indexOf(savedProfile).coerceAtLeast(0))
+        val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, randomFields)
+        fieldAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spRandomField.adapter = fieldAdapter
     }
 
-    private fun loadSavedValues() {
-        etAndroidId.setText(prefs.getString("android_id", generateRandomId(16)))
-        etImei.setText(prefs.getString("imei", generateValidImei()))
-        etImei2.setText(prefs.getString("imei2", generateValidImei()))
-        etSerial.setText(prefs.getString("serial", generateRandomSerial()))
-        etGaid.setText(prefs.getString("gaid", generateRandomGaid()))
-        etSsaid.setText(prefs.getString("ssaid", generateRandomId(16)))
-        etSimOperator.setText(prefs.getString("sim_operator", "310260"))
-        etSimCountry.setText(prefs.getString("sim_country", "us"))
-        etMccMnc.setText(prefs.getString("mcc_mnc", "310260"))
-        etWifiMac.setText(prefs.getString("wifi_mac", generateRandomMac()))
-        etBluetoothMac.setText(prefs.getString("bluetooth_mac", generateRandomMac()))
-        etGsfId.setText(prefs.getString("gsf_id", generateRandomId(16)))
+    private fun loadPrefs() {
+        val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        val encryptedProfile = prefs.getString("profile", null)
+        val savedProfile = decrypt(encryptedProfile) ?: "Redmi 9 (Original)"
 
-        swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false)
-        etMockLat.setText(prefs.getString("mock_latitude", "0.0"))
-        etMockLon.setText(prefs.getString("mock_longitude", "0.0"))
-        etMockAlt.setText(prefs.getString("mock_altitude", "0.0"))
+        spProfile.setSelection(profiles.indexOfFirst { it.startsWith(savedProfile) }.coerceAtLeast(0))
+
+        val encryptedImei = prefs.getString("imei", "")
+        etImei.setText(decrypt(encryptedImei))
+
+        swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false) // Booleans no se encriptan (no sensible)
+        etMockLat.setText(decrypt(prefs.getString("mock_latitude", "0.0")))
+        etMockLon.setText(decrypt(prefs.getString("mock_longitude", "0.0")))
+        etMockAlt.setText(decrypt(prefs.getString("mock_altitude", "0.0")))
+        etMockAcc.setText(decrypt(prefs.getString("mock_accuracy", "10.0")))
     }
 
-    private fun setupButtons() {
-        findViewById<Button>(R.id.btn_apply).setOnClickListener {
-            if (validateInputs()) {
-                saveValues()
-                // FIX #2: Hacer archivo world-readable para Xposed
-                makePrefsWorldReadable()
-                Toast.makeText(this, "Settings applied! Restart target apps.", Toast.LENGTH_LONG).show()
-            }
-        }
-
-        findViewById<Button>(R.id.btn_randomize).setOnClickListener {
-            randomizeValues()
-        }
-    }
-
-    private fun validateInputs(): Boolean {
-        // Validar IMEI
-        if (etImei.text.toString().length != 15) {
-            Toast.makeText(this, "IMEI must be 15 digits", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (etImei2.text.toString().length != 15) {
-            Toast.makeText(this, "IMEI 2 must be 15 digits", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        // Validar MAC
-        val macRegex = Regex("^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
-        if (!etWifiMac.text.toString().matches(macRegex)) {
-            Toast.makeText(this, "Invalid WiFi MAC format", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (!etBluetoothMac.text.toString().matches(macRegex)) {
-            Toast.makeText(this, "Invalid Bluetooth MAC format", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        return true
-    }
-
-    private fun saveValues() {
-        prefs.edit {
-            putString("profile", spProfile.selectedItem.toString())
-            putString("android_id", etAndroidId.text.toString())
-            putString("imei", etImei.text.toString())
-            putString("imei2", etImei2.text.toString())
-            putString("serial", etSerial.text.toString())
-            putString("gaid", etGaid.text.toString())
-            putString("ssaid", etSsaid.text.toString())
-            putString("sim_operator", etSimOperator.text.toString())
-            putString("sim_country", etSimCountry.text.toString())
-            putString("mcc_mnc", etMccMnc.text.toString())
-            putString("wifi_mac", etWifiMac.text.toString())
-            putString("bluetooth_mac", etBluetoothMac.text.toString())
-            putString("gsf_id", etGsfId.text.toString())
+    private fun savePrefs() {
+        val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putString("profile", encrypt(spProfile.selectedItem.toString()))
+            putString("imei", encrypt(etImei.text.toString()))
 
             putBoolean("mock_location_enabled", swMockLocation.isChecked)
-            putString("mock_latitude", etMockLat.text.toString())
-            putString("mock_longitude", etMockLon.text.toString())
-            putString("mock_altitude", etMockAlt.text.toString())
+            putString("mock_latitude", encrypt(etMockLat.text.toString()))
+            putString("mock_longitude", encrypt(etMockLon.text.toString()))
+            putString("mock_altitude", encrypt(etMockAlt.text.toString()))
+            putString("mock_accuracy", encrypt(etMockAcc.text.toString()))
+
+            apply()
+        }
+        makePrefsWorldReadable()
+        Toast.makeText(this, "Guardado y Encriptado", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun randomizeAll() {
+        // Randomiza valores visuales y guarda otros en segundo plano
+        val randomImei = generateValidImei()
+        etImei.setText(randomImei)
+
+        val randomProfileIndex = (0 until profiles.size).random()
+        spProfile.setSelection(randomProfileIndex)
+
+        // Generar y guardar otros IDs
+        val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putString("imei2", encrypt(generateValidImei()))
+            putString("android_id", encrypt(generateRandomId(16)))
+            putString("gsf_id", encrypt(generateRandomId(16)))
+            putString("gaid", encrypt(UUID.randomUUID().toString()))
+            putString("ssaid", encrypt(generateRandomId(16)))
+            putString("wifi_mac", encrypt(generateRandomMac()))
+            putString("bluetooth_mac", encrypt(generateRandomMac()))
+            apply()
         }
     }
 
-    // FIX #2: Hacer preferencias world-readable para Xposed
+    private fun randomizeSelected() {
+        val field = spRandomField.selectedItem.toString()
+        val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        var newValue = ""
+        val key = when (field) {
+            "IMEI" -> "imei"
+            "IMEI2" -> "imei2"
+            "Serial" -> "serial"
+            "Android ID" -> "android_id"
+            "GAID" -> "gaid"
+            "SSAID" -> "ssaid"
+            "WiFi MAC" -> "wifi_mac"
+            "Bluetooth MAC" -> "bluetooth_mac"
+            "GSF ID" -> "gsf_id"
+            else -> ""
+        }
+
+        if (key.isNotEmpty()) {
+            newValue = when (field) {
+                "IMEI", "IMEI2" -> generateValidImei()
+                "Serial" -> generateRandomId(12).uppercase()
+                "Android ID", "SSAID", "GSF ID" -> generateRandomId(16)
+                "GAID" -> UUID.randomUUID().toString()
+                "WiFi MAC", "Bluetooth MAC" -> generateRandomMac()
+                else -> ""
+            }
+            editor.putString(key, encrypt(newValue))
+            editor.apply()
+
+            // Actualizar UI si es visible
+            if (field == "IMEI") etImei.setText(newValue)
+
+            Toast.makeText(this, "$field actualizado: $newValue", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun makePrefsWorldReadable() {
         try {
             val prefsDir = File(applicationInfo.dataDir, "shared_prefs")
             val prefsFile = File(prefsDir, "spoof_prefs.xml")
-
             if (prefsFile.exists()) {
                 prefsFile.setReadable(true, false)
-                prefsDir.setExecutable(true, false)
-
-                // Cambiar permisos usando shell root
-                val commands = arrayOf(
-                    "chmod 644 ${prefsFile.absolutePath}",
-                    "chmod 755 ${prefsDir.absolutePath}"
-                )
-
-                Runtime.getRuntime().exec(arrayOf("su", "-c", commands.joinToString(" && "))).waitFor()
+                prefsDir.setReadable(true, false)
+                Runtime.getRuntime().exec("su -c chmod 644 ${prefsFile.absolutePath}")
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "Warning: Could not set world-readable. Root may be required.", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
         }
     }
 
-    private fun randomizeValues() {
-        etAndroidId.setText(generateRandomId(16))
-        etImei.setText(generateValidImei())
-        etImei2.setText(generateValidImei())
-        etSerial.setText(generateRandomSerial())
-        etGaid.setText(generateRandomGaid())
-        etSsaid.setText(generateRandomId(16))
-        etWifiMac.setText(generateRandomMac())
-        etBluetoothMac.setText(generateRandomMac())
-        etGsfId.setText(generateRandomId(16))
-
-        Toast.makeText(this, "Values randomized", Toast.LENGTH_SHORT).show()
-    }
-
-    // ========== GENERADORES ==========
-
-    private fun generateRandomId(length: Int): String =
-        (1..length).map { "0123456789abcdef".random() }.joinToString("")
+    // Utilidades
+    private fun isValidImei(imei: String): Boolean = imei.length == 15 && imei.all { it.isDigit() }
 
     private fun generateValidImei(): String {
-        val validTacs = listOf(
-            "35891603",  // Xiaomi
-            "35328708",  // Samsung
-            "35404907"   // Motorola
-        )
-        val tac = validTacs.random()
-        val serial = (1..6).map { (0..9).random() }.joinToString("")
+        val tac = "35" + (100000..999999).random()
+        val serial = (100000..999999).random().toString()
         val base = tac + serial
         return base + luhnChecksum(base)
     }
@@ -276,21 +264,12 @@ class MainActivity : AppCompatActivity() {
         return (10 - (sum % 10)) % 10
     }
 
-    private fun generateRandomSerial(): String =
-        (1..12).map { "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".random() }.joinToString("")
-
-    private fun generateRandomGaid(): String =
-        "${generateRandomId(8)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(12)}"
+    private fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
 
     private fun generateRandomMac(): String {
-        val firstByte = (0x02 or (kotlin.random.Random.nextInt(256) and 0xFC))
-            .toString(16).padStart(2, '0').uppercase()
-
-        val rest = (1..5).map {
-            kotlin.random.Random.nextInt(256).toString(16)
-                .padStart(2, '0').uppercase()
-        }.joinToString(":")
-
-        return "$firstByte:$rest"
+        val bytes = ByteArray(6)
+        java.util.Random().nextBytes(bytes)
+        bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte() // Unicast local
+        return bytes.joinToString(":") { "%02X".format(it) }
     }
 }
