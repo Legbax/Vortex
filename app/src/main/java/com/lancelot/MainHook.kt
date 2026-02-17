@@ -180,13 +180,26 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", "test.user" + (1000..9999).random() + "@gmail.com")
         if (cachedSerial == null) cachedSerial = getString("serial", generateRandomSerial())
 
-        val mccMnc = getString("mcc_mnc", "310260")
+        // Select a random US carrier for consistency
+        val carrier = US_CARRIERS.random()
+
+        val mccMnc = getString("mcc_mnc", carrier.mccMnc)
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
         if (cachedIccid == null) cachedIccid = generateValidIccid()
 
-        val simCountry = getString("sim_country", "us")
-        if (cachedPhoneNumber == null) cachedPhoneNumber = generatePhoneNumber(simCountry)
+        // Force US country
+        val simCountry = "us"
+        if (cachedPhoneNumber == null) cachedPhoneNumber = generateUSPhoneNumber()
     }
+
+    // US Carrier Data
+    data class CarrierInfo(val name: String, val mccMnc: String)
+    private val US_CARRIERS = listOf(
+        CarrierInfo("Verizon", "310410"),
+        CarrierInfo("T-Mobile", "310260"),
+        CarrierInfo("AT&T", "310410"),
+        CarrierInfo("Sprint", "310120")
+    )
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
         val cleanName = profileName.replace(" - Android 11", "").trim()
@@ -306,14 +319,16 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(tmClass, "getSimSerialNumber", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = cachedIccid } })
             XposedHelpers.findAndHookMethod(tmClass, "getLine1Number", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = cachedPhoneNumber } })
 
-            val mccMnc = getString("mcc_mnc", "310260")
-            val simCountry = getString("sim_country", "us")
-            val simOperator = getString("sim_operator", "310260")
+            // Extract MCC/MNC from cached IMSI (first 6 chars usually) or default
+            val mccMnc = if (cachedImsi != null && cachedImsi!!.length >= 6) cachedImsi!!.substring(0, 6) else "310260"
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS[1] // Default T-Mobile
 
             XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = mccMnc } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simOperator } })
-            XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simCountry } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simCountry } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = mccMnc } })
+            XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperatorName", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = carrier.name } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimOperatorName", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = carrier.name } })
+            XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = "us" } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = "us" } })
 
         } catch (e: Throwable) {}
     }
@@ -502,12 +517,14 @@ class MainHook : IXposedHookLoadPackage {
         val base = prefix + country + issuer + account
         return base + luhnChecksum(base)
     }
-    private fun generatePhoneNumber(countryCode: String): String {
-        return when (countryCode.lowercase()) {
-            "us" -> "+1" + (2..9).random().toString() + (0..9).random().toString() + (0..9).random().toString() + (1..7).map { (0..9).random() }.joinToString("")
-            "mx" -> "+52" + listOf("55", "33", "81").random() + (1..7).map { (0..9).random() }.joinToString("")
-            else -> "+1" + (2..9).random().toString() + (1..9).map { (0..9).random() }.joinToString("")
-        }
+    private fun generateUSPhoneNumber(): String {
+        // Generate valid US Area Code (200-999)
+        val areaCode = (2..9).random().toString() + (0..9).random() + (0..9).random()
+        // Exchange code (200-999)
+        val exchange = (2..9).random().toString() + (0..9).random() + (0..9).random()
+        // Subscriber number (0000-9999)
+        val subscriber = (0..9999).random().toString().padStart(4, '0')
+        return "+1$areaCode$exchange$subscriber"
     }
     private fun luhnChecksum(number: String): Int {
         var sum = 0
