@@ -346,9 +346,16 @@ class MainActivity : AppCompatActivity() {
         return sum % 10 == 0
     }
 
+    private val VALID_TACS = listOf(
+        "86413405", "86413404",   // Redmi / Xiaomi
+        "35271311", "35361311",   // Redmi
+        "35449209", "35449210",   // Samsung A-series
+        "35674910", "35674911"    // Google Pixel
+    )
+
     private fun generateValidImei(): String {
-        val tac = "35" + (100000..999999).random()
-        val serial = (100000..999999).random().toString()
+        val tac = VALID_TACS.random()
+        val serial = (1..6).map { (0..9).random() }.joinToString("")
         val base = tac + serial
         return base + luhnChecksum(base)
     }
@@ -368,7 +375,7 @@ class MainActivity : AppCompatActivity() {
         var sum = 0
         for (i in number.indices.reversed()) {
             var digit = number[i].digitToInt()
-            if ((number.length - i) % 2 == 0) digit *= 2
+            if ((number.length - i + 1) % 2 == 0) digit *= 2
             if (digit > 9) digit -= 9
             sum += digit
         }
