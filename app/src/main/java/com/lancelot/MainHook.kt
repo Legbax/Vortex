@@ -166,7 +166,7 @@ class MainHook : IXposedHookLoadPackage {
                 buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
                 incremental = "V12.5.5.0.RJUMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "vayu", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8150", zygote = "zygote64_32", vendorFingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
+                boardPlatform = "msmnile", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8150-AC", zygote = "zygote64_32", vendorFingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
                 display = "V12.5.5.0.RJUMIXM", buildDescription = "vayu_global-user 11 RKQ1.200826.002 V12.5.5.0.RJUMIXM release-keys", buildFlavor = "vayu_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "POCO M3" to DeviceFingerprint(
@@ -236,7 +236,7 @@ class MainHook : IXposedHookLoadPackage {
                 buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
                 incremental = "V12.5.7.0.RKKMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "laaayna", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM888", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys",
+                boardPlatform = "lahaina", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8350", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys",
                 display = "V12.5.7.0.RKKMIXM", buildDescription = "haydn_global-user 11 RKQ1.200826.002 V12.5.7.0.RKKMIXM release-keys", buildFlavor = "haydn_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Samsung Galaxy A52" to DeviceFingerprint(
@@ -246,7 +246,7 @@ class MainHook : IXposedHookLoadPackage {
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
                 incremental = "A525FXXU4CVJB", sdkInt = 30, release = "11",
-                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
                 display = "RP1A.200720.012.A525FXXU4CVJB", buildDescription = "a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys", buildFlavor = "a52qxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1639497600", securityPatch = "2021-12-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Samsung Galaxy A32" to DeviceFingerprint(
@@ -400,7 +400,7 @@ class MainHook : IXposedHookLoadPackage {
                 display = "RQ3A.210705.001", buildDescription = "bramble-user 11 RQ3A.210705.001 7380771 release-keys", buildFlavor = "bramble-user", buildHost = "abfarm-release-rbe-64.hot.corp.google.com", buildUser = "android-build", buildDateUtc = "1625616000", securityPatch = "2021-07-05", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Samsung Galaxy S20+" to DeviceFingerprint(
-                manufacturer = "Samsung", brand = "samsung", model = "SM-G985F", device = "y2s", product = "y2sxx",
+                manufacturer = "samsung", brand = "samsung", model = "SM-G985F", device = "y2s", product = "y2sxx",
                 hardware = "exynos990", board = "universal990", bootloader = "G985FXXSGHWA3",
                 fingerprint = "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -410,7 +410,7 @@ class MainHook : IXposedHookLoadPackage {
                 display = "RP1A.200720.012.G985FXXSGHWA3", buildDescription = "y2sxx-user 11 RP1A.200720.012 G985FXXSGHWA3 release-keys", buildFlavor = "y2sxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1639497600", securityPatch = "2022-01-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Samsung Galaxy S10e" to DeviceFingerprint(
-                manufacturer = "Samsung", brand = "samsung", model = "SM-G970F", device = "beyond0", product = "beyond0ltexx",
+                manufacturer = "samsung", brand = "samsung", model = "SM-G970F", device = "beyond0", product = "beyond0ltexx",
                 hardware = "exynos9820", board = "universal9820", bootloader = "G970FXXSGHWC1",
                 fingerprint = "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -466,7 +466,7 @@ class MainHook : IXposedHookLoadPackage {
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
                 radioVersion = "MOLY.LR12A.R3.MP.V98",
                 incremental = "compiler10212015", sdkInt = 30, release = "11",
-                boardPlatform = "mt6893", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "Dimensity 1200", zygote = "zygote64_32", vendorFingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
+                boardPlatform = "mt6893", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6893", zygote = "zygote64_32", vendorFingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
                 display = "RP1A.200720.012", buildDescription = "V2105-user 11 RP1A.200720.012 compiler10212015 release-keys", buildFlavor = "V2105-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Realme 8 Pro" to DeviceFingerprint(
@@ -588,14 +588,11 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", "test.user" + (1000..9999).random() + "@gmail.com")
         if (cachedSerial == null) cachedSerial = getString("serial", generateRandomSerial())
 
-        val carrier = US_CARRIERS.random()
+        val defaultMccMnc = US_CARRIERS.random().mccMnc
+        val mccMnc = getString("mcc_mnc", defaultMccMnc)
 
-        val mccMnc = getString("mcc_mnc", carrier.mccMnc)
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
-
         if (cachedIccid == null) cachedIccid = generateValidIccid(mccMnc)
-
-        val simCountry = "us"
         if (cachedPhoneNumber == null) cachedPhoneNumber = generatePhoneNumber(mccMnc)
     }
 
@@ -934,16 +931,14 @@ class MainHook : IXposedHookLoadPackage {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val stackTrace = param.result as Array<StackTraceElement>
                     val filtered = stackTrace.filterNot {
-                        it.className.contains("xposed", ignoreCase = true) ||
-                        it.className.contains("edxposed", ignoreCase = true) ||
-                        it.className.contains("lsposed", ignoreCase = true) ||
-                        it.className.contains("de.robv", ignoreCase = true) ||
-                        it.className.contains("zygisk", ignoreCase = true) ||
-                        it.className.contains("shamiko", ignoreCase = true) ||
-                        it.className.contains("riru", ignoreCase = true) ||
-                        it.className.contains("taichi", ignoreCase = true) ||
-                        it.className.contains("bridge", ignoreCase = true) ||
-                        it.className.contains("hook", ignoreCase = true)
+                        it.className.startsWith("de.robv.android.xposed") ||
+                        it.className.startsWith("io.github.lsposed") ||
+                        it.className.startsWith("com.elderdrivers.riru") ||
+                        it.className.startsWith("org.lsposed") ||
+                        it.className.startsWith("top.canyie.dreamland") ||
+                        it.className.startsWith("me.weishu.exposed") ||
+                        it.className.contains("LSPosed", ignoreCase = true) ||
+                        it.className.contains("XposedBridge", ignoreCase = true)
                     }
                     param.result = filtered.toTypedArray()
                 }
