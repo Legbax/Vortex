@@ -568,6 +568,7 @@ class MainHook : IXposedHookLoadPackage {
             hookXposedDetection(lpparam)
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
+            hookFile()
 
         } catch (e: Throwable) {
             // Only log in debug builds
@@ -978,6 +979,42 @@ class MainHook : IXposedHookLoadPackage {
                 }
             )
         } catch (e: Throwable) {
+        }
+    }
+
+    private fun hookFile() {
+        try {
+            val sensitivePaths = setOf(
+                "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
+                "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
+                "/system/sd/xbin/su", "/system/bin/failsafe/su",
+                "/su/bin/su", "/system/xbin/daemonsu",
+                "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
+            )
+
+            val hook = object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val file = param.thisObject as File
+                    val path = file.absolutePath
+                    if (sensitivePaths.contains(path) ||
+                        path.contains("magisk", true) ||
+                        path.contains("xposed", true) ||
+                        path.contains("lsposed", true) ||
+                        path.startsWith("/data/adb/modules")
+                    ) {
+                        param.result = false
+                    }
+                }
+            }
+
+            XposedHelpers.findAndHookMethod(File::class.java, "exists", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canRead", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canExecute", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "isFile", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "isDirectory", hook)
+
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("File hook error: ${e.message}")
         }
     }
 
