@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.lancelot"
-    compileSdk = 30 // FIX: Match Target SDK exactly
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.lancelot"
@@ -42,6 +42,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     packaging {

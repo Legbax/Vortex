@@ -65,14 +65,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Perfiles específicos con alta fidelidad (Xiaomi Android 11)
+    // Perfiles específicos con alta fidelidad
     private val profiles = listOf(
         "Redmi 9 - Android 11",
         "Redmi Note 9 - Android 11",
         "Redmi 9A - Android 11",
         "Redmi 9C - Android 11",
         "Redmi Note 9S - Android 11",
-        "Redmi Note 9 Pro - Android 11"
+        "Redmi Note 9 Pro - Android 11",
+        "POCO X3 NFC - Android 11",
+        "POCO X3 Pro - Android 11",
+        "POCO M3 - Android 11",
+        "POCO M3 Pro 5G - Android 11",
+        "Mi 10T - Android 11",
+        "Mi 11 Lite - Android 11",
+        "Redmi Note 10 Pro - Android 11",
+        "Mi 10 Lite - Android 11",
+        "Mi 11i - Android 11",
+        "Samsung Galaxy A52 - Android 11",
+        "Samsung Galaxy A32 - Android 11",
+        "Samsung Galaxy A12 - Android 11",
+        "Samsung Galaxy A51 - Android 11",
+        "Samsung Galaxy M12 - Android 11",
+        "OnePlus Nord - Android 11",
+        "OnePlus 8T - Android 11",
+        "OnePlus Nord CE - Android 11",
+        "Moto G30 - Android 11",
+        "Moto G Power 2021 - Android 11",
+        "Moto G50 - Android 11",
+        "Nokia 5.4 - Android 11",
+        "Nokia X10 - Android 11",
+        "Google Pixel 4a - Android 11",
+        "Google Pixel 5 - Android 11",
+        "Google Pixel 4a 5G - Android 11",
+        "Samsung Galaxy S20+ - Android 11",
+        "Samsung Galaxy S10e - Android 11",
+        "Vivo Y53s - Android 11",
+        "Realme 7 5G - Android 11",
+        "Oppo Reno5 - Android 11",
+        "Vivo X60 - Android 11",
+        "Huawei P40 - Android 10",
+        "Honor 30 - Android 10",
+        "Asus Zenfone 8 - Android 11"
     )
 
     private val randomFields = listOf(
@@ -139,9 +173,11 @@ class MainActivity : AppCompatActivity() {
     private fun loadPrefs() {
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
         val encryptedProfile = prefs.getString("profile", null)
-        val savedProfile = decrypt(encryptedProfile) ?: "Redmi 9 (Original)"
+        val savedProfile = decrypt(encryptedProfile) ?: "Redmi 9"
 
-        spProfile.setSelection(profiles.indexOfFirst { it.startsWith(savedProfile) }.coerceAtLeast(0))
+        // Find the index, ignoring the suffix if necessary or matching start
+        val index = profiles.indexOfFirst { it.startsWith(savedProfile) }.coerceAtLeast(0)
+        spProfile.setSelection(index)
 
         val usCarriers = MainHook.getUsCarriers()
         val savedMccMnc = prefs.getString("mcc_mnc", "310260")
@@ -154,7 +190,7 @@ class MainActivity : AppCompatActivity() {
         val encryptedGmail = prefs.getString("gmail", "")
         etGmail.setText(decrypt(encryptedGmail))
 
-        swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false) // Booleans no se encriptan (no sensible)
+        swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false)
         etMockLat.setText(decrypt(prefs.getString("mock_latitude", "0.0")))
         etMockLon.setText(decrypt(prefs.getString("mock_longitude", "0.0")))
         etMockAlt.setText(decrypt(prefs.getString("mock_altitude", "0.0")))
@@ -168,11 +204,12 @@ class MainActivity : AppCompatActivity() {
         val selectedCarrier = usCarriers[spCarrier.selectedItemPosition]
 
         prefs.edit().apply {
+            // Save the full string from spinner (e.g. "Redmi 9 - Android 11")
+            // MainHook will strip the suffix.
             putString("profile", encrypt(spProfile.selectedItem.toString()))
             putString("imei", encrypt(etImei.text.toString()))
             putString("gmail", encrypt(etGmail.text.toString()))
 
-            // Carrier info derived from spinner
             putString("mcc_mnc", selectedCarrier.mccMnc)
             putString("sim_operator", selectedCarrier.mccMnc)
             putString("sim_country", "us")
@@ -190,7 +227,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun randomizeAll() {
-        // Randomiza valores visuales y guarda otros en segundo plano
         val randomImei = generateValidImei()
         etImei.setText(randomImei)
 
@@ -200,7 +236,6 @@ class MainActivity : AppCompatActivity() {
         val randomProfileIndex = (0 until profiles.size).random()
         spProfile.setSelection(randomProfileIndex)
 
-        // Generar y guardar otros IDs
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
             putString("gmail", encrypt(randomGmail))
@@ -246,7 +281,6 @@ class MainActivity : AppCompatActivity() {
             editor.putString(key, encrypt(newValue))
             editor.apply()
 
-            // Actualizar UI si es visible
             if (field == "IMEI") etImei.setText(newValue)
             if (field == "Gmail") etGmail.setText(newValue)
 
@@ -268,10 +302,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Utilidades
     private fun isValidImei(imei: String): Boolean {
         if (imei.length != 15 || !imei.all { it.isDigit() }) return false
-        // Validate with Luhn algorithm
         val number = imei.substring(0, 14)
         val checkDigit = imei.last().digitToInt()
         return luhnChecksum(number) == checkDigit
@@ -300,51 +332,22 @@ class MainActivity : AppCompatActivity() {
     private fun generateRandomMac(): String {
         val bytes = ByteArray(6)
         java.util.Random().nextBytes(bytes)
-        bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte() // Unicast local
+        bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte()
         return bytes.joinToString(":") { "%02X".format(it) }
     }
 
     private fun generateRealisticGmail(): String {
-        val maleNames = listOf(
+        val names = listOf(
             "juan", "jose", "luis", "carlos", "francisco", "antonio", "jorge", "miguel", "manuel", "pedro",
-            "jesus", "alejandro", "david", "daniel", "ricardo", "fernando", "eduardo", "javier", "raul", "roberto",
-            "martin", "gabriel", "andres", "marco", "sergio", "oscar", "mario", "angel", "ramon", "ruben",
-            "hector", "arturo", "jaime", "victor", "hugo", "salvador", "alfredo", "guillermo", "felipe", "cesar",
-            "diego", "gerardo", "pablo", "enrique", "alberto", "armando", "gustavo", "ignacio", "julio", "adrian",
-            "saul", "omar", "nicolas", "joaquin", "samuel", "esteban", "cristian", "emilio", "lucas", "agustin",
-            "sebastian", "mariano", "matias", "rodrigo", "patricio", "gonzalo", "benjamin", "tomas", "fede", "maxi",
-            "bruno", "ignacio", "lautaro", "facundo", "nahuel", "santiago", "julian", "federico", "leonardo", "mauricio",
-            "emmanuel", "axel", "joel", "ivan", "alan", "brian", "kevin", "alex", "jonathan", "erick",
-            "isaac", "rafael", "felix", "rolando", "gilberto", "rojelio", "abraham", "moises", "elias", "jacobo"
-        )
-        val femaleNames = listOf(
-            "maria", "ana", "rosa", "juana", "carmen", "marisol", "veronica", "lucia", "laura", "elena",
-            "isabel", "silvia", "patricia", "adriana", "gabriela", "claudia", "monica", "teresa", "yolanda", "martha",
-            "luz", "guadalupe", "alicia", "beatriz", "sonia", "rocio", "esther", "lourdes", "consuelo", "gloria",
-            "sofia", "valentina", "camila", "mariana", "daniela", "paula", "andrea", "xites", "natalia", "alejandra",
-            "fernanda", "victoria", "regina", "renata", "antonella", "florencia", "agustina", "candela", "rocio", "belen",
-            "milagros", "julieta", "micaela", "romina", "carolina", "lorena", "paola", "erika", "brenda", "vanesa",
-            "cynthia", "karen", "nancy", "leticia", "norma", "diana", "sandra", "liliana", "angelica", "cecilia",
-            "margarita", "blanca", "elba", "sara", "rebeca", "raquel", "noemi", "miriam", "ruth", "deborah",
-            "esmeralda", "jazmin", "luna", "abril", "mayra", "ivonne", "pamela", "lizbeth", "fabiola", "karla"
+            "jesus", "alejandro", "david", "daniel", "ricardo", "fernando", "eduardo", "javier", "raul", "roberto"
         )
         val surnames = listOf(
-            "rossi", "russo", "ferrari", "esposito", "bianchi", "romano", "colombo", "ricci", "marino", "greco", // Italia
-            "martin", "bernard", "thomas", "petit", "robert", "richard", "durand", "dubois", "moreau", "laurent", // Francia
-            "garcia", "rodriguez", "gonzalez", "fernandez", "lopez", "martinez", "sanchez", "perez", "gomez", "martin", // España
-            "silva", "santos", "ferreira", "pereira", "oliveira", "costa", "rodrigues", "martins", "jesus", "sousa", // Portugal
-            "popa", "popescu", "radulescu", "ionescu", "dumitru", "stoica", "stan", "gheorghe", "rusu", "matei" // Rumania
+            "rossi", "russo", "ferrari", "esposito", "bianchi", "romano", "colombo", "ricci", "marino", "greco"
         )
-
-        val name = (maleNames + femaleNames).random()
+        val name = names.random()
         val surname = surnames.random()
         val randomNum = (1..9999).random().toString()
 
-        // Formato: diegodagama11@gmail.com (numero al final o entre medio)
-        return if ((0..1).random() == 0) {
-            "$name$surname$randomNum@gmail.com"
-        } else {
-            "$name$randomNum$surname@gmail.com"
-        }
+        return "$name$surname$randomNum@gmail.com"
     }
 }
