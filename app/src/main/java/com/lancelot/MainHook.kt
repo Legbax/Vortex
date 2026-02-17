@@ -65,6 +65,93 @@ class MainHook : IXposedHookLoadPackage {
         private var mockBearing: Float = 0.0f
         private var mockSpeed: Float = 0.0f
         private var mockLocationEnabled: Boolean = false
+
+        // US Carrier Data
+        data class UsCarrier(
+            val name: String,
+            val mccMnc: String,
+            val npas: List<String>
+        )
+
+        private val US_CARRIERS = listOf(
+            UsCarrier("T-Mobile", "310260", listOf("206","253","360","425","509","564","347","646","917","929","718","212")),
+            UsCarrier("AT&T", "310410", listOf("214","469","972","817","682","940","404","678","770","470","312","872")),
+            UsCarrier("Verizon", "310012", listOf("201","551","732","848","908","973","609","856","862","732","908","862")),
+            UsCarrier("Sprint (legacy)", "310120", listOf("312","773","847","224","331","630","708","872","779","815","618","309")),
+            UsCarrier("US Cellular", "311580", listOf("217","309","618","815","319","563","920","414","262","608","715","906")),
+            UsCarrier("Cricket", "310150", listOf("832","713","281","346","979","936","210","726","830","956","361","430")),
+            UsCarrier("Metro PCS", "310260", listOf("305","786","954","754","561","407","321","689","386","352","904","727")),
+            UsCarrier("Boost Mobile", "311870", listOf("323","213","310","424","818","747","626","562","661","760","442","951")),
+            UsCarrier("Google Fi", "310260", listOf("202","703","571","240","301","410","443","667","301","202","571","703")),
+            UsCarrier("Tracfone", "310410", listOf("786","305","954","561","407","321","352","863","941","239","850","904"))
+        )
+
+        // Public accessor for UI
+        fun getUsCarriers(): List<UsCarrier> = US_CARRIERS
+
+        // Full High-Fidelity Profile Map
+        private val DEVICE_FINGERPRINTS = mapOf(
+            "Redmi 9" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9", device = "lancelot", product = "lancelot_global",
+                hardware = "mt6768", board = "lancelot", bootloader = "unknown",
+                fingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.3.0.RJCMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6768", eglDriver = "mali", openGlEs = "196610",
+                display = "V12.5.3.0.RJCMIXM", buildDescription = "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys"
+            ),
+            "Redmi Note 9" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9", device = "merlin", product = "merlin_global",
+                hardware = "mt6769", board = "merlin", bootloader = "unknown",
+                fingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.2.0.RJOMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6769", eglDriver = "mali", openGlEs = "196610",
+                display = "V12.5.2.0.RJOMIXM", buildDescription = "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys"
+            ),
+            "Redmi 9A" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9A", device = "dandelion", product = "dandelion_global",
+                hardware = "mt6762", board = "dandelion", bootloader = "unknown",
+                fingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.4.0.RCDMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608",
+                display = "V12.5.4.0.RCDMIXM", buildDescription = "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys"
+            ),
+            "Redmi 9C" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9C", device = "angelica", product = "angelica_global",
+                hardware = "mt6762", board = "angelica", bootloader = "unknown",
+                fingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.1.0.RCRMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608",
+                display = "V12.5.1.0.RCRMIXM", buildDescription = "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys"
+            ),
+            "Redmi Note 9S" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9S", device = "curtana", product = "curtana_global",
+                hardware = "qcom", board = "curtana", bootloader = "unknown",
+                fingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.1.0.RJWMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610",
+                display = "V12.5.1.0.RJWMIXM", buildDescription = "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys"
+            ),
+            "Redmi Note 9 Pro" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9 Pro", device = "joyeuse", product = "joyeuse_global",
+                hardware = "qcom", board = "joyeuse", bootloader = "unknown",
+                fingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.3.0.RJZMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610",
+                display = "V12.5.3.0.RJZMIXM", buildDescription = "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys"
+            )
+        )
     }
 
     data class DeviceFingerprint(
@@ -84,7 +171,10 @@ class MainHook : IXposedHookLoadPackage {
         val incremental: String,
         val sdkInt: Int,
         val release: String,
-        val display: String,        // Build.DISPLAY
+        val boardPlatform: String,   // ro.board.platform
+        val eglDriver: String,       // ro.hardware.egl
+        val openGlEs: String,        // ro.opengles.version
+        val display: String,         // Build.DISPLAY
         val buildDescription: String // ro.build.description
     )
 
@@ -155,104 +245,19 @@ class MainHook : IXposedHookLoadPackage {
 
         val mccMnc = getString("mcc_mnc", carrier.mccMnc)
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
-        if (cachedIccid == null) cachedIccid = generateValidIccid()
+
+        // Use carrier-aware generators for consistency
+        if (cachedIccid == null) cachedIccid = generateValidIccid(mccMnc)
 
         // Force US country
         val simCountry = "us"
-        if (cachedPhoneNumber == null) cachedPhoneNumber = generateUSPhoneNumber()
+        if (cachedPhoneNumber == null) cachedPhoneNumber = generatePhoneNumber(mccMnc)
     }
-
-    // US Carrier Data
-    data class CarrierInfo(val name: String, val mccMnc: String)
-    private val US_CARRIERS = listOf(
-        CarrierInfo("Verizon", "310410"),
-        CarrierInfo("T-Mobile", "310260"),
-        CarrierInfo("AT&T", "310410"),
-        CarrierInfo("Sprint", "310120")
-    )
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
         val cleanName = profileName.replace(" - Android 11", "").trim()
-
-        // Return specific high-quality profiles if matched, otherwise generic generator
-        return when {
-            cleanName.contains("Redmi 9") && !cleanName.contains("Note") && !cleanName.contains("A") && !cleanName.contains("C") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9", device = "lancelot", product = "lancelot_global",
-                hardware = "mt6768", board = "lancelot", bootloader = "unknown",
-                fingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.3.0.RJCMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.3.0.RJCMIXM", buildDescription = "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys"
-            )
-            cleanName.contains("Redmi Note 9") && !cleanName.contains("S") && !cleanName.contains("Pro") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9", device = "merlin", product = "merlin_global",
-                hardware = "mt6768", board = "merlin", bootloader = "unknown",
-                fingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.2.0.RJOMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.2.0.RJOMIXM", buildDescription = "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys"
-            )
-            cleanName.contains("Redmi 9A") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9A", device = "dandelion", product = "dandelion_global",
-                hardware = "mt6762", board = "dandelion", bootloader = "unknown",
-                fingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.4.0.RCDMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.4.0.RCDMIXM", buildDescription = "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys"
-            )
-            cleanName.contains("Redmi 9C") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9C", device = "angelica", product = "angelica_global",
-                hardware = "mt6762", board = "angelica", bootloader = "unknown",
-                fingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.1.0.RCRMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.1.0.RCRMIXM", buildDescription = "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys"
-            )
-            cleanName.contains("Redmi Note 9S") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9S", device = "curtana", product = "curtana_global",
-                hardware = "qcom", board = "curtana", bootloader = "unknown",
-                fingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "V12.5.1.0.RJWMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.1.0.RJWMIXM", buildDescription = "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys"
-            )
-            cleanName.contains("Redmi Note 9 Pro") -> DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9 Pro", device = "joyeuse", product = "joyeuse_global",
-                hardware = "qcom", board = "joyeuse", bootloader = "unknown",
-                fingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "V12.5.3.0.RJZMIXM", sdkInt = 30, release = "11",
-                display = "V12.5.3.0.RJZMIXM", buildDescription = "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys"
-            )
-            else -> generateFingerprintFromModel(cleanName)
-        }
-    }
-
-    private fun generateFingerprintFromModel(modelName: String): DeviceFingerprint {
-        val brand = modelName.split(" ")[0]
-        val device = modelName.lowercase().replace(" ", "_")
-        val manufacturer = brand
-        val product = "${device}_global"
-        val board = device
-        val buildId = "RP1A.200720.011"
-        val tags = "release-keys"
-        val type = "user"
-        val incremental = "V12.5.3.0"
-        val fingerprint = "$brand/$product/$device:11/$buildId/$incremental:$type/$tags"
-
-        return DeviceFingerprint(
-            manufacturer = manufacturer, brand = brand, model = modelName,
-            device = device, product = product, hardware = "qcom", board = board,
-            bootloader = "unknown", fingerprint = fingerprint, buildId = buildId,
-            tags = tags, type = type, radioVersion = "", incremental = incremental,
-            sdkInt = 30, release = "11", display = buildId, buildDescription = "$product-user 11 $buildId $incremental $tags"
-        )
+        // Default to Redmi 9 if no match found
+        return DEVICE_FINGERPRINTS.entries.find { it.key == cleanName }?.value ?: DEVICE_FINGERPRINTS["Redmi 9"]!!
     }
 
     private fun hookBuildFields(lpparam: XC_LoadPackage.LoadPackageParam,
@@ -273,6 +278,10 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.setStaticObjectField(buildClass, "ID", fingerprint.buildId)
             XposedHelpers.setStaticObjectField(buildClass, "TAGS", fingerprint.tags)
             XposedHelpers.setStaticObjectField(buildClass, "TYPE", fingerprint.type)
+
+            XposedHelpers.setStaticObjectField(buildClass, "DISPLAY", fingerprint.display)
+            XposedHelpers.setStaticObjectField(buildClass, "HOST", "pangu-build-component-system-177793")
+            XposedHelpers.setStaticObjectField(buildClass, "USER", "builder")
 
             XposedHelpers.setStaticObjectField(buildClass, "DISPLAY", fingerprint.display)
             XposedHelpers.setStaticObjectField(buildClass, "HOST", "pangu-build-component-system-177793")
@@ -332,6 +341,11 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.build.characteristics"  -> "default"
                         "ro.build.flavor"           -> "${fingerprint.product}-user"
                         "ro.vendor.build.fingerprint" -> fingerprint.fingerprint
+
+                        // Hardware specific properties
+                        "ro.board.platform"         -> fingerprint.boardPlatform
+                        "ro.hardware.egl"           -> fingerprint.eglDriver
+                        "ro.opengles.version"       -> fingerprint.openGlEs
 
                         // Partition specific properties
                         "ro.product.system.manufacturer" -> fingerprint.manufacturer
@@ -573,6 +587,7 @@ class MainHook : IXposedHookLoadPackage {
                 String::class.java,
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
+                        // Snapchat verifica que fue instalado desde Play Store
                         param.result = "com.android.vending"
                     }
                 }
@@ -584,6 +599,7 @@ class MainHook : IXposedHookLoadPackage {
 
     private fun hookApplicationFlags(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
+            // Limpiar FLAG_DEBUGGABLE (0x2) y FLAG_ALLOW_MOCK_LOCATION (0x100)
             XposedHelpers.findAndHookMethod(
                 "android.content.pm.ApplicationInfo",
                 lpparam.classLoader,
@@ -609,22 +625,30 @@ class MainHook : IXposedHookLoadPackage {
         val base = tac + serial
         return base + luhnChecksum(base)
     }
-    private fun generateValidIccid(): String {
-        val prefix = "89"
-        val country = listOf("01", "52").random()
-        val issuer = (1..2).map { (0..9).random() }.joinToString("")
-        val account = (1..13).map { (0..9).random() }.joinToString("")
-        val base = prefix + country + issuer + account
+    private fun generateValidIccid(mccMnc: String): String {
+        // ICCID format: 89 + Country(1) + MNC(2/3) + Issuer + Account...
+        // US (CC=1): 89 + 1 + MNC(3) + ...
+        val mnc = if (mccMnc.length >= 6) mccMnc.substring(3) else "260"
+        val issuer = (10..99).random().toString()
+        val prefixPart = "891$mnc$issuer"
+
+        val accountLen = 18 - prefixPart.length
+        val account = (1..accountLen).map { (0..9).random() }.joinToString("")
+        val base = prefixPart + account
         return base + luhnChecksum(base)
     }
-    private fun generateUSPhoneNumber(): String {
-        // Generate valid US Area Code (200-999)
-        val areaCode = (2..9).random().toString() + (0..9).random() + (0..9).random()
-        // Exchange code (200-999)
-        val exchange = (2..9).random().toString() + (0..9).random() + (0..9).random()
-        // Subscriber number (0000-9999)
+
+    private fun generatePhoneNumber(mccMnc: String): String {
+        // Find carrier matching MNC to use real area codes (NPAs)
+        val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.random()
+        val npa = if (carrier.npas.isNotEmpty()) carrier.npas.random() else "202" // Default fallback
+
+        // NXX: 200-999 (exclude 555)
+        var nxx = (200..999).random()
+        if (nxx == 555) nxx = 556
+
         val subscriber = (0..9999).random().toString().padStart(4, '0')
-        return "+1$areaCode$exchange$subscriber"
+        return "+1$npa$nxx$subscriber"
     }
     private fun luhnChecksum(number: String): Int {
         var sum = 0
