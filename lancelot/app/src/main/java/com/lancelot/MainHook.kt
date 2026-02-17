@@ -974,7 +974,6 @@ class MainHook : IXposedHookLoadPackage {
             val prefsFile = File("/data/data/com.lancelot/shared_prefs/$PREFS_NAME.xml")
             val prefs = if (prefsFile.exists() && prefsFile.canRead()) {
                 XSharedPreferences("com.lancelot", PREFS_NAME).apply {
-                    makeWorldReadable()
                     reload()
                 }
             } else {

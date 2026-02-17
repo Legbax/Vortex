@@ -3,7 +3,5 @@
     <string-array name="xposed_scope">
         <item>com.snapchat.android</item>
         <item>com.instagram.android</item>
-        <item>com.whatsapp</item>
-        <item>com.zhiliaoapp.musically</item>
     </string-array>
 </resources>
