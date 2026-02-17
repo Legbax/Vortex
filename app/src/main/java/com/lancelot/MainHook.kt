@@ -991,7 +991,7 @@ class MainHook : IXposedHookLoadPackage {
             // Hook Build fields
             hookBuildFields(lpparam, fingerprint, prefs)
 
-            // Hook System Properties
+            // Hook System Properties (Addresses Problem 1 & mitigates Problem 2 for Java readers)
             hookSystemProperties(lpparam, fingerprint, prefs)
 
             // Hook TelephonyManager
@@ -1005,6 +1005,9 @@ class MainHook : IXposedHookLoadPackage {
 
             // Hook Mock Location
             hookLocation(lpparam, prefs)
+
+            // Hook WebView User-Agent (FIX #4)
+            hookWebView(lpparam, fingerprint)
 
             // Anti-detección adicional
             hookXposedDetection(lpparam)
@@ -1120,6 +1123,31 @@ class MainHook : IXposedHookLoadPackage {
                             "ro.serialno" -> param.result = prefs?.getString("serial", null) ?: generateRandomSerial()
                             "ro.build.version.release" -> param.result = "11"  // FIX #5: Siempre 11
                             "ro.build.version.sdk" -> param.result = "30"  // FIX #5: Siempre 30
+
+                            // Partition specific properties
+                            "ro.product.system.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.system.brand" -> param.result = fingerprint.brand
+                            "ro.product.system.model" -> param.result = fingerprint.model
+                            "ro.product.system.device" -> param.result = fingerprint.device
+                            "ro.product.system.name" -> param.result = fingerprint.product
+
+                            "ro.product.vendor.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.vendor.brand" -> param.result = fingerprint.brand
+                            "ro.product.vendor.model" -> param.result = fingerprint.model
+                            "ro.product.vendor.device" -> param.result = fingerprint.device
+                            "ro.product.vendor.name" -> param.result = fingerprint.product
+
+                            "ro.product.odm.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.odm.brand" -> param.result = fingerprint.brand
+                            "ro.product.odm.model" -> param.result = fingerprint.model
+                            "ro.product.odm.device" -> param.result = fingerprint.device
+                            "ro.product.odm.name" -> param.result = fingerprint.product
+
+                            "ro.product.product.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.product.brand" -> param.result = fingerprint.brand
+                            "ro.product.product.model" -> param.result = fingerprint.model
+                            "ro.product.product.device" -> param.result = fingerprint.device
+                            "ro.product.product.name" -> param.result = fingerprint.product
                         }
                     }
                 }
@@ -1146,6 +1174,31 @@ class MainHook : IXposedHookLoadPackage {
                             "ro.serialno" -> param.result = prefs?.getString("serial", null) ?: generateRandomSerial()
                             "ro.build.version.release" -> param.result = "11"
                             "ro.build.version.sdk" -> param.result = "30"
+
+                            // Partition specific properties
+                            "ro.product.system.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.system.brand" -> param.result = fingerprint.brand
+                            "ro.product.system.model" -> param.result = fingerprint.model
+                            "ro.product.system.device" -> param.result = fingerprint.device
+                            "ro.product.system.name" -> param.result = fingerprint.product
+
+                            "ro.product.vendor.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.vendor.brand" -> param.result = fingerprint.brand
+                            "ro.product.vendor.model" -> param.result = fingerprint.model
+                            "ro.product.vendor.device" -> param.result = fingerprint.device
+                            "ro.product.vendor.name" -> param.result = fingerprint.product
+
+                            "ro.product.odm.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.odm.brand" -> param.result = fingerprint.brand
+                            "ro.product.odm.model" -> param.result = fingerprint.model
+                            "ro.product.odm.device" -> param.result = fingerprint.device
+                            "ro.product.odm.name" -> param.result = fingerprint.product
+
+                            "ro.product.product.manufacturer" -> param.result = fingerprint.manufacturer
+                            "ro.product.product.brand" -> param.result = fingerprint.brand
+                            "ro.product.product.model" -> param.result = fingerprint.model
+                            "ro.product.product.device" -> param.result = fingerprint.device
+                            "ro.product.product.name" -> param.result = fingerprint.product
                         }
                     }
                 }
@@ -1409,6 +1462,29 @@ class MainHook : IXposedHookLoadPackage {
 
         } catch (e: Throwable) {
             XposedBridge.log("Location hook error: ${e.message}")
+        }
+    }
+
+    private fun hookWebView(lpparam: XC_LoadPackage.LoadPackageParam, fingerprint: DeviceFingerprint) {
+        try {
+            val webSettingsClass = XposedHelpers.findClass("android.webkit.WebSettings", lpparam.classLoader)
+
+            XposedHelpers.findAndHookMethod(webSettingsClass, "getUserAgentString",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val originalUserAgent = param.result as String
+                        // Replace the device model in the User-Agent
+                        // Pattern matches typical Android User-Agents: ...; Model Build/...
+                        val newUserAgent = originalUserAgent.replace(
+                            Regex(";\\s+[^;]+?\\s+Build/"),
+                            "; ${fingerprint.model} Build/"
+                        )
+                        param.result = newUserAgent
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+            XposedBridge.log("WebView hook error: ${e.message}")
         }
     }
 
