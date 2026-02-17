@@ -104,8 +104,8 @@ class MainActivity : AppCompatActivity() {
         "Realme 7 5G - Android 11",
         "Oppo Reno5 - Android 11",
         "Vivo X60 - Android 11",
-        "Huawei P40 - Android 10",
-        "Honor 30 - Android 10",
+        "Vivo X70 Pro - Android 11",
+        "Realme 8 Pro - Android 11",
         "Asus Zenfone 8 - Android 11"
     )
 

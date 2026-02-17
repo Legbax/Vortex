@@ -459,25 +459,25 @@ class MainHook : IXposedHookLoadPackage {
                 boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8250", zygote = "zygote64_32", vendorFingerprint = "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
                 display = "RP1A.200720.012", buildDescription = "V2046-user 11 RP1A.200720.012 compiler05211516 release-keys", buildFlavor = "V2046-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1621584000", securityPatch = "2021-05-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
-            "Huawei P40" to DeviceFingerprint(
-                manufacturer = "HUAWEI", brand = "HUAWEI", model = "ANA-NX9", device = "HWANA", product = "ANA-NX9",
-                hardware = "kirin990", board = "ANA", bootloader = "unknown",
-                fingerprint = "HUAWEI/ANA-NX9/HWANA:10/HUAWEIANA-NX9/10.1.0.131C432:user/release-keys",
-                buildId = "HUAWEIANA-NX9", tags = "release-keys", type = "user",
-                radioVersion = "21C20B369S000C000",
-                incremental = "10.1.0.131C432", sdkInt = 29, release = "10",
-                boardPlatform = "kirin990", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "HiSilicon Kirin 990", zygote = "zygote64_32", vendorFingerprint = "HUAWEI/ANA-NX9/HWANA:10/HUAWEIANA-NX9/10.1.0.131C432:user/release-keys",
-                display = "ANA-NX9 10.1.0.131(C432E8R4P1)", buildDescription = "ANA-NX9-user 10 HUAWEIANA-NX9 10.1.0.131C432 release-keys", buildFlavor = "ANA-NX9-user", buildHost = "hur-sz-12", buildUser = "jenkins", buildDateUtc = "1590480000", securityPatch = "2020-05-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            "Vivo X70 Pro" to DeviceFingerprint(
+                manufacturer = "vivo", brand = "vivo", model = "V2105", device = "V2105", product = "V2105",
+                hardware = "mt6893", board = "V2105", bootloader = "unknown",
+                fingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V98",
+                incremental = "compiler10212015", sdkInt = 30, release = "11",
+                boardPlatform = "mt6893", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "Dimensity 1200", zygote = "zygote64_32", vendorFingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
+                display = "RP1A.200720.012", buildDescription = "V2105-user 11 RP1A.200720.012 compiler10212015 release-keys", buildFlavor = "V2105-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
-            "Honor 30" to DeviceFingerprint(
-                manufacturer = "HONOR", brand = "HONOR", model = "BMH-AN10", device = "BMH", product = "BMH-AN10",
-                hardware = "kirin985", board = "BMH", bootloader = "unknown",
-                fingerprint = "HONOR/BMH-AN10/BMH:10/HUAWEIBMH-AN10/3.1.1.162C00:user/release-keys",
-                buildId = "HUAWEIBMH-AN10", tags = "release-keys", type = "user",
-                radioVersion = "21C20B369S000C000",
-                incremental = "3.1.1.162C00", sdkInt = 29, release = "10",
-                boardPlatform = "kirin985", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "HiSilicon Kirin 985", zygote = "zygote64_32", vendorFingerprint = "HONOR/BMH-AN10/BMH:10/HUAWEIBMH-AN10/3.1.1.162C00:user/release-keys",
-                display = "BMH-AN10 3.1.1.162(C00E160R7P2)", buildDescription = "BMH-AN10-user 10 HUAWEIBMH-AN10 3.1.1.162C00 release-keys", buildFlavor = "BMH-AN10-user", buildHost = "hur-sz-12", buildUser = "jenkins", buildDateUtc = "1598480000", securityPatch = "2020-08-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            "Realme 8 Pro" to DeviceFingerprint(
+                manufacturer = "realme", brand = "realme", model = "RMX3081", device = "RMX3081", product = "RMX3081",
+                hardware = "qcom", board = "RMX3081", bootloader = "unknown",
+                fingerprint = "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.2.0.c4-00165",
+                incremental = "1626245367375", sdkInt = 30, release = "11",
+                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
+                display = "RP1A.200720.011", buildDescription = "RMX3081-user 11 RP1A.200720.011 1626245367375 release-keys", buildFlavor = "RMX3081-user", buildHost = "ubuntu-123", buildUser = "jenkins", buildDateUtc = "1626245367", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
             "Asus Zenfone 8" to DeviceFingerprint(
                 manufacturer = "asus", brand = "asus", model = "ASUS_I006D", device = "ASUS_I006D", product = "WW_I006D",
