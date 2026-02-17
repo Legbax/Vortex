@@ -570,7 +570,10 @@ class MainHook : IXposedHookLoadPackage {
             hookApplicationFlags(lpparam)
 
         } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
+            // Only log in debug builds
+            try {
+                if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
+            } catch (ex: Throwable) {}
         }
     }
 
@@ -728,6 +731,14 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.kernel.qemu" -> "0"
                         "persist.sys.usb.config" -> "none"
                         "service.adb.root" -> "0"
+
+                        // Boot properties
+                        "ro.boot.serialno" -> cachedSerial
+                        "ro.boot.hardware" -> fingerprint.hardware
+                        "ro.boot.bootloader" -> fingerprint.bootloader
+                        "ro.boot.verifiedbootstate" -> "green"
+                        "ro.boot.flash.locked" -> "1"
+                        "ro.boot.vbmeta.device_state" -> "locked"
                         else -> null
                     }
                     if (res != null) param.result = res
@@ -827,6 +838,10 @@ class MainHook : IXposedHookLoadPackage {
             mockBearing = (Math.random() * 360.0).toFloat()
             mockSpeed = (Math.random() * 5.0).toFloat()
 
+            // Random jitter for accuracy and altitude
+            mockAccuracy = 5.0f + (Math.random() * 15.0).toFloat() // 5-20
+            mockAltitude = (Math.random() * 100.0) // 0-100
+
             if (!mockLocationEnabled) return
 
             val locationClass = XposedHelpers.findClass("android.location.Location", lpparam.classLoader)
@@ -909,7 +924,7 @@ class MainHook : IXposedHookLoadPackage {
                 }
             })
         } catch (e: Throwable) {
-            XposedBridge.log("AccountManager hook error: ${e.message}")
+            if (BuildConfig.DEBUG) XposedBridge.log("AccountManager hook error: ${e.message}")
         }
     }
 

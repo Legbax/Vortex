@@ -304,9 +304,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun isValidImei(imei: String): Boolean {
         if (imei.length != 15 || !imei.all { it.isDigit() }) return false
-        val number = imei.substring(0, 14)
-        val checkDigit = imei.last().digitToInt()
-        return luhnChecksum(number) == checkDigit
+        return isLuhnValid(imei)
+    }
+
+    private fun isLuhnValid(number: String): Boolean {
+        var sum = 0
+        val len = number.length
+        for (i in 0 until len) {
+            var digit = number[len - 1 - i].digitToInt()
+            if (i % 2 == 1) {
+                digit *= 2
+            }
+            if (digit > 9) {
+                digit -= 9
+            }
+            sum += digit
+        }
+        return sum % 10 == 0
     }
 
     private fun generateValidImei(): String {
