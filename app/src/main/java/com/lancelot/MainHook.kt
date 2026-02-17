@@ -722,6 +722,12 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.product.product.model" -> fingerprint.model
                         "ro.product.product.device" -> fingerprint.device
                         "ro.product.product.name" -> fingerprint.product
+
+                        "ro.build.version.all_codenames" -> fingerprint.buildVersionCodename
+                        "ro.build.version.min_supported_target_sdk" -> "23"
+                        "ro.kernel.qemu" -> "0"
+                        "persist.sys.usb.config" -> "none"
+                        "service.adb.root" -> "0"
                         else -> null
                     }
                     if (res != null) param.result = res
@@ -848,6 +854,13 @@ class MainHook : IXposedHookLoadPackage {
                         location.speed = mockSpeed
                         location.time = System.currentTimeMillis()
                         location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+
+                        try {
+                            val setMockMethod = Location::class.java.getDeclaredMethod("setIsFromMockProvider", Boolean::class.javaPrimitiveType)
+                            setMockMethod.isAccessible = true
+                            setMockMethod.invoke(location, false)
+                        } catch (e: Exception) {}
+
                         param.result = location
                     }
                 }
