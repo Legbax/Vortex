@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSave: Button
     private lateinit var btnRandom: Button
     private lateinit var etImei: EditText
+    private lateinit var etIccid: EditText
     private lateinit var etGmail: EditText
     private lateinit var spCarrier: Spinner
     private lateinit var swMockLocation: Switch
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity() {
     )
 
     private val randomFields = listOf(
-        "IMEI", "IMEI2", "Serial", "Android ID", "GAID",
+        "IMEI", "ICCID", "IMEI2", "Serial", "Android ID", "GAID",
         "WiFi MAC", "Bluetooth MAC", "GSF ID", "Gmail"
     )
 
@@ -123,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         btnSave = findViewById(R.id.btn_save)
         btnRandom = findViewById(R.id.btn_random)
         etImei = findViewById(R.id.et_imei)
+        etIccid = findViewById(R.id.et_iccid)
         etGmail = findViewById(R.id.et_gmail)
 
         swMockLocation = findViewById(R.id.sw_mock_location)
@@ -140,6 +142,11 @@ class MainActivity : AppCompatActivity() {
         btnSave.setOnClickListener {
             if (!isValidImei(etImei.text.toString())) {
                 Toast.makeText(this, "IMEI inválido (15 dígitos o Checksum incorrecto)", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val iccid = etIccid.text.toString()
+            if (iccid.isNotEmpty() && (!iccid.all { it.isDigit() } || !isLuhnValid(iccid))) {
+                Toast.makeText(this, "ICCID inválido (Solo dígitos o Checksum incorrecto)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             savePrefs()
@@ -187,6 +194,9 @@ class MainActivity : AppCompatActivity() {
         val encryptedImei = prefs.getString("imei", "")
         etImei.setText(decrypt(encryptedImei))
 
+        val encryptedIccid = prefs.getString("iccid", "")
+        etIccid.setText(decrypt(encryptedIccid))
+
         val encryptedGmail = prefs.getString("gmail", "")
         etGmail.setText(decrypt(encryptedGmail))
 
@@ -208,6 +218,7 @@ class MainActivity : AppCompatActivity() {
             // MainHook will strip the suffix.
             putString("profile", encrypt(spProfile.selectedItem.toString()))
             putString("imei", encrypt(etImei.text.toString()))
+            putString("iccid", encrypt(etIccid.text.toString()))
             putString("gmail", encrypt(etGmail.text.toString()))
 
             putString("mcc_mnc", selectedCarrier.mccMnc)
@@ -227,8 +238,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun randomizeAll() {
+        val usCarriers = MainHook.getUsCarriers()
+        val selectedCarrier = usCarriers[spCarrier.selectedItemPosition]
+
         val randomImei = generateValidImei()
         etImei.setText(randomImei)
+
+        val randomIccid = generateValidIccid(selectedCarrier.mccMnc)
+        etIccid.setText(randomIccid)
 
         val randomGmail = generateRealisticGmail()
         etGmail.setText(randomGmail)
@@ -254,10 +271,14 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
+        val usCarriers = MainHook.getUsCarriers()
+        val selectedCarrier = usCarriers[spCarrier.selectedItemPosition]
+
         var newValue = ""
         val key = when (field) {
             "IMEI" -> "imei"
             "IMEI2" -> "imei2"
+            "ICCID" -> "iccid"
             "Serial" -> "serial"
             "Android ID" -> "android_id"
             "GAID" -> "gaid"
@@ -271,6 +292,7 @@ class MainActivity : AppCompatActivity() {
         if (key.isNotEmpty()) {
             newValue = when (field) {
                 "IMEI", "IMEI2" -> generateValidImei()
+                "ICCID" -> generateValidIccid(selectedCarrier.mccMnc)
                 "Serial" -> generateRandomId(12).uppercase()
                 "Android ID", "GSF ID" -> generateRandomId(16)
                 "GAID" -> UUID.randomUUID().toString()
@@ -282,6 +304,7 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
 
             if (field == "IMEI") etImei.setText(newValue)
+            if (field == "ICCID") etIccid.setText(newValue)
             if (field == "Gmail") etGmail.setText(newValue)
 
             Toast.makeText(this, "$field actualizado: $newValue", Toast.LENGTH_SHORT).show()
@@ -327,6 +350,17 @@ class MainActivity : AppCompatActivity() {
         val tac = "35" + (100000..999999).random()
         val serial = (100000..999999).random().toString()
         val base = tac + serial
+        return base + luhnChecksum(base)
+    }
+
+    private fun generateValidIccid(mccMnc: String): String {
+        val mnc = if (mccMnc.length >= 6) mccMnc.substring(3) else "260"
+        val issuer = (10..99).random().toString()
+        val prefixPart = "891$mnc$issuer"
+
+        val accountLen = 18 - prefixPart.length
+        val account = (1..accountLen).map { (0..9).random() }.joinToString("")
+        val base = prefixPart + account
         return base + luhnChecksum(base)
     }
 

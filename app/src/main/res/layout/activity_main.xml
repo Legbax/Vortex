@@ -1,196 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:orientation="vertical"
     android:padding="16dp">
+
+    <Spinner
+        android:id="@+id/sp_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/sp_carrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_imei"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="IMEI (15 dígitos)"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/et_iccid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="ICCID (19-20 dígitos)"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/et_gmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Gmail"
+        android:inputType="textEmailAddress" />
+
+    <Switch
+        android:id="@+id/sw_mock_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mock Location" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lancelot - Stealth Spoofer"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Profile Selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Device Profile (Android 11)"
-            android:textStyle="bold"/>
-
-        <Spinner
-            android:id="@+id/sp_profile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Randomize Actions -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Randomization"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btn_random"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Randomize ALL Fields"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select specific field to randomize:"
-            android:layout_marginTop="8dp"/>
-
-        <Spinner
-            android:id="@+id/sp_random_field"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/btn_random_selected"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Randomize Selected Field"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Device IDs -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Visible Identifiers"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp"/>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="IMEI (15 digits)">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_imei"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="15"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Google Account (Gmail)">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_gmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- SIM Info -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="US Carrier Selection"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <Spinner
-            android:id="@+id/sp_carrier"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Mock Location -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mock Location"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <Switch
-            android:id="@+id/sw_mock_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Enable Mock Location"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Latitude">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_mock_lat"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Longitude">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_mock_lon"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Altitude (m)">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_mock_alt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Accuracy (m)">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_mock_acc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <!-- Save Button -->
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Save &amp; Apply"
-            android:backgroundTint="?attr/colorPrimary"/>
-
+        android:orientation="horizontal">
+        <EditText android:id="@+id/et_mock_lat" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Lat" />
+        <EditText android:id="@+id/et_mock_lon" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Lon" />
     </LinearLayout>
-</ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText android:id="@+id/et_mock_alt" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Alt" />
+        <EditText android:id="@+id/et_mock_acc" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:hint="Acc" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_random"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Randomize All" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Spinner android:id="@+id/sp_random_field" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" />
+        <Button android:id="@+id/btn_random_selected" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Randomize Field" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save &amp; Apply" />
+
+</LinearLayout>
