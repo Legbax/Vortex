@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             if (!isValidImei(etImei.text.toString())) {
-                Toast.makeText(this, "IMEI inválido (15 dígitos)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "IMEI inválido (15 dígitos o Checksum incorrecto)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             savePrefs()
@@ -257,7 +257,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Utilidades
-    private fun isValidImei(imei: String): Boolean = imei.length == 15 && imei.all { it.isDigit() }
+    private fun isValidImei(imei: String): Boolean {
+        if (imei.length != 15 || !imei.all { it.isDigit() }) return false
+        // Validate with Luhn algorithm
+        val number = imei.substring(0, 14)
+        val checkDigit = imei.last().digitToInt()
+        return luhnChecksum(number) == checkDigit
+    }
 
     private fun generateValidImei(): String {
         val tac = "35" + (100000..999999).random()
@@ -287,24 +293,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateRealisticGmail(): String {
-        val names = listOf(
-            "james", "john", "robert", "michael", "william", "david", "richard", "joseph", "thomas", "charles",
-            "christopher", "daniel", "matthew", "anthony", "donald", "mark", "paul", "steven", "andrew", "kenneth",
-            "mary", "patricia", "jennifer", "linda", "elizabeth", "barbara", "susan", "jessica", "sarah", "karen",
-            "nancy", "lisa", "margaret", "betty", "sandra", "ashley", "dorothy", "kimberly", "emily", "donna"
+        val maleNames = listOf(
+            "juan", "jose", "luis", "carlos", "francisco", "antonio", "jorge", "miguel", "manuel", "pedro",
+            "jesus", "alejandro", "david", "daniel", "ricardo", "fernando", "eduardo", "javier", "raul", "roberto",
+            "martin", "gabriel", "andres", "marco", "sergio", "oscar", "mario", "angel", "ramon", "ruben",
+            "hector", "arturo", "jaime", "victor", "hugo", "salvador", "alfredo", "guillermo", "felipe", "cesar",
+            "diego", "gerardo", "pablo", "enrique", "alberto", "armando", "gustavo", "ignacio", "julio", "adrian",
+            "saul", "omar", "nicolas", "joaquin", "samuel", "esteban", "cristian", "emilio", "lucas", "agustin",
+            "sebastian", "mariano", "matias", "rodrigo", "patricio", "gonzalo", "benjamin", "tomas", "fede", "maxi",
+            "bruno", "ignacio", "lautaro", "facundo", "nahuel", "santiago", "julian", "federico", "leonardo", "mauricio",
+            "emmanuel", "axel", "joel", "ivan", "alan", "brian", "kevin", "alex", "jonathan", "erick",
+            "isaac", "rafael", "felix", "rolando", "gilberto", "rojelio", "abraham", "moises", "elias", "jacobo"
+        )
+        val femaleNames = listOf(
+            "maria", "ana", "rosa", "juana", "carmen", "marisol", "veronica", "lucia", "laura", "elena",
+            "isabel", "silvia", "patricia", "adriana", "gabriela", "claudia", "monica", "teresa", "yolanda", "martha",
+            "luz", "guadalupe", "alicia", "beatriz", "sonia", "rocio", "esther", "lourdes", "consuelo", "gloria",
+            "sofia", "valentina", "camila", "mariana", "daniela", "paula", "andrea", "xites", "natalia", "alejandra",
+            "fernanda", "victoria", "regina", "renata", "antonella", "florencia", "agustina", "candela", "rocio", "belen",
+            "milagros", "julieta", "micaela", "romina", "carolina", "lorena", "paola", "erika", "brenda", "vanesa",
+            "cynthia", "karen", "nancy", "leticia", "norma", "diana", "sandra", "liliana", "angelica", "cecilia",
+            "margarita", "blanca", "elba", "sara", "rebeca", "raquel", "noemi", "miriam", "ruth", "deborah",
+            "esmeralda", "jazmin", "luna", "abril", "mayra", "ivonne", "pamela", "lizbeth", "fabiola", "karla"
         )
         val surnames = listOf(
-            "smith", "johnson", "williams", "brown", "jones", "garcia", "miller", "davis", "rodriguez", "martinez",
-            "hernandez", "lopez", "gonzalez", "wilson", "anderson", "thomas", "taylor", "moore", "jackson", "martin",
-            "lee", "perez", "thompson", "white", "harris", "sanchez", "clark", "ramirez", "lewis", "robinson"
+            "rossi", "russo", "ferrari", "esposito", "bianchi", "romano", "colombo", "ricci", "marino", "greco", // Italia
+            "martin", "bernard", "thomas", "petit", "robert", "richard", "durand", "dubois", "moreau", "laurent", // Francia
+            "garcia", "rodriguez", "gonzalez", "fernandez", "lopez", "martinez", "sanchez", "perez", "gomez", "martin", // España
+            "silva", "santos", "ferreira", "pereira", "oliveira", "costa", "rodrigues", "martins", "jesus", "sousa", // Portugal
+            "popa", "popescu", "radulescu", "ionescu", "dumitru", "stoica", "stan", "gheorghe", "rusu", "matei" // Rumania
         )
-        val separators = listOf("", ".", "_")
 
-        val name = names.random()
+        val name = (maleNames + femaleNames).random()
         val surname = surnames.random()
-        val sep = separators.random()
-        val suffix = (1970..2005).random().toString() // Year suffix
+        val randomNum = (1..9999).random().toString()
 
-        return "$name$sep$surname$suffix@gmail.com"
+        // Formato: diegodagama11@gmail.com (numero al final o entre medio)
+        return if ((0..1).random() == 0) {
+            "$name$surname$randomNum@gmail.com"
+        } else {
+            "$name$randomNum$surname@gmail.com"
+        }
     }
 }
