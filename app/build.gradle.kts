@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.lancelot"
-    compileSdk = 34
+    compileSdk = 30 // FIX: Match Target SDK exactly
 
     defaultConfig {
         applicationId = "com.lancelot"

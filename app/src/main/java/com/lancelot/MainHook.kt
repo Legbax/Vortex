@@ -6,6 +6,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.accounts.Account
 import android.telephony.TelephonyManager
 import android.util.Base64
 import de.robv.android.xposed.*
@@ -24,9 +25,6 @@ class MainHook : IXposedHookLoadPackage {
 
         // --- Manual Encryption Implementation (AES) ---
         private const val ALGO = "AES"
-        // Clave estática ofuscada (en producción real debería ser más compleja o nativa)
-        // "LancelotStealthKey2026" - 32 bytes para AES-256 (necesita policy) o 16 bytes para AES-128
-        // Usaremos 16 bytes (128 bit) para compatibilidad máxima
         private val KEY_BYTES = byteArrayOf(
             0x4c, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6f, 0x74,
             0x53, 0x74, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x31
@@ -41,7 +39,6 @@ class MainHook : IXposedHookLoadPackage {
                 val decodedBytes = Base64.decode(encrypted, Base64.NO_WRAP)
                 String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8)
             } catch (e: Exception) {
-                // Si falla desencriptar (ej. valor plano antiguo), devolvemos el original o null
                 if (!encrypted.startsWith("ENC:")) encrypted else null
             }
         }
@@ -55,33 +52,18 @@ class MainHook : IXposedHookLoadPackage {
         private var cachedAndroidId: String? = null
         private var cachedGsfId: String? = null
         private var cachedGaid: String? = null
-        private var cachedSsaid: String? = null
         private var cachedWifiMac: String? = null
         private var cachedBtMac: String? = null
-
-        // 50 perfiles reales A11
-        private val PROFILES_LIST = listOf(
-            "Google Pixel 5 - Android 11", "Samsung Galaxy A52 - Android 11", "Xiaomi Redmi Note 10 Pro - Android 11",
-            "Sony Xperia 10 III - Android 11", "OnePlus 9 - Android 11", "Motorola Moto G Stylus 5G - Android 11",
-            "Nokia 8.3 5G - Android 11", "Oppo Reno5 - Android 11", "Vivo X60 - Android 11", "Realme 8 Pro - Android 11",
-            "Samsung Galaxy S20 FE - Android 11", "Google Pixel 4a - Android 11", "Samsung Galaxy Note 20 - Android 11",
-            "Xiaomi Mi 11 - Android 11", "Sony Xperia 5 II - Android 11", "OnePlus Nord - Android 11", "LG Velvet - Android 11",
-            "Asus Zenfone 7 - Android 11", "Huawei P40 - Android 11", "Honor 30 - Android 11", "Samsung Galaxy A12 - Android 11",
-            "Google Pixel 4a 5G - Android 11", "Oppo A53 - Android 11", "Vivo Y53s - Android 11", "Realme 7 5G - Android 11",
-            "Xiaomi Redmi Note 9 - Android 11", "Samsung Galaxy M31 - Android 11", "Motorola Edge - Android 11",
-            "Nokia 5.4 - Android 11", "Oppo Find X2 - Android 11", "Vivo V20 - Android 11", "Realme X7 Pro - Android 11",
-            "Samsung Galaxy A32 - Android 11", "Google Pixel 5a - Android 11", "Samsung Galaxy Z Flip - Android 11",
-            "Xiaomi Poco X3 NFC - Android 11", "Sony Xperia 1 II - Android 11", "OnePlus 8T - Android 11", "LG Wing - Android 11",
-            "Asus ROG Phone 3 - Android 11", "Huawei Mate 40 Pro - Android 11", "Honor V40 - Android 11", "Samsung Galaxy A51 - Android 11",
-            "Google Pixel 4 - Android 11", "Samsung Galaxy S10 Lite - Android 11", "Xiaomi Mi 10T Pro - Android 11",
-            "Sony Xperia 5 III - Android 11", "OnePlus Nord 2 - Android 11", "LG Q52 - Android 11", "Asus Zenfone 8 - Android 11"
-        )
+        private var cachedGmail: String? = null
+        private var cachedSerial: String? = null
 
         // Mock Location settings
         private var mockLatitude: Double = 0.0
         private var mockLongitude: Double = 0.0
         private var mockAltitude: Double = 0.0
         private var mockAccuracy: Float = 10.0f
+        private var mockBearing: Float = 0.0f
+        private var mockSpeed: Float = 0.0f
         private var mockLocationEnabled: Boolean = false
     }
 
@@ -101,7 +83,9 @@ class MainHook : IXposedHookLoadPackage {
         val radioVersion: String,
         val incremental: String,
         val sdkInt: Int,
-        val release: String
+        val release: String,
+        val display: String,        // Build.DISPLAY
+        val buildDescription: String // ro.build.description
     )
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
@@ -145,10 +129,13 @@ class MainHook : IXposedHookLoadPackage {
             hookNetworkInterfaces(lpparam, prefs, ::getEncryptedString)
             hookLocation(lpparam, prefs, ::getEncryptedString)
             hookWebView(lpparam, fingerprint)
+            hookAccountManager(lpparam)
             hookXposedDetection(lpparam) // Extended
+            hookPackageManager(lpparam)
+            hookApplicationFlags(lpparam)
 
         } catch (e: Throwable) {
-            XposedBridge.log("Lancelot Error: ${e.message}")
+            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
         }
     }
 
@@ -158,22 +145,93 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", generateRandomId(16))
         if (cachedGsfId == null) cachedGsfId = getString("gsf_id", generateRandomId(16))
         if (cachedGaid == null) cachedGaid = getString("gaid", generateRandomGaid())
-        if (cachedSsaid == null) cachedSsaid = getString("ssaid", generateRandomId(16))
         if (cachedWifiMac == null) cachedWifiMac = getString("wifi_mac", generateRandomMac())
         if (cachedBtMac == null) cachedBtMac = getString("bluetooth_mac", generateRandomMac())
+        if (cachedGmail == null) cachedGmail = getString("gmail", "test.user" + (1000..9999).random() + "@gmail.com")
+        if (cachedSerial == null) cachedSerial = getString("serial", generateRandomSerial())
 
-        val mccMnc = getString("mcc_mnc", "310260")
+        // Select a random US carrier for consistency
+        val carrier = US_CARRIERS.random()
+
+        val mccMnc = getString("mcc_mnc", carrier.mccMnc)
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
         if (cachedIccid == null) cachedIccid = generateValidIccid()
 
-        val simCountry = getString("sim_country", "us")
-        if (cachedPhoneNumber == null) cachedPhoneNumber = generatePhoneNumber(simCountry)
+        // Force US country
+        val simCountry = "us"
+        if (cachedPhoneNumber == null) cachedPhoneNumber = generateUSPhoneNumber()
     }
+
+    // US Carrier Data
+    data class CarrierInfo(val name: String, val mccMnc: String)
+    private val US_CARRIERS = listOf(
+        CarrierInfo("Verizon", "310410"),
+        CarrierInfo("T-Mobile", "310260"),
+        CarrierInfo("AT&T", "310410"),
+        CarrierInfo("Sprint", "310120")
+    )
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
         val cleanName = profileName.replace(" - Android 11", "").trim()
-        // Generador simple basado en el nombre para simular 50 perfiles sin hardcoding masivo
-        return generateFingerprintFromModel(cleanName)
+
+        // Return specific high-quality profiles if matched, otherwise generic generator
+        return when {
+            cleanName.contains("Redmi 9") && !cleanName.contains("Note") && !cleanName.contains("A") && !cleanName.contains("C") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9", device = "lancelot", product = "lancelot_global",
+                hardware = "mt6768", board = "lancelot", bootloader = "unknown",
+                fingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.3.0.RJCMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.3.0.RJCMIXM", buildDescription = "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys"
+            )
+            cleanName.contains("Redmi Note 9") && !cleanName.contains("S") && !cleanName.contains("Pro") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9", device = "merlin", product = "merlin_global",
+                hardware = "mt6768", board = "merlin", bootloader = "unknown",
+                fingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.2.0.RJOMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.2.0.RJOMIXM", buildDescription = "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys"
+            )
+            cleanName.contains("Redmi 9A") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9A", device = "dandelion", product = "dandelion_global",
+                hardware = "mt6762", board = "dandelion", bootloader = "unknown",
+                fingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.4.0.RCDMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.4.0.RCDMIXM", buildDescription = "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys"
+            )
+            cleanName.contains("Redmi 9C") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9C", device = "angelica", product = "angelica_global",
+                hardware = "mt6762", board = "angelica", bootloader = "unknown",
+                fingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.1.0.RCRMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.1.0.RCRMIXM", buildDescription = "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys"
+            )
+            cleanName.contains("Redmi Note 9S") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9S", device = "curtana", product = "curtana_global",
+                hardware = "qcom", board = "curtana", bootloader = "unknown",
+                fingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.1.0.RJWMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.1.0.RJWMIXM", buildDescription = "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys"
+            )
+            cleanName.contains("Redmi Note 9 Pro") -> DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9 Pro", device = "joyeuse", product = "joyeuse_global",
+                hardware = "qcom", board = "joyeuse", bootloader = "unknown",
+                fingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.3.0.RJZMIXM", sdkInt = 30, release = "11",
+                display = "V12.5.3.0.RJZMIXM", buildDescription = "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys"
+            )
+            else -> generateFingerprintFromModel(cleanName)
+        }
     }
 
     private fun generateFingerprintFromModel(modelName: String): DeviceFingerprint {
@@ -182,7 +240,7 @@ class MainHook : IXposedHookLoadPackage {
         val manufacturer = brand
         val product = "${device}_global"
         val board = device
-        val buildId = "RP1A.200720.011" // Common A11 Build ID
+        val buildId = "RP1A.200720.011"
         val tags = "release-keys"
         val type = "user"
         val incremental = "V12.5.3.0"
@@ -193,7 +251,7 @@ class MainHook : IXposedHookLoadPackage {
             device = device, product = product, hardware = "qcom", board = board,
             bootloader = "unknown", fingerprint = fingerprint, buildId = buildId,
             tags = tags, type = type, radioVersion = "", incremental = incremental,
-            sdkInt = 30, release = "11"
+            sdkInt = 30, release = "11", display = buildId, buildDescription = "$product-user 11 $buildId $incremental $tags"
         )
     }
 
@@ -216,8 +274,11 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.setStaticObjectField(buildClass, "TAGS", fingerprint.tags)
             XposedHelpers.setStaticObjectField(buildClass, "TYPE", fingerprint.type)
 
-            val customSerial = getString("serial", generateRandomSerial())
-            XposedHelpers.setStaticObjectField(buildClass, "SERIAL", customSerial)
+            XposedHelpers.setStaticObjectField(buildClass, "DISPLAY", fingerprint.display)
+            XposedHelpers.setStaticObjectField(buildClass, "HOST", "pangu-build-component-system-177793")
+            XposedHelpers.setStaticObjectField(buildClass, "USER", "builder")
+
+            XposedHelpers.setStaticObjectField(buildClass, "SERIAL", cachedSerial)
 
             val versionClass = Build.VERSION::class.java
             XposedHelpers.setStaticIntField(versionClass, "SDK_INT", 30)
@@ -228,7 +289,7 @@ class MainHook : IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod(Build::class.java, "getSerial",
                     object : XC_MethodHook() {
                         override fun afterHookedMethod(param: MethodHookParam) {
-                            param.result = customSerial
+                            param.result = cachedSerial
                         }
                     }
                 )
@@ -247,11 +308,11 @@ class MainHook : IXposedHookLoadPackage {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val key = param.args[0] as String
                     val res = when (key) {
-                        "ro.product.manufacturer", "ro.product.system.manufacturer", "ro.product.vendor.manufacturer", "ro.product.odm.manufacturer", "ro.product.product.manufacturer" -> fingerprint.manufacturer
-                        "ro.product.brand", "ro.product.system.brand", "ro.product.vendor.brand", "ro.product.odm.brand", "ro.product.product.brand" -> fingerprint.brand
-                        "ro.product.model", "ro.product.system.model", "ro.product.vendor.model", "ro.product.odm.model", "ro.product.product.model" -> fingerprint.model
-                        "ro.product.device", "ro.product.system.device", "ro.product.vendor.device", "ro.product.odm.device", "ro.product.product.device" -> fingerprint.device
-                        "ro.product.name", "ro.product.system.name", "ro.product.vendor.name", "ro.product.odm.name", "ro.product.product.name" -> fingerprint.product
+                        "ro.product.manufacturer" -> fingerprint.manufacturer
+                        "ro.product.brand" -> fingerprint.brand
+                        "ro.product.model" -> fingerprint.model
+                        "ro.product.device" -> fingerprint.device
+                        "ro.product.name" -> fingerprint.product
                         "ro.hardware" -> fingerprint.hardware
                         "ro.product.board" -> fingerprint.board
                         "ro.bootloader" -> fingerprint.bootloader
@@ -260,9 +321,42 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.build.tags" -> fingerprint.tags
                         "ro.build.type" -> fingerprint.type
                         "gsm.version.baseband" -> fingerprint.radioVersion
-                        "ro.serialno" -> getString("serial", generateRandomSerial())
+                        "ro.serialno" -> cachedSerial
                         "ro.build.version.release" -> "11"
                         "ro.build.version.sdk" -> "30"
+
+                        "ro.debuggable"             -> "0"
+                        "ro.secure"                 -> "1"
+                        "ro.build.display.id"       -> fingerprint.display
+                        "ro.build.description"      -> fingerprint.buildDescription
+                        "ro.build.characteristics"  -> "default"
+                        "ro.build.flavor"           -> "${fingerprint.product}-user"
+                        "ro.vendor.build.fingerprint" -> fingerprint.fingerprint
+
+                        // Partition specific properties
+                        "ro.product.system.manufacturer" -> fingerprint.manufacturer
+                        "ro.product.system.brand" -> fingerprint.brand
+                        "ro.product.system.model" -> fingerprint.model
+                        "ro.product.system.device" -> fingerprint.device
+                        "ro.product.system.name" -> fingerprint.product
+
+                        "ro.product.vendor.manufacturer" -> fingerprint.manufacturer
+                        "ro.product.vendor.brand" -> fingerprint.brand
+                        "ro.product.vendor.model" -> fingerprint.model
+                        "ro.product.vendor.device" -> fingerprint.device
+                        "ro.product.vendor.name" -> fingerprint.product
+
+                        "ro.product.odm.manufacturer" -> fingerprint.manufacturer
+                        "ro.product.odm.brand" -> fingerprint.brand
+                        "ro.product.odm.model" -> fingerprint.model
+                        "ro.product.odm.device" -> fingerprint.device
+                        "ro.product.odm.name" -> fingerprint.product
+
+                        "ro.product.product.manufacturer" -> fingerprint.manufacturer
+                        "ro.product.product.brand" -> fingerprint.brand
+                        "ro.product.product.model" -> fingerprint.model
+                        "ro.product.product.device" -> fingerprint.device
+                        "ro.product.product.name" -> fingerprint.product
                         else -> null
                     }
                     if (res != null) param.result = res
@@ -289,14 +383,16 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(tmClass, "getSimSerialNumber", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = cachedIccid } })
             XposedHelpers.findAndHookMethod(tmClass, "getLine1Number", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = cachedPhoneNumber } })
 
-            val mccMnc = getString("mcc_mnc", "310260")
-            val simCountry = getString("sim_country", "us")
-            val simOperator = getString("sim_operator", "310260")
+            // Extract MCC/MNC from cached IMSI (first 6 chars usually) or default
+            val mccMnc = if (cachedImsi != null && cachedImsi!!.length >= 6) cachedImsi!!.substring(0, 6) else "310260"
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS[1] // Default T-Mobile
 
             XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = mccMnc } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simOperator } })
-            XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simCountry } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = simCountry } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimOperator", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = mccMnc } })
+            XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperatorName", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = carrier.name } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimOperatorName", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = carrier.name } })
+            XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = "us" } })
+            XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { param.result = "us" } })
 
         } catch (e: Throwable) {}
     }
@@ -359,6 +455,10 @@ class MainHook : IXposedHookLoadPackage {
             mockAltitude = altStr.toDoubleOrNull() ?: 0.0
             mockAccuracy = accStr.toFloatOrNull() ?: 10.0f
 
+            // Random variability for realism
+            mockBearing = (Math.random() * 360.0).toFloat()
+            mockSpeed = (Math.random() * 5.0).toFloat()
+
             if (!mockLocationEnabled) return
 
             val locationClass = XposedHelpers.findClass("android.location.Location", lpparam.classLoader)
@@ -368,6 +468,10 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(locationClass, "getAltitude", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockAltitude } })
             XposedHelpers.findAndHookMethod(locationClass, "hasAltitude", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
             XposedHelpers.findAndHookMethod(locationClass, "getAccuracy", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockAccuracy } })
+            XposedHelpers.findAndHookMethod(locationClass, "getBearing", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockBearing } })
+            XposedHelpers.findAndHookMethod(locationClass, "hasBearing", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
+            XposedHelpers.findAndHookMethod(locationClass, "getSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockSpeed } })
+            XposedHelpers.findAndHookMethod(locationClass, "hasSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
 
             val locationManagerClass = XposedHelpers.findClass("android.location.LocationManager", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(locationManagerClass, "getLastKnownLocation", String::class.java, object : XC_MethodHook() {
@@ -378,6 +482,8 @@ class MainHook : IXposedHookLoadPackage {
                         location.longitude = mockLongitude
                         location.altitude = mockAltitude
                         location.accuracy = mockAccuracy
+                        location.bearing = mockBearing
+                        location.speed = mockSpeed
                         location.time = System.currentTimeMillis()
                         location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
                         param.result = location
@@ -398,6 +504,41 @@ class MainHook : IXposedHookLoadPackage {
                 }
             })
         } catch (e: Throwable) {}
+    }
+
+    private fun hookAccountManager(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val amClass = XposedHelpers.findClass("android.accounts.AccountManager", lpparam.classLoader)
+
+            // Hook getAccounts()
+            XposedHelpers.findAndHookMethod(amClass, "getAccounts", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val accounts = param.result as Array<Account>
+                    // Remove existing google accounts and add fake one
+                    val newAccounts = accounts.filter { it.type != "com.google" }.toMutableList()
+                    if (cachedGmail != null) {
+                        newAccounts.add(Account(cachedGmail, "com.google"))
+                    }
+                    param.result = newAccounts.toTypedArray()
+                }
+            })
+
+            // Hook getAccountsByType(String type)
+            XposedHelpers.findAndHookMethod(amClass, "getAccountsByType", String::class.java, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val type = param.args[0] as String
+                    if (type == "com.google") {
+                        if (cachedGmail != null) {
+                            param.result = arrayOf(Account(cachedGmail, "com.google"))
+                        } else {
+                            param.result = emptyArray<Account>()
+                        }
+                    }
+                }
+            })
+        } catch (e: Throwable) {
+            XposedBridge.log("AccountManager hook error: ${e.message}")
+        }
     }
 
     private fun hookXposedDetection(lpparam: XC_LoadPackage.LoadPackageParam) {
@@ -423,11 +564,47 @@ class MainHook : IXposedHookLoadPackage {
         } catch (e: Throwable) {}
     }
 
+    private fun hookPackageManager(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "android.app.ApplicationPackageManager",
+                lpparam.classLoader,
+                "getInstallerPackageName",
+                String::class.java,
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        param.result = "com.android.vending"
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("PackageManager hook error: ${e.message}")
+        }
+    }
+
+    private fun hookApplicationFlags(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "android.content.pm.ApplicationInfo",
+                lpparam.classLoader,
+                "getFlags",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val flags = param.result as? Int ?: return
+                        param.result = flags and 0x100.inv() and 0x2.inv()
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+        }
+    }
+
     // ========== GENERADORES Y UTILIDADES ==========
 
     private fun generateRandomId(length: Int): String = (1..length).map { "0123456789abcdef".random() }.joinToString("")
     private fun generateValidImei(): String {
-        val tac = listOf("35891603", "35328708", "35404907").random()
+        // Updated with verified real TACs
+        val tac = listOf("86413405", "86413404", "35271311", "35361311").random()
         val serial = (1..6).map { (0..9).random() }.joinToString("")
         val base = tac + serial
         return base + luhnChecksum(base)
@@ -440,18 +617,21 @@ class MainHook : IXposedHookLoadPackage {
         val base = prefix + country + issuer + account
         return base + luhnChecksum(base)
     }
-    private fun generatePhoneNumber(countryCode: String): String {
-        return when (countryCode.lowercase()) {
-            "us" -> "+1" + (2..9).random().toString() + (0..9).random().toString() + (0..9).random().toString() + (1..7).map { (0..9).random() }.joinToString("")
-            "mx" -> "+52" + listOf("55", "33", "81").random() + (1..7).map { (0..9).random() }.joinToString("")
-            else -> "+1" + (2..9).random().toString() + (1..9).map { (0..9).random() }.joinToString("")
-        }
+    private fun generateUSPhoneNumber(): String {
+        // Generate valid US Area Code (200-999)
+        val areaCode = (2..9).random().toString() + (0..9).random() + (0..9).random()
+        // Exchange code (200-999)
+        val exchange = (2..9).random().toString() + (0..9).random() + (0..9).random()
+        // Subscriber number (0000-9999)
+        val subscriber = (0..9999).random().toString().padStart(4, '0')
+        return "+1$areaCode$exchange$subscriber"
     }
     private fun luhnChecksum(number: String): Int {
         var sum = 0
         for (i in number.indices.reversed()) {
             var digit = number[i].digitToInt()
-            if ((number.length - i) % 2 == 0) digit *= 2
+            // FIX: Luhn position adjustment
+            if ((number.length - i + 1) % 2 == 0) digit *= 2
             if (digit > 9) digit -= 9
             sum += digit
         }

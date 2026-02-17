@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSave: Button
     private lateinit var btnRandom: Button
     private lateinit var etImei: EditText
+    private lateinit var etGmail: EditText
     private lateinit var swMockLocation: Switch
     private lateinit var etMockLat: EditText
     private lateinit var etMockLon: EditText
@@ -82,8 +83,8 @@ class MainActivity : AppCompatActivity() {
     )
 
     private val randomFields = listOf(
-        "IMEI", "IMEI2", "Serial", "Android ID", "GAID", "SSAID",
-        "WiFi MAC", "Bluetooth MAC", "GSF ID"
+        "IMEI", "IMEI2", "Serial", "Android ID", "GAID",
+        "WiFi MAC", "Bluetooth MAC", "GSF ID", "Gmail"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         btnSave = findViewById(R.id.btn_save)
         btnRandom = findViewById(R.id.btn_random)
         etImei = findViewById(R.id.et_imei)
+        etGmail = findViewById(R.id.et_gmail)
 
         swMockLocation = findViewById(R.id.sw_mock_location)
         etMockLat = findViewById(R.id.et_mock_lat)
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             if (!isValidImei(etImei.text.toString())) {
-                Toast.makeText(this, "IMEI inválido (15 dígitos)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "IMEI inválido (15 dígitos o Checksum incorrecto)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             savePrefs()
@@ -144,6 +146,9 @@ class MainActivity : AppCompatActivity() {
         val encryptedImei = prefs.getString("imei", "")
         etImei.setText(decrypt(encryptedImei))
 
+        val encryptedGmail = prefs.getString("gmail", "")
+        etGmail.setText(decrypt(encryptedGmail))
+
         swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false) // Booleans no se encriptan (no sensible)
         etMockLat.setText(decrypt(prefs.getString("mock_latitude", "0.0")))
         etMockLon.setText(decrypt(prefs.getString("mock_longitude", "0.0")))
@@ -156,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         prefs.edit().apply {
             putString("profile", encrypt(spProfile.selectedItem.toString()))
             putString("imei", encrypt(etImei.text.toString()))
+            putString("gmail", encrypt(etGmail.text.toString()))
 
             putBoolean("mock_location_enabled", swMockLocation.isChecked)
             putString("mock_latitude", encrypt(etMockLat.text.toString()))
@@ -174,17 +180,20 @@ class MainActivity : AppCompatActivity() {
         val randomImei = generateValidImei()
         etImei.setText(randomImei)
 
+        val randomGmail = generateRealisticGmail()
+        etGmail.setText(randomGmail)
+
         val randomProfileIndex = (0 until profiles.size).random()
         spProfile.setSelection(randomProfileIndex)
 
         // Generar y guardar otros IDs
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
+            putString("gmail", encrypt(randomGmail))
             putString("imei2", encrypt(generateValidImei()))
             putString("android_id", encrypt(generateRandomId(16)))
             putString("gsf_id", encrypt(generateRandomId(16)))
             putString("gaid", encrypt(UUID.randomUUID().toString()))
-            putString("ssaid", encrypt(generateRandomId(16)))
             putString("wifi_mac", encrypt(generateRandomMac()))
             putString("bluetooth_mac", encrypt(generateRandomMac()))
             apply()
@@ -203,10 +212,10 @@ class MainActivity : AppCompatActivity() {
             "Serial" -> "serial"
             "Android ID" -> "android_id"
             "GAID" -> "gaid"
-            "SSAID" -> "ssaid"
             "WiFi MAC" -> "wifi_mac"
             "Bluetooth MAC" -> "bluetooth_mac"
             "GSF ID" -> "gsf_id"
+            "Gmail" -> "gmail"
             else -> ""
         }
 
@@ -214,9 +223,10 @@ class MainActivity : AppCompatActivity() {
             newValue = when (field) {
                 "IMEI", "IMEI2" -> generateValidImei()
                 "Serial" -> generateRandomId(12).uppercase()
-                "Android ID", "SSAID", "GSF ID" -> generateRandomId(16)
+                "Android ID", "GSF ID" -> generateRandomId(16)
                 "GAID" -> UUID.randomUUID().toString()
                 "WiFi MAC", "Bluetooth MAC" -> generateRandomMac()
+                "Gmail" -> generateRealisticGmail()
                 else -> ""
             }
             editor.putString(key, encrypt(newValue))
@@ -224,6 +234,7 @@ class MainActivity : AppCompatActivity() {
 
             // Actualizar UI si es visible
             if (field == "IMEI") etImei.setText(newValue)
+            if (field == "Gmail") etGmail.setText(newValue)
 
             Toast.makeText(this, "$field actualizado: $newValue", Toast.LENGTH_SHORT).show()
         }
@@ -244,7 +255,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Utilidades
-    private fun isValidImei(imei: String): Boolean = imei.length == 15 && imei.all { it.isDigit() }
+    private fun isValidImei(imei: String): Boolean {
+        if (imei.length != 15 || !imei.all { it.isDigit() }) return false
+        // Validate with Luhn algorithm
+        val number = imei.substring(0, 14)
+        val checkDigit = imei.last().digitToInt()
+        return luhnChecksum(number) == checkDigit
+    }
 
     private fun generateValidImei(): String {
         val tac = "35" + (100000..999999).random()
@@ -271,5 +288,49 @@ class MainActivity : AppCompatActivity() {
         java.util.Random().nextBytes(bytes)
         bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte() // Unicast local
         return bytes.joinToString(":") { "%02X".format(it) }
+    }
+
+    private fun generateRealisticGmail(): String {
+        val maleNames = listOf(
+            "juan", "jose", "luis", "carlos", "francisco", "antonio", "jorge", "miguel", "manuel", "pedro",
+            "jesus", "alejandro", "david", "daniel", "ricardo", "fernando", "eduardo", "javier", "raul", "roberto",
+            "martin", "gabriel", "andres", "marco", "sergio", "oscar", "mario", "angel", "ramon", "ruben",
+            "hector", "arturo", "jaime", "victor", "hugo", "salvador", "alfredo", "guillermo", "felipe", "cesar",
+            "diego", "gerardo", "pablo", "enrique", "alberto", "armando", "gustavo", "ignacio", "julio", "adrian",
+            "saul", "omar", "nicolas", "joaquin", "samuel", "esteban", "cristian", "emilio", "lucas", "agustin",
+            "sebastian", "mariano", "matias", "rodrigo", "patricio", "gonzalo", "benjamin", "tomas", "fede", "maxi",
+            "bruno", "ignacio", "lautaro", "facundo", "nahuel", "santiago", "julian", "federico", "leonardo", "mauricio",
+            "emmanuel", "axel", "joel", "ivan", "alan", "brian", "kevin", "alex", "jonathan", "erick",
+            "isaac", "rafael", "felix", "rolando", "gilberto", "rojelio", "abraham", "moises", "elias", "jacobo"
+        )
+        val femaleNames = listOf(
+            "maria", "ana", "rosa", "juana", "carmen", "marisol", "veronica", "lucia", "laura", "elena",
+            "isabel", "silvia", "patricia", "adriana", "gabriela", "claudia", "monica", "teresa", "yolanda", "martha",
+            "luz", "guadalupe", "alicia", "beatriz", "sonia", "rocio", "esther", "lourdes", "consuelo", "gloria",
+            "sofia", "valentina", "camila", "mariana", "daniela", "paula", "andrea", "xites", "natalia", "alejandra",
+            "fernanda", "victoria", "regina", "renata", "antonella", "florencia", "agustina", "candela", "rocio", "belen",
+            "milagros", "julieta", "micaela", "romina", "carolina", "lorena", "paola", "erika", "brenda", "vanesa",
+            "cynthia", "karen", "nancy", "leticia", "norma", "diana", "sandra", "liliana", "angelica", "cecilia",
+            "margarita", "blanca", "elba", "sara", "rebeca", "raquel", "noemi", "miriam", "ruth", "deborah",
+            "esmeralda", "jazmin", "luna", "abril", "mayra", "ivonne", "pamela", "lizbeth", "fabiola", "karla"
+        )
+        val surnames = listOf(
+            "rossi", "russo", "ferrari", "esposito", "bianchi", "romano", "colombo", "ricci", "marino", "greco", // Italia
+            "martin", "bernard", "thomas", "petit", "robert", "richard", "durand", "dubois", "moreau", "laurent", // Francia
+            "garcia", "rodriguez", "gonzalez", "fernandez", "lopez", "martinez", "sanchez", "perez", "gomez", "martin", // España
+            "silva", "santos", "ferreira", "pereira", "oliveira", "costa", "rodrigues", "martins", "jesus", "sousa", // Portugal
+            "popa", "popescu", "radulescu", "ionescu", "dumitru", "stoica", "stan", "gheorghe", "rusu", "matei" // Rumania
+        )
+
+        val name = (maleNames + femaleNames).random()
+        val surname = surnames.random()
+        val randomNum = (1..9999).random().toString()
+
+        // Formato: diegodagama11@gmail.com (numero al final o entre medio)
+        return if ((0..1).random() == 0) {
+            "$name$surname$randomNum@gmail.com"
+        } else {
+            "$name$randomNum$surname@gmail.com"
+        }
     }
 }

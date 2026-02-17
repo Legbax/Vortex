@@ -84,6 +84,17 @@
                 android:maxLength="15"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Google Account (Gmail)">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_gmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Mock Location -->
         <TextView
             android:layout_width="wrap_content"
