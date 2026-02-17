@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnRandom: Button
     private lateinit var etImei: EditText
     private lateinit var etGmail: EditText
+    private lateinit var spCarrier: Spinner
     private lateinit var swMockLocation: Switch
     private lateinit var etMockLat: EditText
     private lateinit var etMockLon: EditText
@@ -64,22 +65,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 50 perfiles (debe coincidir con MainHook)
+    // Perfiles específicos con alta fidelidad (Xiaomi Android 11)
     private val profiles = listOf(
-        "Google Pixel 5 - Android 11", "Samsung Galaxy A52 - Android 11", "Xiaomi Redmi Note 10 Pro - Android 11",
-        "Sony Xperia 10 III - Android 11", "OnePlus 9 - Android 11", "Motorola Moto G Stylus 5G - Android 11",
-        "Nokia 8.3 5G - Android 11", "Oppo Reno5 - Android 11", "Vivo X60 - Android 11", "Realme 8 Pro - Android 11",
-        "Samsung Galaxy S20 FE - Android 11", "Google Pixel 4a - Android 11", "Samsung Galaxy Note 20 - Android 11",
-        "Xiaomi Mi 11 - Android 11", "Sony Xperia 5 II - Android 11", "OnePlus Nord - Android 11", "LG Velvet - Android 11",
-        "Asus Zenfone 7 - Android 11", "Huawei P40 - Android 11", "Honor 30 - Android 11", "Samsung Galaxy A12 - Android 11",
-        "Google Pixel 4a 5G - Android 11", "Oppo A53 - Android 11", "Vivo Y53s - Android 11", "Realme 7 5G - Android 11",
-        "Xiaomi Redmi Note 9 - Android 11", "Samsung Galaxy M31 - Android 11", "Motorola Edge - Android 11",
-        "Nokia 5.4 - Android 11", "Oppo Find X2 - Android 11", "Vivo V20 - Android 11", "Realme X7 Pro - Android 11",
-        "Samsung Galaxy A32 - Android 11", "Google Pixel 5a - Android 11", "Samsung Galaxy Z Flip - Android 11",
-        "Xiaomi Poco X3 NFC - Android 11", "Sony Xperia 1 II - Android 11", "OnePlus 8T - Android 11", "LG Wing - Android 11",
-        "Asus ROG Phone 3 - Android 11", "Huawei Mate 40 Pro - Android 11", "Honor V40 - Android 11", "Samsung Galaxy A51 - Android 11",
-        "Google Pixel 4 - Android 11", "Samsung Galaxy S10 Lite - Android 11", "Xiaomi Mi 10T Pro - Android 11",
-        "Sony Xperia 5 III - Android 11", "OnePlus Nord 2 - Android 11", "LG Q52 - Android 11", "Asus Zenfone 8 - Android 11"
+        "Redmi 9 - Android 11",
+        "Redmi Note 9 - Android 11",
+        "Redmi 9A - Android 11",
+        "Redmi 9C - Android 11",
+        "Redmi Note 9S - Android 11",
+        "Redmi Note 9 Pro - Android 11"
     )
 
     private val randomFields = listOf(
@@ -92,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         spProfile = findViewById(R.id.sp_profile)
+        spCarrier = findViewById(R.id.sp_carrier)
         btnSave = findViewById(R.id.btn_save)
         btnRandom = findViewById(R.id.btn_random)
         etImei = findViewById(R.id.et_imei)
@@ -134,6 +128,12 @@ class MainActivity : AppCompatActivity() {
         val fieldAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, randomFields)
         fieldAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spRandomField.adapter = fieldAdapter
+
+        val usCarriers = MainHook.getUsCarriers()
+        val carrierNames = usCarriers.map { "${it.name} (${it.mccMnc})" }
+        val carrierAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, carrierNames)
+        carrierAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spCarrier.adapter = carrierAdapter
     }
 
     private fun loadPrefs() {
@@ -142,6 +142,11 @@ class MainActivity : AppCompatActivity() {
         val savedProfile = decrypt(encryptedProfile) ?: "Redmi 9 (Original)"
 
         spProfile.setSelection(profiles.indexOfFirst { it.startsWith(savedProfile) }.coerceAtLeast(0))
+
+        val usCarriers = MainHook.getUsCarriers()
+        val savedMccMnc = prefs.getString("mcc_mnc", "310260")
+        val carrierIdx = usCarriers.indexOfFirst { it.mccMnc == savedMccMnc }.coerceAtLeast(0)
+        spCarrier.setSelection(carrierIdx)
 
         val encryptedImei = prefs.getString("imei", "")
         etImei.setText(decrypt(encryptedImei))
@@ -158,10 +163,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun savePrefs() {
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+
+        val usCarriers = MainHook.getUsCarriers()
+        val selectedCarrier = usCarriers[spCarrier.selectedItemPosition]
+
         prefs.edit().apply {
             putString("profile", encrypt(spProfile.selectedItem.toString()))
             putString("imei", encrypt(etImei.text.toString()))
             putString("gmail", encrypt(etGmail.text.toString()))
+
+            // Carrier info derived from spinner
+            putString("mcc_mnc", selectedCarrier.mccMnc)
+            putString("sim_operator", selectedCarrier.mccMnc)
+            putString("sim_country", "us")
 
             putBoolean("mock_location_enabled", swMockLocation.isChecked)
             putString("mock_latitude", encrypt(etMockLat.text.toString()))
