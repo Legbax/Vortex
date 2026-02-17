@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSave: Button
     private lateinit var btnRandom: Button
     private lateinit var etImei: EditText
+    private lateinit var etGmail: EditText
     private lateinit var swMockLocation: Switch
     private lateinit var etMockLat: EditText
     private lateinit var etMockLon: EditText
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     private val randomFields = listOf(
         "IMEI", "IMEI2", "Serial", "Android ID", "GAID", "SSAID",
-        "WiFi MAC", "Bluetooth MAC", "GSF ID"
+        "WiFi MAC", "Bluetooth MAC", "GSF ID", "Gmail"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         btnSave = findViewById(R.id.btn_save)
         btnRandom = findViewById(R.id.btn_random)
         etImei = findViewById(R.id.et_imei)
+        etGmail = findViewById(R.id.et_gmail)
 
         swMockLocation = findViewById(R.id.sw_mock_location)
         etMockLat = findViewById(R.id.et_mock_lat)
@@ -144,6 +146,9 @@ class MainActivity : AppCompatActivity() {
         val encryptedImei = prefs.getString("imei", "")
         etImei.setText(decrypt(encryptedImei))
 
+        val encryptedGmail = prefs.getString("gmail", "")
+        etGmail.setText(decrypt(encryptedGmail))
+
         swMockLocation.isChecked = prefs.getBoolean("mock_location_enabled", false) // Booleans no se encriptan (no sensible)
         etMockLat.setText(decrypt(prefs.getString("mock_latitude", "0.0")))
         etMockLon.setText(decrypt(prefs.getString("mock_longitude", "0.0")))
@@ -156,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         prefs.edit().apply {
             putString("profile", encrypt(spProfile.selectedItem.toString()))
             putString("imei", encrypt(etImei.text.toString()))
+            putString("gmail", encrypt(etGmail.text.toString()))
 
             putBoolean("mock_location_enabled", swMockLocation.isChecked)
             putString("mock_latitude", encrypt(etMockLat.text.toString()))
@@ -174,12 +180,16 @@ class MainActivity : AppCompatActivity() {
         val randomImei = generateValidImei()
         etImei.setText(randomImei)
 
+        val randomGmail = generateRealisticGmail()
+        etGmail.setText(randomGmail)
+
         val randomProfileIndex = (0 until profiles.size).random()
         spProfile.setSelection(randomProfileIndex)
 
         // Generar y guardar otros IDs
         val prefs = getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
+            putString("gmail", encrypt(randomGmail))
             putString("imei2", encrypt(generateValidImei()))
             putString("android_id", encrypt(generateRandomId(16)))
             putString("gsf_id", encrypt(generateRandomId(16)))
@@ -207,6 +217,7 @@ class MainActivity : AppCompatActivity() {
             "WiFi MAC" -> "wifi_mac"
             "Bluetooth MAC" -> "bluetooth_mac"
             "GSF ID" -> "gsf_id"
+            "Gmail" -> "gmail"
             else -> ""
         }
 
@@ -217,6 +228,7 @@ class MainActivity : AppCompatActivity() {
                 "Android ID", "SSAID", "GSF ID" -> generateRandomId(16)
                 "GAID" -> UUID.randomUUID().toString()
                 "WiFi MAC", "Bluetooth MAC" -> generateRandomMac()
+                "Gmail" -> generateRealisticGmail()
                 else -> ""
             }
             editor.putString(key, encrypt(newValue))
@@ -224,6 +236,7 @@ class MainActivity : AppCompatActivity() {
 
             // Actualizar UI si es visible
             if (field == "IMEI") etImei.setText(newValue)
+            if (field == "Gmail") etGmail.setText(newValue)
 
             Toast.makeText(this, "$field actualizado: $newValue", Toast.LENGTH_SHORT).show()
         }
@@ -271,5 +284,27 @@ class MainActivity : AppCompatActivity() {
         java.util.Random().nextBytes(bytes)
         bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte() // Unicast local
         return bytes.joinToString(":") { "%02X".format(it) }
+    }
+
+    private fun generateRealisticGmail(): String {
+        val names = listOf(
+            "james", "john", "robert", "michael", "william", "david", "richard", "joseph", "thomas", "charles",
+            "christopher", "daniel", "matthew", "anthony", "donald", "mark", "paul", "steven", "andrew", "kenneth",
+            "mary", "patricia", "jennifer", "linda", "elizabeth", "barbara", "susan", "jessica", "sarah", "karen",
+            "nancy", "lisa", "margaret", "betty", "sandra", "ashley", "dorothy", "kimberly", "emily", "donna"
+        )
+        val surnames = listOf(
+            "smith", "johnson", "williams", "brown", "jones", "garcia", "miller", "davis", "rodriguez", "martinez",
+            "hernandez", "lopez", "gonzalez", "wilson", "anderson", "thomas", "taylor", "moore", "jackson", "martin",
+            "lee", "perez", "thompson", "white", "harris", "sanchez", "clark", "ramirez", "lewis", "robinson"
+        )
+        val separators = listOf("", ".", "_")
+
+        val name = names.random()
+        val surname = surnames.random()
+        val sep = separators.random()
+        val suffix = (1970..2005).random().toString() // Year suffix
+
+        return "$name$sep$surname$suffix@gmail.com"
     }
 }

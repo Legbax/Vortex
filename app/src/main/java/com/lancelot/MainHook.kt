@@ -6,6 +6,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.accounts.Account
 import android.telephony.TelephonyManager
 import android.util.Base64
 import de.robv.android.xposed.*
@@ -58,6 +59,7 @@ class MainHook : IXposedHookLoadPackage {
         private var cachedSsaid: String? = null
         private var cachedWifiMac: String? = null
         private var cachedBtMac: String? = null
+        private var cachedGmail: String? = null
 
         // 50 perfiles reales A11
         private val PROFILES_LIST = listOf(
@@ -145,6 +147,7 @@ class MainHook : IXposedHookLoadPackage {
             hookNetworkInterfaces(lpparam, prefs, ::getEncryptedString)
             hookLocation(lpparam, prefs, ::getEncryptedString)
             hookWebView(lpparam, fingerprint)
+            hookAccountManager(lpparam)
             hookXposedDetection(lpparam) // Extended
 
         } catch (e: Throwable) {
@@ -161,6 +164,7 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedSsaid == null) cachedSsaid = getString("ssaid", generateRandomId(16))
         if (cachedWifiMac == null) cachedWifiMac = getString("wifi_mac", generateRandomMac())
         if (cachedBtMac == null) cachedBtMac = getString("bluetooth_mac", generateRandomMac())
+        if (cachedGmail == null) cachedGmail = getString("gmail", "test.user" + (1000..9999).random() + "@gmail.com")
 
         val mccMnc = getString("mcc_mnc", "310260")
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
@@ -398,6 +402,41 @@ class MainHook : IXposedHookLoadPackage {
                 }
             })
         } catch (e: Throwable) {}
+    }
+
+    private fun hookAccountManager(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val amClass = XposedHelpers.findClass("android.accounts.AccountManager", lpparam.classLoader)
+
+            // Hook getAccounts()
+            XposedHelpers.findAndHookMethod(amClass, "getAccounts", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val accounts = param.result as Array<Account>
+                    // Remove existing google accounts and add fake one
+                    val newAccounts = accounts.filter { it.type != "com.google" }.toMutableList()
+                    if (cachedGmail != null) {
+                        newAccounts.add(Account(cachedGmail, "com.google"))
+                    }
+                    param.result = newAccounts.toTypedArray()
+                }
+            })
+
+            // Hook getAccountsByType(String type)
+            XposedHelpers.findAndHookMethod(amClass, "getAccountsByType", String::class.java, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val type = param.args[0] as String
+                    if (type == "com.google") {
+                        if (cachedGmail != null) {
+                            param.result = arrayOf(Account(cachedGmail, "com.google"))
+                        } else {
+                            param.result = emptyArray<Account>()
+                        }
+                    }
+                }
+            })
+        } catch (e: Throwable) {
+            XposedBridge.log("AccountManager hook error: ${e.message}")
+        }
     }
 
     private fun hookXposedDetection(lpparam: XC_LoadPackage.LoadPackageParam) {
