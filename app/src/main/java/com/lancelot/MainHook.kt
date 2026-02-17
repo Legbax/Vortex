@@ -853,6 +853,17 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(locationClass, "getSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockSpeed } })
             XposedHelpers.findAndHookMethod(locationClass, "hasSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
 
+            // Fix #11: Ensure isFromMockProvider returns false
+            try {
+                XposedHelpers.findAndHookMethod(locationClass, "isFromMockProvider", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        if (mockLocationEnabled) param.result = false
+                    }
+                })
+            } catch (e: NoSuchMethodError) {
+                // Method might not exist on older Android versions, but we target Android 11
+            }
+
             val locationManagerClass = XposedHelpers.findClass("android.location.LocationManager", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(locationManagerClass, "getLastKnownLocation", String::class.java, object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_status"
+        android:icon="@drawable/ic_status"
+        android:title="Status" />
+    <item
+        android:id="@+id/nav_device"
+        android:icon="@drawable/ic_device"
+        android:title="Device" />
+    <item
+        android:id="@+id/nav_network"
+        android:icon="@drawable/ic_network"
+        android:title="Network" />
+    <item
+        android:id="@+id/nav_ids"
+        android:icon="@drawable/ic_ids"
+        android:title="IDs" />
+    <item
+        android:id="@+id/nav_location"
+        android:icon="@drawable/ic_location"
+        android:title="Location" />
+    <item
+        android:id="@+id/nav_advanced"
+        android:icon="@drawable/ic_advanced"
+        android:title="Advanced" />
+</menu>
