@@ -56,7 +56,7 @@ class MainHook : IXposedHookLoadPackage {
         private var cachedAndroidId: String? = null
         private var cachedGsfId: String? = null
         private var cachedGaid: String? = null
-        private var cachedSsaid: String? = null
+        // cachedSsaid removed as it is redundant with cachedAndroidId (which hooks Settings.Secure.ANDROID_ID)
         private var cachedWifiMac: String? = null
         private var cachedBtMac: String? = null
         private var cachedGmail: String? = null
@@ -174,7 +174,7 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", generateRandomId(16))
         if (cachedGsfId == null) cachedGsfId = getString("gsf_id", generateRandomId(16))
         if (cachedGaid == null) cachedGaid = getString("gaid", generateRandomGaid())
-        if (cachedSsaid == null) cachedSsaid = getString("ssaid", generateRandomId(16))
+        // SSAID is effectively Android ID. We use cachedAndroidId for Settings.Secure.ANDROID_ID.
         if (cachedWifiMac == null) cachedWifiMac = getString("wifi_mac", generateRandomMac())
         if (cachedBtMac == null) cachedBtMac = getString("bluetooth_mac", generateRandomMac())
         if (cachedGmail == null) cachedGmail = getString("gmail", "test.user" + (1000..9999).random() + "@gmail.com")

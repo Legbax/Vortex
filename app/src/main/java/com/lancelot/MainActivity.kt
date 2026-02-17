@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     )
 
     private val randomFields = listOf(
-        "IMEI", "IMEI2", "Serial", "Android ID", "GAID", "SSAID",
+        "IMEI", "IMEI2", "Serial", "Android ID", "GAID",
         "WiFi MAC", "Bluetooth MAC", "GSF ID", "Gmail"
     )
 
@@ -194,7 +194,6 @@ class MainActivity : AppCompatActivity() {
             putString("android_id", encrypt(generateRandomId(16)))
             putString("gsf_id", encrypt(generateRandomId(16)))
             putString("gaid", encrypt(UUID.randomUUID().toString()))
-            putString("ssaid", encrypt(generateRandomId(16)))
             putString("wifi_mac", encrypt(generateRandomMac()))
             putString("bluetooth_mac", encrypt(generateRandomMac()))
             apply()
@@ -213,7 +212,6 @@ class MainActivity : AppCompatActivity() {
             "Serial" -> "serial"
             "Android ID" -> "android_id"
             "GAID" -> "gaid"
-            "SSAID" -> "ssaid"
             "WiFi MAC" -> "wifi_mac"
             "Bluetooth MAC" -> "bluetooth_mac"
             "GSF ID" -> "gsf_id"
@@ -225,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             newValue = when (field) {
                 "IMEI", "IMEI2" -> generateValidImei()
                 "Serial" -> generateRandomId(12).uppercase()
-                "Android ID", "SSAID", "GSF ID" -> generateRandomId(16)
+                "Android ID", "GSF ID" -> generateRandomId(16)
                 "GAID" -> UUID.randomUUID().toString()
                 "WiFi MAC", "Bluetooth MAC" -> generateRandomMac()
                 "Gmail" -> generateRealisticGmail()
