@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lancelot">
 
-    <!-- FIX #10: Solo permisos estrictamente necesarios -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -14,8 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lancelot"
         tools:ignore="GoogleAppIndexingWarning">
-
-        <!-- FIX #1: Eliminadas referencias a XML inexistentes -->
 
         <activity
             android:name=".MainActivity"
@@ -37,7 +34,7 @@
             android:value="Advanced device spoofing for Android 11" />
         <meta-data
             android:name="xposedminversion"
-            android:value="82" />
+            android:value="93" />
         <meta-data
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />

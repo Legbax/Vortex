@@ -14,36 +14,54 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.io.File
 import java.net.NetworkInterface
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Random
 import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class MainHook : IXposedHookLoadPackage {
 
     companion object {
         private const val PREFS_NAME = "spoof_prefs"
-
-        // --- Manual Encryption Implementation (AES) ---
         private const val ALGO = "AES"
+        // Matches PrefsManager.kt
         private val KEY_BYTES = byteArrayOf(
-            0x4c, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6f, 0x74,
-            0x53, 0x74, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x31
-        ) // "LancelotStealth1"
+            76, 97, 110, 99, 101, 108, 111, 116,
+            83, 116, 101, 97, 108, 116, 104, 49
+        )
+        private const val GCM_IV_LENGTH = 12
+        private const val GCM_TAG_LENGTH = 128
 
         private fun decrypt(encrypted: String?): String? {
             if (encrypted.isNullOrEmpty()) return null
             return try {
-                val key = SecretKeySpec(KEY_BYTES, ALGO)
-                val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-                cipher.init(Cipher.DECRYPT_MODE, key)
-                val decodedBytes = Base64.decode(encrypted, Base64.NO_WRAP)
-                String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8)
+                if (encrypted.startsWith("GCM:")) {
+                    val decodedBytes = Base64.decode(encrypted.substring(4), Base64.NO_WRAP)
+                    val iv = decodedBytes.copyOfRange(0, GCM_IV_LENGTH)
+                    val ciphertext = decodedBytes.copyOfRange(GCM_IV_LENGTH, decodedBytes.size)
+
+                    val key = SecretKeySpec(KEY_BYTES, ALGO)
+                    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                    val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
+                    cipher.init(Cipher.DECRYPT_MODE, key, spec)
+
+                    String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8)
+                } else if (encrypted.startsWith("ENC:")) {
+                    // Legacy Support
+                    val key = SecretKeySpec(KEY_BYTES, ALGO)
+                    val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+                    cipher.init(Cipher.DECRYPT_MODE, key)
+                    val decodedBytes = Base64.decode(encrypted.substring(4), Base64.NO_WRAP)
+                    String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8)
+                } else {
+                    null // Safe fallback
+                }
             } catch (e: Exception) {
-                if (!encrypted.startsWith("ENC:")) encrypted else null
+                null // Safe fallback
             }
         }
 
-        // Cache para valores consistentes por sesión
+        // Cache for consistent values per session
         private var cachedImei: String? = null
         private var cachedImei2: String? = null
         private var cachedImsi: String? = null
@@ -88,442 +106,25 @@ class MainHook : IXposedHookLoadPackage {
 
         fun getUsCarriers(): List<UsCarrier> = US_CARRIERS
 
-        private val DEVICE_FINGERPRINTS = mapOf(
-            "Redmi 9" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9", device = "lancelot", product = "lancelot_global",
-                hardware = "mt6768", board = "lancelot", bootloader = "unknown",
-                fingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.3.0.RJCMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6768", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6768", zygote = "zygote64_32", vendorFingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                display = "V12.5.3.0.RJCMIXM", buildDescription = "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys", buildFlavor = "lancelot_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi Note 9" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9", device = "merlin", product = "merlin_global",
-                hardware = "mt6769", board = "merlin", bootloader = "unknown",
-                fingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.2.0.RJOMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6769", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6769", zygote = "zygote64_32", vendorFingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                display = "V12.5.2.0.RJOMIXM", buildDescription = "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys", buildFlavor = "merlin_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi 9A" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9A", device = "dandelion", product = "dandelion_global",
-                hardware = "mt6762", board = "dandelion", bootloader = "unknown",
-                fingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.4.0.RCDMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608", hardwareChipname = "MT6762", zygote = "zygote64_32", vendorFingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                display = "V12.5.4.0.RCDMIXM", buildDescription = "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys", buildFlavor = "dandelion_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1633046400", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi 9C" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9C", device = "angelica", product = "angelica_global",
-                hardware = "mt6762", board = "angelica", bootloader = "unknown",
-                fingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.1.0.RCRMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608", hardwareChipname = "MT6762", zygote = "zygote64_32", vendorFingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                display = "V12.5.1.0.RCRMIXM", buildDescription = "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys", buildFlavor = "angelica_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi Note 9S" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9S", device = "curtana", product = "curtana_global",
-                hardware = "qcom", board = "curtana", bootloader = "unknown",
-                fingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "V12.5.1.0.RJWMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
-                display = "V12.5.1.0.RJWMIXM", buildDescription = "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys", buildFlavor = "curtana_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi Note 9 Pro" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9 Pro", device = "joyeuse", product = "joyeuse_global",
-                hardware = "qcom", board = "joyeuse", bootloader = "unknown",
-                fingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "V12.5.3.0.RJZMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
-                display = "V12.5.3.0.RJZMIXM", buildDescription = "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys", buildFlavor = "joyeuse_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "POCO X3 NFC" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "POCO", model = "POCO X3 NFC", device = "surya", product = "surya_global",
-                hardware = "qcom", board = "surya", bootloader = "unknown",
-                fingerprint = "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.7.0.RJGMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7150", zygote = "zygote64_32", vendorFingerprint = "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                display = "V12.5.7.0.RJGMIXM", buildDescription = "surya_global-user 11 RKQ1.200826.002 V12.5.7.0.RJGMIXM release-keys", buildFlavor = "surya_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "POCO X3 Pro" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "POCO", model = "POCO X3 Pro", device = "vayu", product = "vayu_global",
-                hardware = "qcom", board = "vayu", bootloader = "unknown",
-                fingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.5.0.RJUMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "msmnile", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8150-AC", zygote = "zygote64_32", vendorFingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
-                display = "V12.5.5.0.RJUMIXM", buildDescription = "vayu_global-user 11 RKQ1.200826.002 V12.5.5.0.RJUMIXM release-keys", buildFlavor = "vayu_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "POCO M3" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "POCO", model = "POCO M3", device = "citrus", product = "citrus_global",
-                hardware = "qcom", board = "citrus", bootloader = "unknown",
-                fingerprint = "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "V12.5.2.0.RJBMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM6115", zygote = "zygote64_32", vendorFingerprint = "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys",
-                display = "V12.5.2.0.RJBMIXM", buildDescription = "citrus_global-user 11 RKQ1.200826.002 V12.5.2.0.RJBMIXM release-keys", buildFlavor = "citrus_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "POCO M3 Pro 5G" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "POCO", model = "POCO M3 Pro 5G", device = "camellia", product = "camellia_global",
-                hardware = "mt6833", board = "camellia", bootloader = "unknown",
-                fingerprint = "POCO/camellia_global/camellia:11/RP1A.200720.011/V12.5.3.0.RKSMIXM:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V84.P47",
-                incremental = "V12.5.3.0.RKSMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6833", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6833", zygote = "zygote64_32", vendorFingerprint = "POCO/camellia_global/camellia:11/RP1A.200720.011/V12.5.3.0.RKSMIXM:user/release-keys",
-                display = "V12.5.3.0.RKSMIXM", buildDescription = "camellia_global-user 11 RP1A.200720.011 V12.5.3.0.RKSMIXM release-keys", buildFlavor = "camellia_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Mi 10T" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Xiaomi", model = "Mi 10T", device = "apollo", product = "apollo_global",
-                hardware = "qcom", board = "apollo", bootloader = "unknown",
-                fingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.11.0.RJDMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8250", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys",
-                display = "V12.5.11.0.RJDMIXM", buildDescription = "apollo_global-user 11 RKQ1.200826.002 V12.5.11.0.RJDMIXM release-keys", buildFlavor = "apollo_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Mi 11 Lite" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Xiaomi", model = "Mi 11 Lite", device = "courbet", product = "courbet_global",
-                hardware = "qcom", board = "courbet", bootloader = "unknown",
-                fingerprint = "Xiaomi/courbet_global/courbet:11/RKQ1.200826.002/V12.5.5.0.RKQMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.5.0.RKQMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7150", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/courbet_global/courbet:11/RKQ1.200826.002/V12.5.5.0.RKQMIXM:user/release-keys",
-                display = "V12.5.5.0.RKQMIXM", buildDescription = "courbet_global-user 11 RKQ1.200826.002 V12.5.5.0.RKQMIXM release-keys", buildFlavor = "courbet_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Redmi Note 10 Pro" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 10 Pro", device = "sweet", product = "sweet_global",
-                hardware = "qcom", board = "sweet", bootloader = "unknown",
-                fingerprint = "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.3.0.RKIMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.3.0.RKIMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7150", zygote = "zygote64_32", vendorFingerprint = "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.3.0.RKIMIXM:user/release-keys",
-                display = "V12.5.3.0.RKIMIXM", buildDescription = "sweet_global-user 11 RKQ1.200826.002 V12.5.3.0.RKIMIXM release-keys", buildFlavor = "sweet_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Mi 10 Lite" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Xiaomi", model = "Mi 10 Lite", device = "vangogh", product = "vangogh_global",
-                hardware = "qcom", board = "vangogh", bootloader = "unknown",
-                fingerprint = "Xiaomi/vangogh_global/vangogh:11/RKQ1.200826.002/V12.5.2.0.RJEMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "V12.5.2.0.RJEMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7250", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/vangogh_global/vangogh:11/RKQ1.200826.002/V12.5.2.0.RJEMIXM:user/release-keys",
-                display = "V12.5.2.0.RJEMIXM", buildDescription = "vangogh_global-user 11 RKQ1.200826.002 V12.5.2.0.RJEMIXM release-keys", buildFlavor = "vangogh_global-user", buildHost = "pangu-build-component-system-177793", buildUser = "builder", buildDateUtc = "1632960000", securityPatch = "2021-09-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Mi 11i" to DeviceFingerprint(
-                manufacturer = "Xiaomi", brand = "Xiaomi", model = "Mi 11i", device = "haydn", product = "haydn_global",
-                hardware = "qcom", board = "haydn", bootloader = "unknown",
-                fingerprint = "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys",
-                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "V12.5.7.0.RKKMIXM", sdkInt = 30, release = "11",
-                boardPlatform = "lahaina", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8350", zygote = "zygote64_32", vendorFingerprint = "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys",
-                display = "V12.5.7.0.RKKMIXM", buildDescription = "haydn_global-user 11 RKQ1.200826.002 V12.5.7.0.RKKMIXM release-keys", buildFlavor = "haydn_global-user", buildHost = "cr3-buildbot-02", buildUser = "builder", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy A52" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-A525F", device = "a52q", product = "a52qxx",
-                hardware = "qcom", board = "a52q", bootloader = "A525FXXU4CVJB",
-                fingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "A525FXXU4CVJB", sdkInt = 30, release = "11",
-                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
-                display = "RP1A.200720.012.A525FXXU4CVJB", buildDescription = "a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys", buildFlavor = "a52qxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1639497600", securityPatch = "2021-12-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy A32" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-A325F", device = "a32", product = "a32xxx",
-                hardware = "mt6853", board = "a32", bootloader = "A325FXXU2BUG1",
-                fingerprint = "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR14A.R3.MP.V62.P4,MOLY.LR14A.R3.MP.V62.P4",
-                incremental = "A325FXXU2BUG1", sdkInt = 30, release = "11",
-                boardPlatform = "mt6853", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6853", zygote = "zygote64_32", vendorFingerprint = "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys",
-                display = "RP1A.200720.012.A325FXXU2BUG1", buildDescription = "a32xxx-user 11 RP1A.200720.012 A325FXXU2BUG1 release-keys", buildFlavor = "a32xxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1625097600", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy A12" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-A125F", device = "a12", product = "a12xxx",
-                hardware = "exynos850", board = "a12", bootloader = "A125FXXU4BUL1",
-                fingerprint = "samsung/a12xxx/a12:11/RP1A.200720.012/A125FXXU4BUL1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "",
-                incremental = "A125FXXU4BUL1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos850", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "S5E3830", zygote = "zygote64_32", vendorFingerprint = "samsung/a12xxx/a12:11/RP1A.200720.012/A125FXXU4BUL1:user/release-keys",
-                display = "RP1A.200720.012.A125FXXU4BUL1", buildDescription = "a12xxx-user 11 RP1A.200720.012 A125FXXU4BUL1 release-keys", buildFlavor = "a12xxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1639497600", securityPatch = "2021-12-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy A51" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-A515F", device = "a51", product = "a51xxx",
-                hardware = "exynos9610", board = "a51", bootloader = "A515FXXU4CUG1",
-                fingerprint = "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "",
-                incremental = "A515FXXU4CUG1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos9610", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "Exynos9611", zygote = "zygote64_32", vendorFingerprint = "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
-                display = "RP1A.200720.012.A515FXXU4CUG1", buildDescription = "a51xxx-user 11 RP1A.200720.012 A515FXXU4CUG1 release-keys", buildFlavor = "a51xxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1625097600", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy M12" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-M127F", device = "m12", product = "m12xid",
-                hardware = "exynos850", board = "m12", bootloader = "M127FXXU3BUK1",
-                fingerprint = "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "",
-                incremental = "M127FXXU3BUK1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos850", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "S5E3830", zygote = "zygote64_32", vendorFingerprint = "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys",
-                display = "RP1A.200720.012.M127FXXU3BUK1", buildDescription = "m12xid-user 11 RP1A.200720.012 M127FXXU3BUK1 release-keys", buildFlavor = "m12xid-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1636934400", securityPatch = "2021-11-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "OnePlus Nord" to DeviceFingerprint(
-                manufacturer = "OnePlus", brand = "OnePlus", model = "OnePlus Nord", device = "avicii", product = "OnePlus Nord",
-                hardware = "qcom", board = "avicii", bootloader = "avicii_11_A.11",
-                fingerprint = "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys",
-                buildId = "RKQ1.201022.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                incremental = "2107141742", sdkInt = 30, release = "11",
-                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7250", zygote = "zygote64_32", vendorFingerprint = "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys",
-                display = "RKQ1.201022.002.2107141742", buildDescription = "OnePlus Nord-user 11 RKQ1.201022.002 2107141742 release-keys", buildFlavor = "OnePlus Nord-user", buildHost = "buildserver12", buildUser = "jenkins", buildDateUtc = "1626307200", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "OnePlus 8T" to DeviceFingerprint(
-                manufacturer = "OnePlus", brand = "OnePlus", model = "KB2005", device = "kebab", product = "OnePlus8T",
-                hardware = "qcom", board = "kebab", bootloader = "kebab_21_A.14",
-                fingerprint = "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys",
-                buildId = "RKQ1.201022.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
-                incremental = "2106051219", sdkInt = 30, release = "11",
-                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8250", zygote = "zygote64_32", vendorFingerprint = "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys",
-                display = "RKQ1.201022.002.2106051219", buildDescription = "OnePlus8T-user 11 RKQ1.201022.002 2106051219 release-keys", buildFlavor = "OnePlus8T-user", buildHost = "buildserver12", buildUser = "jenkins", buildDateUtc = "1622937600", securityPatch = "2021-06-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "OnePlus Nord CE" to DeviceFingerprint(
-                manufacturer = "OnePlus", brand = "OnePlus", model = "EB2101", device = "ebba", product = "OnePlus Nord CE 5G",
-                hardware = "qcom", board = "ebba", bootloader = "ebba_11_A.06",
-                fingerprint = "OnePlus/OnePlus Nord CE 5G/ebba:11/RKQ1.201217.002/2106171000:user/release-keys",
-                buildId = "RKQ1.201217.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                incremental = "2106171000", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7225", zygote = "zygote64_32", vendorFingerprint = "OnePlus/OnePlus Nord CE 5G/ebba:11/RKQ1.201217.002/2106171000:user/release-keys",
-                display = "RKQ1.201217.002.2106171000", buildDescription = "OnePlus Nord CE 5G-user 11 RKQ1.201217.002 2106171000 release-keys", buildFlavor = "OnePlus Nord CE 5G-user", buildHost = "buildserver12", buildUser = "jenkins", buildDateUtc = "1624060800", securityPatch = "2021-06-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Moto G30" to DeviceFingerprint(
-                manufacturer = "motorola", brand = "motorola", model = "moto g30", device = "caprip", product = "caprip",
-                hardware = "qcom", board = "caprip", bootloader = "unknown",
-                fingerprint = "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys",
-                buildId = "RRHS31.Q3-47-32", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "a57fec", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM6115", zygote = "zygote64_32", vendorFingerprint = "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys",
-                display = "RRHS31.Q3-47-32", buildDescription = "caprip-user 11 RRHS31.Q3-47-32 a57fec release-keys", buildFlavor = "caprip-user", buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm", buildDateUtc = "1630022400", securityPatch = "2021-08-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Moto G Power 2021" to DeviceFingerprint(
-                manufacturer = "motorola", brand = "motorola", model = "moto g power (2021)", device = "borneo", product = "borneo",
-                hardware = "qcom", board = "borneo", bootloader = "unknown",
-                fingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
-                buildId = "RRQ31.Q3-47-22", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "2b4fae", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM6115", zygote = "zygote64_32", vendorFingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
-                display = "RRQ31.Q3-47-22", buildDescription = "borneo-user 11 RRQ31.Q3-47-22 2b4fae release-keys", buildFlavor = "borneo-user", buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm", buildDateUtc = "1619827200", securityPatch = "2021-05-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Moto G50" to DeviceFingerprint(
-                manufacturer = "motorola", brand = "motorola", model = "moto g50", device = "ibis", product = "ibis",
-                hardware = "qcom", board = "ibis", bootloader = "unknown",
-                fingerprint = "motorola/ibis/ibis:11/RRQS31.Q3-47-18/a7d2a1:user/release-keys",
-                buildId = "RRQS31.Q3-47-18", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "a7d2a1", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM4350", zygote = "zygote64_32", vendorFingerprint = "motorola/ibis/ibis:11/RRQS31.Q3-47-18/a7d2a1:user/release-keys",
-                display = "RRQS31.Q3-47-18", buildDescription = "ibis-user 11 RRQS31.Q3-47-18 a7d2a1 release-keys", buildFlavor = "ibis-user", buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm", buildDateUtc = "1627344000", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Nokia 5.4" to DeviceFingerprint(
-                manufacturer = "Nokia", brand = "Nokia", model = "Nokia 5.4", device = "DPL-N05", product = "DPL_sprout",
-                hardware = "qcom", board = "DPL-N05", bootloader = "unknown",
-                fingerprint = "Nokia/DPL_sprout/DPL-N05:11/00WW_4_350/00WW350_360_131:user/release-keys",
-                buildId = "00WW_4_350", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "00WW350_360_131", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM6115", zygote = "zygote64_32", vendorFingerprint = "Nokia/DPL_sprout/DPL-N05:11/00WW_4_350/00WW350_360_131:user/release-keys",
-                display = "00WW_4_350", buildDescription = "DPL_sprout-user 11 00WW_4_350 00WW350_360_131 release-keys", buildFlavor = "DPL_sprout-user", buildHost = "android-build", buildUser = "android-build", buildDateUtc = "1627430400", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Nokia X10" to DeviceFingerprint(
-                manufacturer = "Nokia", brand = "Nokia", model = "Nokia X10", device = "CAP-N05", product = "CAP_sprout",
-                hardware = "qcom", board = "CAP-N05", bootloader = "unknown",
-                fingerprint = "Nokia/CAP_sprout/CAP-N05:11/00WW_2_390/00WW390_390_141:user/release-keys",
-                buildId = "00WW_2_390", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
-                incremental = "00WW390_390_141", sdkInt = 30, release = "11",
-                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM4350", zygote = "zygote64_32", vendorFingerprint = "Nokia/CAP_sprout/CAP-N05:11/00WW_2_390/00WW390_390_141:user/release-keys",
-                display = "00WW_2_390", buildDescription = "CAP_sprout-user 11 00WW_2_390 00WW390_390_141 release-keys", buildFlavor = "CAP_sprout-user", buildHost = "android-build", buildUser = "android-build", buildDateUtc = "1633046400", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Google Pixel 4a" to DeviceFingerprint(
-                manufacturer = "Google", brand = "google", model = "Pixel 4a", device = "sunfish", product = "sunfish",
-                hardware = "qcom", board = "sunfish", bootloader = "s5-0.5-9637172",
-                fingerprint = "google/sunfish/sunfish:11/RQ3A.210705.001/7380771:user/release-keys",
-                buildId = "RQ3A.210705.001", tags = "release-keys", type = "user",
-                radioVersion = "g7150-00023-210610-B-7310372",
-                incremental = "7380771", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7150", zygote = "zygote64_32", vendorFingerprint = "google/sunfish_vend/sunfish:11/RQ3A.210705.001/7380771:vendor/release-keys",
-                display = "RQ3A.210705.001", buildDescription = "sunfish-user 11 RQ3A.210705.001 7380771 release-keys", buildFlavor = "sunfish-user", buildHost = "abfarm-release-rbe-64.hot.corp.google.com", buildUser = "android-build", buildDateUtc = "1625616000", securityPatch = "2021-07-05", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Google Pixel 5" to DeviceFingerprint(
-                manufacturer = "Google", brand = "google", model = "Pixel 5", device = "redfin", product = "redfin",
-                hardware = "qcom", board = "redfin", bootloader = "r8-0.3-7219051",
-                fingerprint = "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys",
-                buildId = "RQ3A.210805.001.A1", tags = "release-keys", type = "user",
-                radioVersion = "g725-00164-210812-B-7522969",
-                incremental = "7512229", sdkInt = 30, release = "11",
-                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7250", zygote = "zygote64_32", vendorFingerprint = "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys",
-                display = "RQ3A.210805.001.A1", buildDescription = "redfin-user 11 RQ3A.210805.001.A1 7512229 release-keys", buildFlavor = "redfin-user", buildHost = "abfarm-release-rbe-64.hot.corp.google.com", buildUser = "android-build", buildDateUtc = "1628100000", securityPatch = "2021-08-05", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Google Pixel 4a 5G" to DeviceFingerprint(
-                manufacturer = "Google", brand = "google", model = "Pixel 4a (5G)", device = "bramble", product = "bramble",
-                hardware = "qcom", board = "bramble", bootloader = "b2-0.3-7214727",
-                fingerprint = "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys",
-                buildId = "RQ3A.210705.001", tags = "release-keys", type = "user",
-                radioVersion = "g7250-00195-210614-B-7352378",
-                incremental = "7380771", sdkInt = 30, release = "11",
-                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7250", zygote = "zygote64_32", vendorFingerprint = "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys",
-                display = "RQ3A.210705.001", buildDescription = "bramble-user 11 RQ3A.210705.001 7380771 release-keys", buildFlavor = "bramble-user", buildHost = "abfarm-release-rbe-64.hot.corp.google.com", buildUser = "android-build", buildDateUtc = "1625616000", securityPatch = "2021-07-05", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy S20+" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-G985F", device = "y2s", product = "y2sxx",
-                hardware = "exynos990", board = "universal990", bootloader = "G985FXXSGHWA3",
-                fingerprint = "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "",
-                incremental = "G985FXXSGHWA3", sdkInt = 30, release = "11",
-                boardPlatform = "exynos990", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "Exynos990", zygote = "zygote64_32", vendorFingerprint = "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
-                display = "RP1A.200720.012.G985FXXSGHWA3", buildDescription = "y2sxx-user 11 RP1A.200720.012 G985FXXSGHWA3 release-keys", buildFlavor = "y2sxx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1639497600", securityPatch = "2022-01-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Samsung Galaxy S10e" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-G970F", device = "beyond0", product = "beyond0ltexx",
-                hardware = "exynos9820", board = "universal9820", bootloader = "G970FXXSGHWC1",
-                fingerprint = "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "",
-                incremental = "G970FXXSGHWC1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos9820", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "Exynos9820", zygote = "zygote64_32", vendorFingerprint = "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
-                display = "RP1A.200720.012.G970FXXSGHWC1", buildDescription = "beyond0ltexx-user 11 RP1A.200720.012 G970FXXSGHWC1 release-keys", buildFlavor = "beyond0ltexx-user", buildHost = "21R3NF12", buildUser = "dpi", buildDateUtc = "1646236800", securityPatch = "2022-03-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Vivo Y53s" to DeviceFingerprint(
-                manufacturer = "vivo", brand = "vivo", model = "V2058", device = "V2058", product = "V2058",
-                hardware = "mt6769", board = "V2058", bootloader = "unknown",
-                fingerprint = "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V98",
-                incremental = "compiler08272021", sdkInt = 30, release = "11",
-                boardPlatform = "mt6769", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6769", zygote = "zygote64_32", vendorFingerprint = "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
-                display = "RP1A.200720.011", buildDescription = "V2058-user 11 RP1A.200720.011 compiler08272021 release-keys", buildFlavor = "V2058-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1630022400", securityPatch = "2021-08-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Realme 7 5G" to DeviceFingerprint(
-                manufacturer = "realme", brand = "realme", model = "RMX2111", device = "RMX2111", product = "RMX2111",
-                hardware = "mt6853", board = "RMX2111", bootloader = "unknown",
-                fingerprint = "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR14A.R3.MP.V62",
-                incremental = "1626245367375", sdkInt = 30, release = "11",
-                boardPlatform = "mt6853", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6853", zygote = "zygote64_32", vendorFingerprint = "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
-                display = "RP1A.200720.011", buildDescription = "RMX2111-user 11 RP1A.200720.011 1626245367375 release-keys", buildFlavor = "RMX2111-user", buildHost = "ubuntu-123", buildUser = "jenkins", buildDateUtc = "1626245367", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Oppo Reno5" to DeviceFingerprint(
-                manufacturer = "OPPO", brand = "OPPO", model = "CPH2159", device = "OP4E75L1", product = "CPH2159",
-                hardware = "qcom", board = "OP4E75L1", bootloader = "unknown",
-                fingerprint = "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.0.c4-00165",
-                incremental = "1622635284", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7225", zygote = "zygote64_32", vendorFingerprint = "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
-                display = "RP1A.200720.011", buildDescription = "CPH2159-user 11 RP1A.200720.011 1622635284 release-keys", buildFlavor = "CPH2159-user", buildHost = "ubuntu", buildUser = "jenkins", buildDateUtc = "1622635284", securityPatch = "2021-06-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Vivo X60" to DeviceFingerprint(
-                manufacturer = "vivo", brand = "vivo", model = "V2046", device = "V2046", product = "V2046",
-                hardware = "qcom", board = "V2046", bootloader = "unknown",
-                fingerprint = "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.0.c4-00165",
-                incremental = "compiler05211516", sdkInt = 30, release = "11",
-                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8250", zygote = "zygote64_32", vendorFingerprint = "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
-                display = "RP1A.200720.012", buildDescription = "V2046-user 11 RP1A.200720.012 compiler05211516 release-keys", buildFlavor = "V2046-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1621584000", securityPatch = "2021-05-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Vivo X70 Pro" to DeviceFingerprint(
-                manufacturer = "vivo", brand = "vivo", model = "V2105", device = "V2105", product = "V2105",
-                hardware = "mt6893", board = "V2105", bootloader = "unknown",
-                fingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "MOLY.LR12A.R3.MP.V98",
-                incremental = "compiler10212015", sdkInt = 30, release = "11",
-                boardPlatform = "mt6893", eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6893", zygote = "zygote64_32", vendorFingerprint = "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
-                display = "RP1A.200720.012", buildDescription = "V2105-user 11 RP1A.200720.012 compiler10212015 release-keys", buildFlavor = "V2105-user", buildHost = "compiler", buildUser = "build", buildDateUtc = "1634860800", securityPatch = "2021-10-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Realme 8 Pro" to DeviceFingerprint(
-                manufacturer = "realme", brand = "realme", model = "RMX3081", device = "RMX3081", product = "RMX3081",
-                hardware = "qcom", board = "RMX3081", bootloader = "unknown",
-                fingerprint = "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
-                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.2.0.c4-00165",
-                incremental = "1626245367375", sdkInt = 30, release = "11",
-                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM7125", zygote = "zygote64_32", vendorFingerprint = "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
-                display = "RP1A.200720.011", buildDescription = "RMX3081-user 11 RP1A.200720.011 1626245367375 release-keys", buildFlavor = "RMX3081-user", buildHost = "ubuntu-123", buildUser = "jenkins", buildDateUtc = "1626245367", securityPatch = "2021-07-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-            "Asus Zenfone 8" to DeviceFingerprint(
-                manufacturer = "asus", brand = "asus", model = "ASUS_I006D", device = "ASUS_I006D", product = "WW_I006D",
-                hardware = "qcom", board = "sake", bootloader = "unknown",
-                fingerprint = "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
-                buildId = "RKQ1.201112.002", tags = "release-keys", type = "user",
-                radioVersion = "M3.13.24.51-Sake_0000100",
-                incremental = "30.11.51.115", sdkInt = 30, release = "11",
-                boardPlatform = "lahaina", eglDriver = "adreno", openGlEs = "196610", hardwareChipname = "SM8350", zygote = "zygote64_32", vendorFingerprint = "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
-                display = "RKQ1.201112.002.30.11.51.115", buildDescription = "WW_I006D-user 11 RKQ1.201112.002 30.11.51.115 release-keys", buildFlavor = "WW_I006D-user", buildHost = "android-build", buildUser = "jenkins", buildDateUtc = "1629859200", securityPatch = "2021-08-01", buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            )
+        val DEVICE_FINGERPRINTS = mapOf(
+            "Redmi 9" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9", "lancelot", "lancelot_global", "mt6768", "lancelot", "unknown", "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.3.0.RJCMIXM", 30, "11", "mt6768", "mali", "196610", "MT6768", "zygote64_32", "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys", "V12.5.3.0.RJCMIXM", "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys", "lancelot_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
+             "Redmi Note 9" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi Note 9", "merlin", "merlin_global", "mt6769", "merlin", "unknown", "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.2.0.RJOMIXM", 30, "11", "mt6769", "mali", "196610", "MT6769", "zygote64_32", "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys", "V12.5.2.0.RJOMIXM", "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys", "merlin_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
+            "Redmi 9A" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9A", "dandelion", "dandelion_global", "mt6762", "dandelion", "unknown", "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.4.0.RCDMIXM", 30, "11", "mt6762", "pvrsrvkm", "196608", "MT6762", "zygote64_32", "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys", "V12.5.4.0.RCDMIXM", "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys", "dandelion_global-user", "pangu-build-component-system-177793", "builder", "1633046400", "2021-10-01", "REL", "0"),
+            "Redmi 9C" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9C", "angelica", "angelica_global", "mt6762", "angelica", "unknown", "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.1.0.RCRMIXM", 30, "11", "mt6762", "pvrsrvkm", "196608", "MT6762", "zygote64_32", "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys", "V12.5.1.0.RCRMIXM", "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys", "angelica_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
+            "POCO X3 NFC" to DeviceFingerprint("Xiaomi", "POCO", "POCO X3 NFC", "surya", "surya_global", "qcom", "surya", "unknown", "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.7.0.RJGMIXM", 30, "11", "atoll", "adreno", "196610", "SM7150", "zygote64_32", "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys", "V12.5.7.0.RJGMIXM", "surya_global-user 11 RKQ1.200826.002 V12.5.7.0.RJGMIXM release-keys", "surya_global-user", "pangu-build-component-system-177793", "builder", "1634860800", "2021-10-01", "REL", "0"),
+            "Samsung Galaxy A52" to DeviceFingerprint("samsung", "samsung", "SM-A525F", "a52q", "a52qxx", "qcom", "a52q", "A525FXXU4CVJB", "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys", "RP1A.200720.012", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "A525FXXU4CVJB", 30, "11", "trinket", "adreno", "196610", "SM7125", "zygote64_32", "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys", "RP1A.200720.012.A525FXXU4CVJB", "a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys", "a52qxx-user", "21R3NF12", "dpi", "1639497600", "2021-12-01", "REL", "0"),
+            "Google Pixel 5" to DeviceFingerprint("Google", "google", "Pixel 5", "redfin", "redfin", "qcom", "redfin", "r8-0.3-7219051", "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys", "RQ3A.210805.001.A1", "release-keys", "user", "g725-00164-210812-B-7522969", "7512229", 30, "11", "lito", "adreno", "196610", "SM7250", "zygote64_32", "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys", "RQ3A.210805.001.A1", "redfin-user 11 RQ3A.210805.001.A1 7512229 release-keys", "redfin-user", "abfarm-release-rbe-64.hot.corp.google.com", "android-build", "1628100000", "2021-08-05", "REL", "0")
         )
     }
 
     data class DeviceFingerprint(
-        val manufacturer: String,
-        val brand: String,
-        val model: String,
-        val device: String,
-        val product: String,
-        val hardware: String,
-        val board: String,
-        val bootloader: String,
-        val fingerprint: String,
-        val buildId: String,
-        val tags: String,
-        val type: String,
-        val radioVersion: String,
-        val incremental: String,
-        val sdkInt: Int,
-        val release: String,
-        val boardPlatform: String,
-        val eglDriver: String,
-        val openGlEs: String,
-        val hardwareChipname: String,
-        val zygote: String,
-        val vendorFingerprint: String,
-        val display: String,
-        val buildDescription: String,
-        val buildFlavor: String,
-        val buildHost: String,
-        val buildUser: String,
-        val buildDateUtc: String,
-        val securityPatch: String,
-        val buildVersionCodename: String,
-        val buildVersionPreviewSdk: String
+        val manufacturer: String, val brand: String, val model: String, val device: String, val product: String,
+        val hardware: String, val board: String, val bootloader: String, val fingerprint: String, val buildId: String,
+        val tags: String, val type: String, val radioVersion: String, val incremental: String, val sdkInt: Int,
+        val release: String, val boardPlatform: String, val eglDriver: String, val openGlEs: String,
+        val hardwareChipname: String, val zygote: String, val vendorFingerprint: String, val display: String,
+        val buildDescription: String, val buildFlavor: String, val buildHost: String, val buildUser: String,
+        val buildDateUtc: String, val securityPatch: String, val buildVersionCodename: String, val buildVersionPreviewSdk: String
     )
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
@@ -534,21 +135,15 @@ class MainHook : IXposedHookLoadPackage {
         }
 
         try {
-            val prefsFile = File("/data/data/com.lancelot/shared_prefs/$PREFS_NAME.xml")
-            val prefs = if (prefsFile.exists() && prefsFile.canRead()) {
-                XSharedPreferences("com.lancelot", PREFS_NAME).apply {
-                    reload()
-                }
-            } else {
-                null
-            }
+            val prefs = XSharedPreferences("com.lancelot", PREFS_NAME)
+            prefs.reload()
 
             fun getEncryptedString(key: String, def: String): String {
-                val raw = prefs?.getString(key, null)
-                return if (raw != null && raw.startsWith("ENC:")) {
-                    decrypt(raw.substring(4)) ?: def
+                val raw = prefs.getString(key, null)
+                return if (raw != null) {
+                    decrypt(raw) ?: def
                 } else {
-                    raw ?: def
+                    def
                 }
             }
 
@@ -570,14 +165,13 @@ class MainHook : IXposedHookLoadPackage {
             hookApplicationFlags(lpparam)
 
         } catch (e: Throwable) {
-            // Only log in debug builds
             try {
                 if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
             } catch (ex: Throwable) {}
         }
     }
 
-    private fun initializeCache(prefs: XSharedPreferences?, getString: (String, String) -> String) {
+    private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
         if (cachedImei == null) cachedImei = getString("imei", generateValidImei())
         if (cachedImei2 == null) cachedImei2 = getString("imei2", generateValidImei())
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", generateRandomId(16))
@@ -598,12 +192,14 @@ class MainHook : IXposedHookLoadPackage {
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
         val cleanName = profileName.replace(" - Android 11", "").trim()
-        return DEVICE_FINGERPRINTS.entries.find { it.key == cleanName }?.value ?: DEVICE_FINGERPRINTS["Redmi 9"]!!
+        return DEVICE_FINGERPRINTS.entries.find { it.key == cleanName }?.value
+            ?: DEVICE_FINGERPRINTS.values.firstOrNull()
+            ?: DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9", "lancelot", "lancelot_global", "mt6768", "lancelot", "unknown", "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47", "V12.5.3.0.RJCMIXM", 30, "11", "mt6768", "mali", "196610", "MT6768", "zygote64_32", "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys", "V12.5.3.0.RJCMIXM", "lancelot_global-user", "lancelot_global-user", "pangu", "builder", "1632960000", "2021-09-01", "REL", "0")
     }
 
     private fun hookBuildFields(lpparam: XC_LoadPackage.LoadPackageParam,
                                  fingerprint: DeviceFingerprint,
-                                 prefs: XSharedPreferences?,
+                                 prefs: XSharedPreferences,
                                  getString: (String, String) -> String) {
         try {
             val buildClass = Build::class.java
@@ -649,7 +245,7 @@ class MainHook : IXposedHookLoadPackage {
 
     private fun hookSystemProperties(lpparam: XC_LoadPackage.LoadPackageParam,
                                       fingerprint: DeviceFingerprint,
-                                      prefs: XSharedPreferences?,
+                                      prefs: XSharedPreferences,
                                       getString: (String, String) -> String) {
         try {
             val sysPropClass = XposedHelpers.findClass("android.os.SystemProperties", lpparam.classLoader)
@@ -683,14 +279,12 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.build.flavor"           -> fingerprint.buildFlavor
                         "ro.vendor.build.fingerprint" -> fingerprint.vendorFingerprint
 
-                        // Hardware specific properties
                         "ro.board.platform"         -> fingerprint.boardPlatform
                         "ro.hardware.egl"           -> fingerprint.eglDriver
                         "ro.opengles.version"       -> fingerprint.openGlEs
                         "ro.hardware.chipname"      -> fingerprint.hardwareChipname
                         "ro.zygote"                 -> fingerprint.zygote
 
-                        // Build info
                         "ro.build.host"             -> fingerprint.buildHost
                         "ro.build.user"             -> fingerprint.buildUser
                         "ro.build.date.utc"         -> fingerprint.buildDateUtc
@@ -698,7 +292,6 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.build.version.codename" -> fingerprint.buildVersionCodename
                         "ro.build.version.preview_sdk" -> fingerprint.buildVersionPreviewSdk
 
-                        // Partition specific properties
                         "ro.product.system.manufacturer" -> fingerprint.manufacturer
                         "ro.product.system.brand" -> fingerprint.brand
                         "ro.product.system.model" -> fingerprint.model
@@ -729,7 +322,6 @@ class MainHook : IXposedHookLoadPackage {
                         "persist.sys.usb.config" -> "none"
                         "service.adb.root" -> "0"
 
-                        // Boot properties
                         "ro.boot.serialno" -> cachedSerial
                         "ro.boot.hardware" -> fingerprint.hardware
                         "ro.boot.bootloader" -> fingerprint.bootloader
@@ -748,7 +340,7 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun hookTelephonyManager(lpparam: XC_LoadPackage.LoadPackageParam,
-                                      prefs: XSharedPreferences?,
+                                      prefs: XSharedPreferences,
                                       getString: (String, String) -> String) {
         try {
             val tmClass = XposedHelpers.findClass("android.telephony.TelephonyManager", lpparam.classLoader)
@@ -776,7 +368,7 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun hookUnifiedSettingsSecure(lpparam: XC_LoadPackage.LoadPackageParam,
-                                    prefs: XSharedPreferences?,
+                                    prefs: XSharedPreferences,
                                     getString: (String, String) -> String) {
         try {
             val settingsSecureClass = XposedHelpers.findClass("android.provider.Settings\$Secure", lpparam.classLoader)
@@ -798,7 +390,7 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun hookNetworkInterfaces(lpparam: XC_LoadPackage.LoadPackageParam,
-                                       prefs: XSharedPreferences?,
+                                       prefs: XSharedPreferences,
                                        getString: (String, String) -> String) {
         try {
             val niClass = XposedHelpers.findClass("java.net.NetworkInterface", lpparam.classLoader)
@@ -818,10 +410,10 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun hookLocation(lpparam: XC_LoadPackage.LoadPackageParam,
-                            prefs: XSharedPreferences?,
+                            prefs: XSharedPreferences,
                             getString: (String, String) -> String) {
         try {
-            mockLocationEnabled = prefs?.getBoolean("mock_location_enabled", false) ?: false
+            mockLocationEnabled = prefs.getBoolean("mock_location_enabled", false)
             val latStr = getString("mock_latitude", "0.0")
             val lonStr = getString("mock_longitude", "0.0")
             val altStr = getString("mock_altitude", "0.0")
@@ -832,12 +424,18 @@ class MainHook : IXposedHookLoadPackage {
             mockAltitude = altStr.toDoubleOrNull() ?: 0.0
             mockAccuracy = accStr.toFloatOrNull() ?: 10.0f
 
-            mockBearing = (Math.random() * 360.0).toFloat()
-            mockSpeed = (Math.random() * 5.0).toFloat()
+            val random = Random()
+            mockBearing = random.nextFloat() * 360.0f
+            mockSpeed = random.nextFloat() * 5.0f
 
-            // Random jitter for accuracy and altitude
-            mockAccuracy = 5.0f + (Math.random() * 15.0).toFloat() // 5-20
-            mockAltitude = (Math.random() * 100.0) // 0-100
+            // Gaussian Noise
+            mockAccuracy = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
+            mockAltitude = mockAltitude + (random.nextGaussian() * 0.5)
+
+            // Small jitter for location
+            val jitterDeg = 0.00001
+            mockLatitude += random.nextGaussian() * jitterDeg
+            mockLongitude += random.nextGaussian() * jitterDeg
 
             if (!mockLocationEnabled) return
 
@@ -852,6 +450,14 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(locationClass, "hasBearing", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
             XposedHelpers.findAndHookMethod(locationClass, "getSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = mockSpeed } })
             XposedHelpers.findAndHookMethod(locationClass, "hasSpeed", object : XC_MethodHook() { override fun afterHookedMethod(param: MethodHookParam) { if (mockLocationEnabled) param.result = true } })
+
+            try {
+                XposedHelpers.findAndHookMethod(locationClass, "isFromMockProvider", object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        if (mockLocationEnabled) param.result = false
+                    }
+                })
+            } catch (e: NoSuchMethodError) {}
 
             val locationManagerClass = XposedHelpers.findClass("android.location.LocationManager", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(locationManagerClass, "getLastKnownLocation", String::class.java, object : XC_MethodHook() {
