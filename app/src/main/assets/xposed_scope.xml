@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Vortex — Xposed Module Scope
+
+    FIX #9  : com.google.android.gms.unstable ELIMINADO.
+              El bypass de Play Integrity / TEE requiere implementación nativa;
+              hookear este proceso desde Xposed aumenta la detección sin beneficio.
+
+    FIX #15 : GMS ya no aparece duplicado (gms + gms.unstable causaban
+              double-hook en cada reinicio del proceso unstable).
+
+    FIX #10 : El scope estático se reduce al mínimo indispensable.
+              El targeting por aplicación se gestiona dinámicamente
+              desde las preferencias de la UI del módulo.
+-->
+<packages>
+    <package name="com.google.android.gms" />
+    <!--
+        Las apps adicionales se añaden desde la UI del módulo.
+        NO añadir aquí entradas estáticas salvo que sean estrictamente necesarias
+        para funcionalidad core, ya que cada entrada implica hooking incondicional
+        en cada arranque de ese proceso.
+    -->
+</packages>
