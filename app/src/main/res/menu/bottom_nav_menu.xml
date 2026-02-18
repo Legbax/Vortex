@@ -9,13 +9,13 @@
         android:icon="@drawable/ic_device"
         android:title="Device" />
     <item
-        android:id="@+id/nav_network"
-        android:icon="@drawable/ic_network"
-        android:title="Network" />
-    <item
         android:id="@+id/nav_ids"
         android:icon="@drawable/ic_ids"
         android:title="IDs" />
+    <item
+        android:id="@+id/nav_network"
+        android:icon="@drawable/ic_network"
+        android:title="Network" />
     <item
         android:id="@+id/nav_location"
         android:icon="@drawable/ic_location"
