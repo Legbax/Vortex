@@ -21,6 +21,36 @@ object SpoofingUtils {
         "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
     )
 
+    private val SENSITIVE_COMMAND_KEYWORDS = setOf(
+        "magisk", "xposed", "lsposed", "edxposed", "riru", "zygisk", "superuser", "daemonsu"
+    )
+
+    fun isSensitiveCommand(command: List<String>): Boolean {
+        if (command.isEmpty()) return false
+
+        // 1. Check if the binary itself is 'su' or a sensitive path
+        val binary = command[0]
+        if (binary == "su" || binary.endsWith("/su") || SENSITIVE_PATHS.contains(binary)) return true
+
+        // 2. Iterate arguments to check for 'su' or sensitive paths directly
+        for (part in command) {
+            if (part == "su" || part == "/sbin/su" || part == "/system/bin/su") return true
+            if (isSensitivePath(part)) return true
+        }
+
+        // 3. Check joined command for keywords (handles 'sh -c "ls /sbin/.magisk"')
+        val fullCommand = command.joinToString(" ").lowercase()
+        for (keyword in SENSITIVE_COMMAND_KEYWORDS) {
+            if (fullCommand.contains(keyword)) return true
+        }
+
+        // 4. Check for critical directory substrings in the full command
+        // This catches /sbin/ or /data/adb/ usage even if not at start of string
+        if (fullCommand.contains("/sbin/") || fullCommand.contains("/data/adb/")) return true
+
+        return false
+    }
+
     fun isSensitivePath(path: String): Boolean {
         // Optimization 1: Only check absolute paths starting with /
         if (path.isEmpty() || path[0] != '/') return false

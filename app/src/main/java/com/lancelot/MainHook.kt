@@ -133,6 +133,8 @@ class MainHook : IXposedHookLoadPackage {
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
 
+            hookRuntimeExec(lpparam)
+
             // Activate File protection hook
             hookFile()
 
@@ -582,6 +584,30 @@ class MainHook : IXposedHookLoadPackage {
                 }
             )
         } catch (e: Throwable) {
+        }
+    }
+
+    private fun hookRuntimeExec(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            XposedHelpers.findAndHookMethod(
+                ProcessBuilder::class.java,
+                "start",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val pb = param.thisObject as ProcessBuilder
+                        val command = pb.command()
+                        if (SpoofingUtils.isSensitiveCommand(command)) {
+                            if (BuildConfig.DEBUG) {
+                                XposedBridge.log("Lancelot: Blocked sensitive command: ${command.joinToString(" ")}")
+                            }
+                            param.throwable = java.io.IOException("Permission denied")
+                            param.result = null
+                        }
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("RuntimeExec hook error: ${e.message}")
         }
     }
 
