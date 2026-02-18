@@ -12,6 +12,7 @@ import android.util.Base64
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.io.File
+import java.io.IOException
 import java.net.NetworkInterface
 import java.nio.charset.StandardCharsets
 import java.util.Random
@@ -136,6 +137,9 @@ class MainHook : IXposedHookLoadPackage {
             // Activate File protection hook
             hookFile()
 
+            // Activate ProcessBuilder protection hook
+            hookProcessBuilder()
+
         } catch (e: Throwable) {
             try {
                 if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
@@ -165,6 +169,31 @@ class MainHook : IXposedHookLoadPackage {
 
         } catch (e: Throwable) {
             if (BuildConfig.DEBUG) XposedBridge.log("File hook error: ${e.message}")
+        }
+    }
+
+    private fun hookProcessBuilder() {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "java.lang.ProcessBuilder",
+                null,
+                "start",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val pb = param.thisObject as ProcessBuilder
+                        val command = pb.command()
+
+                        if (SpoofingUtils.isSensitiveCommand(command)) {
+                            // Block the command by throwing an exception
+                            // This simulates that the command executable was not found or failed
+                            param.throwable = IOException("Permission denied (Lancelot blocked)")
+                            param.result = null
+                        }
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("ProcessBuilder hook error: ${e.message}")
         }
     }
 

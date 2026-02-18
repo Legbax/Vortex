@@ -21,6 +21,11 @@ object SpoofingUtils {
         "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
     )
 
+    // Sensitive commands to block
+    private val SENSITIVE_COMMANDS = setOf(
+        "su", "which su", "mount", "getprop ro.secure"
+    )
+
     fun isSensitivePath(path: String): Boolean {
         // Optimization 1: Only check absolute paths starting with /
         if (path.isEmpty() || path[0] != '/') return false
@@ -43,6 +48,42 @@ object SpoofingUtils {
                 return true
             }
         }
+        return false
+    }
+
+    fun isSensitiveCommand(command: List<String>): Boolean {
+        if (command.isEmpty()) return false
+
+        // Convert full command to single string for easier matching
+        val fullCmd = command.joinToString(" ").lowercase()
+
+        // 1. Direct match with SENSITIVE_COMMANDS set or start
+        if (SENSITIVE_COMMANDS.contains(fullCmd)) return true
+        if (fullCmd.startsWith("su ")) return true
+
+        // 2. Sensitive keywords
+        if (fullCmd.contains("magisk") ||
+            fullCmd.contains("xposed") ||
+            fullCmd.contains("lsposed") ||
+            fullCmd.contains("busybox")) {
+            return true
+        }
+
+        // 3. Known root checks (if not caught by set)
+        if (fullCmd.contains("which su") ||
+            fullCmd.contains("ls /sbin") ||
+            fullCmd.contains("ls /data/adb")) {
+            return true
+        }
+
+        // 4. Check if any argument is a sensitive path
+        // (Reusing the path logic, but we need to filter for potential paths)
+        for (part in command) {
+            if (part.startsWith("/") && isSensitivePath(part)) {
+                return true
+            }
+        }
+
         return false
     }
 
