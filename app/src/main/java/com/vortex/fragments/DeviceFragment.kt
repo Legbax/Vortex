@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.lancelot.MainHook
-import com.lancelot.PrefsManager
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.PrefsManager
+import com.vortex.R
 
 class DeviceFragment : Fragment() {
 

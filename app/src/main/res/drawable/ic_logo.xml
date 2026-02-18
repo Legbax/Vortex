@@ -5,10 +5,10 @@
     android:viewportHeight="24">
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#FF00E676"
+        android:strokeColor="@color/vortex_accent"
         android:strokeWidth="2"
         android:pathData="M12,12m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"/>
     <path
-        android:fillColor="#FF00E676"
+        android:fillColor="@color/vortex_accent"
         android:pathData="M12,12m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
 </vector>

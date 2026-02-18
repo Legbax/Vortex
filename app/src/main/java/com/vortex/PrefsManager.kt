@@ -1,7 +1,7 @@
-package com.lancelot
+package com.vortex
 
 import android.content.Context
-import com.lancelot.utils.CryptoUtils
+import com.vortex.utils.CryptoUtils
 
 object PrefsManager {
     private const val PREFS_NAME = "spoof_prefs"

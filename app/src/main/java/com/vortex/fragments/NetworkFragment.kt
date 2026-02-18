@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -10,10 +10,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.lancelot.MainHook
-import com.lancelot.SpoofingUtils
-import com.lancelot.PrefsManager
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.SpoofingUtils
+import com.vortex.PrefsManager
+import com.vortex.R
 import java.io.File
 
 class NetworkFragment : Fragment() {

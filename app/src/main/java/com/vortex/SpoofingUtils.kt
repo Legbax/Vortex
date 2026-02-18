@@ -1,6 +1,6 @@
-package com.lancelot
+package com.vortex
 
-import com.lancelot.utils.ValidationUtils
+import com.vortex.utils.ValidationUtils
 import java.util.UUID
 import java.util.Random
 
@@ -65,7 +65,7 @@ object SpoofingUtils {
 
     fun isSensitivePath(path: String): Boolean {
         if (path.isEmpty() || path[0] != '/') return false
-        if (path.contains("com.lancelot")) return false
+        if (path.contains("com.vortex")) return false
         if (SENSITIVE_PATHS.contains(path)) return true
 
         if (path.length > 6) {

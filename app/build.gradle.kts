@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.lancelot"
+    namespace = "com.vortex"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.lancelot"
+        applicationId = "com.vortex"
         minSdk = 30  // Android 11 como mínimo
         targetSdk = 30  // FIX #5: Target Android 11 exacto
         versionCode = 1

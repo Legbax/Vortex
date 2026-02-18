@@ -1,7 +1,7 @@
-package com.lancelot.utils
+package com.vortex.utils
 
 import android.util.Base64
-import com.lancelot.BuildConfig
+import com.vortex.BuildConfig
 import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec

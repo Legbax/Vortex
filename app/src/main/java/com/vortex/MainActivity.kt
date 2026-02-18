@@ -1,10 +1,10 @@
-package com.lancelot
+package com.vortex
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.lancelot.fragments.*
+import com.vortex.fragments.*
 
 class MainActivity : AppCompatActivity() {
 

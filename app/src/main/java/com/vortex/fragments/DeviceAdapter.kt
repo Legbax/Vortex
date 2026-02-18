@@ -1,12 +1,12 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.lancelot.MainHook
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.R
 
 class DeviceAdapter(
     private val profiles: Map<String, MainHook.DeviceFingerprint>,

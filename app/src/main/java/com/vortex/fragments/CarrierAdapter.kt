@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -9,8 +9,8 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.lancelot.MainHook
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.R
 
 class CarrierAdapter(
     private val carriers: List<MainHook.Companion.UsCarrier>,

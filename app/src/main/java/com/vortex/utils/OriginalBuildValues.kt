@@ -1,4 +1,4 @@
-package com.lancelot.utils
+package com.vortex.utils
 
 object OriginalBuildValues {
     val ORIGINAL_BUILD_TIME: Long by lazy {
