@@ -13,7 +13,7 @@ object CryptoUtils {
 
     private val SECRET_KEY by lazy {
         val time = OriginalBuildValues.ORIGINAL_BUILD_TIME.toString()
-        val salt = "Lancelot2026SecureSalt"
+        val salt = "Vortex2026SecureSalt"
         val keyMaterial = (time + salt).toByteArray(Charsets.UTF_8)
         val hash = MessageDigest.getInstance("SHA-256").digest(keyMaterial)
         SecretKeySpec(hash, "AES")   // AES-256

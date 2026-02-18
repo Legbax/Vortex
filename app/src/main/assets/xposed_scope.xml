@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Lancelot — Xposed Module Scope
+    Vortex — Xposed Module Scope
 
     FIX #9  : com.google.android.gms.unstable ELIMINADO.
               El bypass de Play Integrity / TEE requiere implementación nativa;

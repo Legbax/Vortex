@@ -1,5 +1,5 @@
 # ================================================================
-# Lancelot Xposed Module — ProGuard Rules
+# Vortex Xposed Module — ProGuard Rules
 # ================================================================
 
 # --- Xposed Framework API ---
