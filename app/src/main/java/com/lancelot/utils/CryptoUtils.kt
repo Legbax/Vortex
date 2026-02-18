@@ -1,11 +1,8 @@
 package com.lancelot.utils
 
 import android.util.Base64
-import android.util.Log
 import com.lancelot.BuildConfig
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -14,8 +11,6 @@ object CryptoUtils {
     private const val ALGO = "AES/GCM/NoPadding"
     private const val PREFIX = "ENC:"
 
-    // Dynamic key derived from Build.TIME (immutable per firmware)
-    // Safe because OriginalBuildValues captures it before Xposed hooks
     private val SECRET_KEY by lazy {
         val time = OriginalBuildValues.ORIGINAL_BUILD_TIME.toString()
         val salt = "Lancelot2026SecureSalt"
@@ -24,58 +19,42 @@ object CryptoUtils {
         SecretKeySpec(hash, "AES")   // AES-256
     }
 
-    private val secureRandom = SecureRandom()
-
     fun encrypt(value: String): String {
         if (value.isEmpty()) return ""
         return try {
             val cipher = Cipher.getInstance(ALGO)
-
-            val iv = ByteArray(12)
-            secureRandom.nextBytes(iv)
-
+            val iv = ByteArray(12).apply { java.security.SecureRandom().nextBytes(this) }
             val gcmSpec = GCMParameterSpec(128, iv)
+
             cipher.init(Cipher.ENCRYPT_MODE, SECRET_KEY, gcmSpec)
+            val encrypted = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
 
-            val encryptedBytes = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
-
-            // Combine IV + Ciphertext
-            val combined = ByteArray(iv.size + encryptedBytes.size)
-            System.arraycopy(iv, 0, combined, 0, iv.size)
-            System.arraycopy(encryptedBytes, 0, combined, iv.size, encryptedBytes.size)
-
+            val combined = iv + encrypted
             PREFIX + Base64.encodeToString(combined, Base64.NO_WRAP)
         } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e("CryptoUtils", "Encrypt failed", e)
+            if (BuildConfig.DEBUG) android.util.Log.e("CryptoUtils", "Encrypt failed", e)
             ""
         }
     }
 
     fun decrypt(encrypted: String?): String? {
-        if (encrypted.isNullOrEmpty()) return null
-        // Check for our new prefix. If not present, maybe return raw if it's old/legacy
-        if (!encrypted.startsWith(PREFIX)) {
-            // Legacy handling or plain text fallback
-            // If it starts with GCM: (old implementation), we can't decrypt it with the NEW key.
-            // Since this is a breaking change for security, we accept old prefs might be lost/reset.
+        if (encrypted.isNullOrEmpty() || !encrypted.startsWith(PREFIX)) {
             return encrypted
         }
 
         return try {
-            val decodedBytes = Base64.decode(encrypted.removePrefix(PREFIX), Base64.NO_WRAP)
-
-            val iv = decodedBytes.copyOfRange(0, 12)
-            val ciphertext = decodedBytes.copyOfRange(12, decodedBytes.size)
+            val data = Base64.decode(encrypted.removePrefix(PREFIX), Base64.NO_WRAP)
+            val iv = data.copyOfRange(0, 12)
+            val ciphertext = data.copyOfRange(12, data.size)
 
             val cipher = Cipher.getInstance(ALGO)
             val gcmSpec = GCMParameterSpec(128, iv)
-
             cipher.init(Cipher.DECRYPT_MODE, SECRET_KEY, gcmSpec)
 
-            val decryptedBytes = cipher.doFinal(ciphertext)
-            String(decryptedBytes, Charsets.UTF_8)
+            val decrypted = cipher.doFinal(ciphertext)
+            String(decrypted, Charsets.UTF_8)
         } catch (e: Exception) {
-            if (BuildConfig.DEBUG) Log.e("CryptoUtils", "Decrypt failed", e)
+            if (BuildConfig.DEBUG) android.util.Log.e("CryptoUtils", "Decrypt failed", e)
             null
         }
     }
