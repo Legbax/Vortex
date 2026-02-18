@@ -8,14 +8,43 @@ import com.vortex.fragments.*
 
 class MainActivity : AppCompatActivity() {
 
+<<<<<<< feat-ui-overhaul-dali-8873407970138867091
+    private lateinit var bottomNav: BottomNavigationView
+=======
     // FIX #19: currentFragment rastreado para usar show/hide en lugar de replace,
     // lo que preserva el estado de la View sin recrear el Fragment.
     private var currentFragment: Fragment? = null
+>>>>>>> main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+<<<<<<< feat-ui-overhaul-dali-8873407970138867091
+        bottomNav = findViewById(R.id.bottom_navigation)
+
+        bottomNav.setOnItemSelectedListener { item ->
+            val fragment: Fragment = when (item.itemId) {
+                R.id.nav_status -> StatusFragment()
+                R.id.nav_device -> DeviceFragment()
+                R.id.nav_network -> NetworkFragment()
+                R.id.nav_ids -> IDsFragment()
+                R.id.nav_location -> LocationFragment()
+                R.id.nav_advanced -> AdvancedFragment()
+                else -> StatusFragment()
+            }
+            loadFragment(fragment)
+            true
+        }
+
+        bottomNav.selectedItemId = R.id.nav_status
+    }
+
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, fragment)
+            .commit()
+=======
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
 
         bottomNav.setOnItemSelectedListener { item ->
@@ -72,5 +101,6 @@ class MainActivity : AppCompatActivity() {
         R.id.nav_location -> LocationFragment()
         R.id.nav_advanced -> AdvancedFragment()
         else              -> StatusFragment()
+>>>>>>> main
     }
 }
