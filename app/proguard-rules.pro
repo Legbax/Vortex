@@ -8,32 +8,32 @@
 -dontwarn de.robv.android.xposed.**
 
 # --- Punto de entrada del módulo ---
--keep class com.lancelot.MainHook { *; }
+-keep class com.vortex.MainHook { *; }
 
 # FIX #7: Companion object debe mantenerse por nombre; Xposed accede a campos
 # estáticos del Companion via reflexión y el nombre original es obligatorio.
--keep class com.lancelot.MainHook$Companion { *; }
+-keep class com.vortex.MainHook$Companion { *; }
 
 # FIX #18: Los campos de DeviceFingerprint y UsCarrier son accedidos por nombre
 # en tiempo de ejecución (data class Kotlin). Sin esto ProGuard los renombra
 # y los accesos via reflexión fallan silenciosamente.
--keepclassmembers class com.lancelot.MainHook$DeviceFingerprint { *; }
--keepclassmembers class com.lancelot.MainHook$UsCarrier { *; }
+-keepclassmembers class com.vortex.MainHook$DeviceFingerprint { *; }
+-keepclassmembers class com.vortex.MainHook$UsCarrier { *; }
 
 # Todas las inner classes de MainHook
--keep class com.lancelot.MainHook$* { *; }
+-keep class com.vortex.MainHook$* { *; }
 
 # --- Clases del módulo completas ---
--keep class com.lancelot.** { *; }
--keepclassmembers class com.lancelot.** { *; }
+-keep class com.vortex.** { *; }
+-keepclassmembers class com.vortex.** { *; }
 
 # --- Clases utilitarias accedidas por nombre ---
--keep class com.lancelot.SpoofingUtils    { *; }
--keep class com.lancelot.SpoofingUtils$*  { *; }
--keep class com.lancelot.utils.**         { *; }
--keep class com.lancelot.utils.CryptoUtils       { *; }
--keep class com.lancelot.utils.OriginalBuildValues { *; }
--keep class com.lancelot.BuildConfig      { *; }
+-keep class com.vortex.SpoofingUtils    { *; }
+-keep class com.vortex.SpoofingUtils$*  { *; }
+-keep class com.vortex.utils.**         { *; }
+-keep class com.vortex.utils.CryptoUtils       { *; }
+-keep class com.vortex.utils.OriginalBuildValues { *; }
+-keep class com.vortex.BuildConfig      { *; }
 
 # --- Metadatos Kotlin (necesario para data classes y reflexión) ---
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
@@ -47,4 +47,4 @@
 
 # FIX #17: Una sola directiva -repackageclasses (el original tenía dos contradictorias).
 # Nota: no reempaquetar clases que Xposed necesita encontrar por nombre canónico.
--repackageclasses 'com.lancelot.r'
+-repackageclasses 'com.vortex.r'

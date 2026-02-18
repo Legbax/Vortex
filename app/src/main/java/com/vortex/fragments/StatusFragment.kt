@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.lancelot.R
+import com.vortex.R
 
 class StatusFragment : Fragment() {
 

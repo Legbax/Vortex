@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.lancelot"
-    compileSdk = 34
+    namespace = "com.vortex"
+    compileSdk = 30
 
     defaultConfig {
-        applicationId = "com.lancelot"
-        minSdk = 27
+        applicationId = "com.vortex"
+        minSdk = 28
         targetSdk = 30
         versionCode = 1
         versionName = "1.0"
@@ -41,12 +41,13 @@ dependencies {
     compileOnly("de.robv.android.xposed:api:82")
     compileOnly("de.robv.android.xposed:api:82:sources")
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    // Downgraded dependencies for compileSdk 30 compatibility
+    implementation("androidx.core:core-ktx:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.3.1")
+    implementation("com.google.android.material:material:1.4.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+    implementation("androidx.fragment:fragment-ktx:1.3.6")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

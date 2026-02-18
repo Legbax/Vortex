@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Lancelot"
+rootProject.name = "Vortex"
 include(":app")

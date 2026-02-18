@@ -9,7 +9,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Lancelot">
+        android:theme="@style/Theme.Vortex">
 
         <meta-data
             android:name="xposedmodule"

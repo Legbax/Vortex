@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,8 +8,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
-import com.lancelot.PrefsManager
-import com.lancelot.R
+import com.vortex.PrefsManager
+import com.vortex.R
 import kotlin.random.Random
 
 class LocationFragment : Fragment() {

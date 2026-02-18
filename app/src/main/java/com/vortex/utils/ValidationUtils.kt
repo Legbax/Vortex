@@ -1,4 +1,4 @@
-package com.lancelot.utils
+package com.vortex.utils
 
 object ValidationUtils {
     fun isValidImei(imei: String): Boolean {

@@ -1,6 +1,6 @@
-package com.lancelot.utils
+package com.vortex.utils
 
-import com.lancelot.SpoofingUtils
+import com.vortex.SpoofingUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

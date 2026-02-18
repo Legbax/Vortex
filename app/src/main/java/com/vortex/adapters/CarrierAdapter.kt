@@ -1,12 +1,12 @@
-package com.lancelot.adapters
+package com.vortex.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.lancelot.MainHook
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.R
 
 class CarrierAdapter(
     private val carriers: List<MainHook.Companion.UsCarrier>,

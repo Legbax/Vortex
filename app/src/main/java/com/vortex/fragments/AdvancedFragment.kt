@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater

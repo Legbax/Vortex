@@ -1,11 +1,11 @@
-package com.lancelot.adapters
+package com.vortex.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.lancelot.R
+import com.vortex.R
 
 class DeviceAdapter(
     private val devices: List<String>,

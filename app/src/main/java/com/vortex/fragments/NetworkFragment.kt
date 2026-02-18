@@ -1,4 +1,4 @@
-package com.lancelot.fragments
+package com.vortex.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,10 +8,10 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
-import com.lancelot.MainHook
-import com.lancelot.PrefsManager
-import com.lancelot.SpoofingUtils
-import com.lancelot.R
+import com.vortex.MainHook
+import com.vortex.PrefsManager
+import com.vortex.SpoofingUtils
+import com.vortex.R
 
 class NetworkFragment : Fragment() {
 

@@ -1,4 +1,4 @@
-package com.lancelot
+package com.vortex
 
 import android.accounts.Account
 import android.content.ContentResolver
@@ -13,10 +13,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.io.File
 import java.net.NetworkInterface
 import java.util.Random
-import com.lancelot.utils.CryptoUtils
-import com.lancelot.utils.OriginalBuildValues
-import com.lancelot.SpoofingUtils
-import com.lancelot.BuildConfig
+import com.vortex.utils.CryptoUtils
+import com.vortex.utils.OriginalBuildValues
+import com.vortex.SpoofingUtils
+import com.vortex.BuildConfig
 
 class MainHook : IXposedHookLoadPackage {
 
@@ -226,7 +226,7 @@ class MainHook : IXposedHookLoadPackage {
     )
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName == "com.lancelot") {
+        if (lpparam.packageName == "com.vortex") {
             hookModuleStatus(lpparam)
             return
         }
@@ -239,7 +239,7 @@ class MainHook : IXposedHookLoadPackage {
         try {
             val originalTime = OriginalBuildValues.ORIGINAL_BUILD_TIME
 
-            val prefs = XSharedPreferences("com.lancelot", PREFS_NAME)
+            val prefs = XSharedPreferences("com.vortex", PREFS_NAME)
             prefs.reload()
 
             fun getEncryptedString(key: String, def: String): String {

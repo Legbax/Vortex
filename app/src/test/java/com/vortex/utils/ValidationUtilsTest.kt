@@ -1,4 +1,4 @@
-package com.lancelot.utils
+package com.vortex.utils
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

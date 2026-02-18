@@ -1,6 +1,6 @@
-package com.lancelot.utils
+package com.vortex.utils
 
-import com.lancelot.SpoofingUtils
+import com.vortex.SpoofingUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -38,10 +38,10 @@ class EvasionTest {
     @Test
     fun testAntiSelfSabotage() {
         // Should NOT hide Lancelot's own files even if they contain "xposed" or other keywords in path context
-        // Note: The logic in SpoofingUtils checks "com.lancelot".
-        // Let's assume a path like /data/data/com.lancelot/files/xposed_log.txt
-        assertFalse(SpoofingUtils.isSensitivePath("/data/data/com.lancelot/files/xposed_log.txt"))
-        assertFalse(SpoofingUtils.isSensitivePath("/data/app/com.lancelot-1/base.apk"))
+        // Note: The logic in SpoofingUtils checks "com.vortex".
+        // Let's assume a path like /data/data/com.vortex/files/xposed_log.txt
+        assertFalse(SpoofingUtils.isSensitivePath("/data/data/com.vortex/files/xposed_log.txt"))
+        assertFalse(SpoofingUtils.isSensitivePath("/data/app/com.vortex-1/base.apk"))
     }
 
     @Test
