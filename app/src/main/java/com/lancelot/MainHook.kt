@@ -111,6 +111,7 @@ class MainHook : IXposedHookLoadPackage {
 
         try {
             // Force initialization of OriginalBuildValues (lazy) before any spoofing
+            // This is critical for consistent encryption keys
             val originalTime = OriginalBuildValues.ORIGINAL_BUILD_TIME
 
             val prefs = XSharedPreferences("com.lancelot", PREFS_NAME)
@@ -217,7 +218,7 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedSerial == null) cachedSerial = getString("serial", SpoofingUtils.generateRandomSerial())
 
         if (cachedImsi == null) {
-            // FIX #3: Use generateValidImsi
+            // FIX: Use generateValidImsi which guarantees correct MCC+MNC prefix
             cachedImsi = SpoofingUtils.generateValidImsi(mccMnc)
         }
         if (cachedIccid == null) cachedIccid = SpoofingUtils.generateValidIccid(mccMnc)

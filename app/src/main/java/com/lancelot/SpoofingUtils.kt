@@ -1,17 +1,25 @@
 package com.lancelot
 
+import com.lancelot.utils.ValidationUtils
 import java.util.UUID
 import java.util.Random
-import com.lancelot.utils.ValidationUtils
 
 object SpoofingUtils {
 
     // Valid TACs (Type Allocation Code) for Lancelot profiles
     private val VALID_TACS = listOf(
-        "86413405", "86413404",   // Redmi / Xiaomi
-        "35271311", "35361311",   // Redmi
-        "35449209", "35449210",   // Samsung A-series
-        "35674910", "35674911"    // Google Pixel
+        // Xiaomi / Redmi (Lancelot focus)
+        "86413405", "86413404", "86413403", "86413402",
+        // Samsung
+        "35271311", "35361311", "35449209", "35449210", "35563409", "35563410",
+        // Google Pixel
+        "35674910", "35674911", "35824005", "35824006",
+        // Motorola
+        "35328510", "35328511",
+        // OnePlus
+        "35824005", "35824006",
+        // Sony
+        "35123456", "35123457"
     )
 
     // Optimized paths to hide (Set for O(1) access)
@@ -121,21 +129,6 @@ object SpoofingUtils {
         return bytes.joinToString(":") { "%02X".format(it) }
     }
 
-    fun generateRealisticGmail(): String {
-        val names = listOf(
-            "juan", "jose", "luis", "carlos", "francisco", "antonio", "jorge", "miguel", "manuel", "pedro",
-            "jesus", "alejandro", "david", "daniel", "ricardo", "fernando", "eduardo", "javier", "raul", "roberto"
-        )
-        val surnames = listOf(
-            "rossi", "russo", "ferrari", "esposito", "bianchi", "romano", "colombo", "ricci", "marino", "greco"
-        )
-        val name = names.random()
-        val surname = surnames.random()
-        val randomNum = (1..9999).random().toString()
-
-        return "$name$surname$randomNum@gmail.com"
-    }
-
     fun generatePhoneNumber(npaList: List<String>): String {
         val npa = if (npaList.isNotEmpty()) npaList.random() else "202"
 
@@ -144,5 +137,86 @@ object SpoofingUtils {
 
         val subscriber = (0..9999).random().toString().padStart(4, '0')
         return "+1$npa$nxx$subscriber"
+    }
+
+    fun generateRealisticGmail(): String {
+        val firstNames = listOf(
+            "sofia","sof","camila","cami","valentina","val","isabella","bella","lucia","luci",
+            "daniela","dani","valeria","vale","gabriela","gaby","mariana","mari","catalina","cata",
+            "ximena","xim","victoria","vicky","natalia","nati","alejandra","ale","fernanda","fer",
+            "paulina","pauli","renata","re","emilia","emi","mia","sara","sarita","laura","laur",
+            "ana","anita","maria","mary","carmen","carme","rosa","rosy","luna","lunita","aurora","rory",
+            "sophia","olivia","emma","ava","charlotte","amelia","harper","evelyn","abigail","ella",
+            "scarlett","grace","chloe","lily","nora","hazel","zoey","riley","layla","violet",
+            "nova","ivy","stella","maya","penelope","everly","willow","eleanor","hannah","addison",
+            "aubrey","brooklyn","claire","savannah","skylar","genesis","madison","isla","aaliyah",
+            "jasmine","jas","ruby","alexa","lexi","brianna","bri","kaylee","kayla","megan","meg",
+            "sydney","syd","rachel","rach","nicole","nikki","vanessa","nessa","andrea","drea",
+            "veronica","vero","monica","mon","patricia","patty","elena","eli","silvia","sil",
+            "beatriz","bea","carolina","caro","adriana","adri","paola","pao","tamara","tami"
+        )
+
+        val lastNames = listOf(
+            "garcia","garci","rodriguez","rodri","lopez","lope","martinez","marti","hernandez","hernan",
+            "gonzalez","gonza","smith","smit","johnson","johns","williams","will","brown","brow",
+            "jones","jone","miller","mill","davis","davi","wilson","wils","moore","moor","taylor","tay",
+            "anderson","thomas","jackson","white","harris","martin","thompson","garcia","martinez",
+            "robinson","clark","rodriguez","lewis","lee","walker","hall","allen","young","hernandez",
+            "king","wright","lopez","scott","green","adams","baker","gonzalez","nelson","carter",
+            "mitchell","perez","roberts","turner","phillips","campbell","parker","evans","edwards",
+            "collins","stewart","sanchez","morris","rogers","reed","cook","morgan","bell","murphy",
+            "bailey","rivera","cooper","richardson","cox","howard","ward","torres","peterson","gray",
+            "ramirez","james","watson","brooks","kelly","sanders","price","bennett","wood","barnes",
+            "ross","henderson","coleman","jenkins","perry","powell","long","patterson","hughes",
+            "flores","washington","butler","simmons","foster","gonzales","bryant","alexander","russell",
+            "griffin","diaz","hayes","myers","ford","hamilton","graham","sullivan","wallace","woods",
+            "cole","west","jordan","owens","reynolds","fisher","ellis","harrison","gibson","mcdonald",
+            "cruz","marshall","ortiz","gomez","murray","freeman","wells","webb","simpson","stevens",
+            "tucker","porter","hunter","hicks","crawford","henry","boyd","mason","moreno","kennedy",
+            "warren","dixon","ramos","reyes","burns","gordon","shaw","holmes","rice","robertson",
+            "hunt","black","daniels","palmer","mills","nichols","grant","knight","ferguson","rose",
+            "stone","hawkins","dunn","perkins","hudson","spencer","gardner","stephens","payne","pierce",
+            "berry","matthews","arnold","wagner","watkins","olson","carroll","duncan","snyder","hart",
+            "cunningham","bradley","lane","andrews","ruiz","harper","fox","riley","armstrong","carpenter",
+            "weaver","greene","lawrence","elliott","chavez","sims","austin","peters","kelley","franklin",
+            "lawson","fields","gutierrez","ryan","schmidt","carr","vasquez","castillo","wheeler","chapman",
+            "oliver","montgomery","richards","williamson","johnston","banks","meyer","bishop","mccoy",
+            "howell","alvarez","morrison","hansen","fernandez","garza","harvey","little","burton","stanley",
+            "nguyen","george","jacobs","reid","kim","fuller","lynch","dean","gilbert","garrett","romero",
+            "welch","larson","frazier","burke","hanson","day","mendoza","moreno","bowman","medina","fowler",
+            "brewer","hoffman","carlson","silva","pearson","holland","douglas","fleming","jensen","vargas",
+            "byrd","davidson","hopkins","may","terry","herrera","wade","soto","walters","curtis","neal",
+            "caldwell","lowe","jennings","barnett","graves","jimenez","horton","shelton","barrett","obrien",
+            "castro","sutton","gregory","mckinney","lucas","miles","craig","rodriquez","chambers","holt",
+            "lambert","fletcher","watts","bates","hale","rhodes","pena","beck","newman","haynes","mcdaniel",
+            "mendez","bush","vaughn","phelps","mccormick","baldwin","kerr","murray","cordova","gibbs"
+        )
+
+        val first = firstNames.random()
+        val last = lastNames.random()
+        val separator = listOf("", ".", "_").random()
+
+        var email = "${first}${separator}${last}"
+
+        // Garantizamos mínimo 9 caracteres
+        if (email.length < 9) {
+            val needed = 9 - email.length
+            val extra = (0..(Math.pow(10.0, needed.toDouble()) - 1).toInt())
+                .random()
+                .toString()
+                .padStart(needed, '0')
+            email += extra
+        }
+
+        // 55% probabilidad de agregar números extras
+        if ((0..99).random() < 55) {
+            val extraLen = (1..4).random()
+            val number = (0..(Math.pow(10.0, extraLen.toDouble()) - 1).toInt())
+                .random()
+                .toString()
+            email += number
+        }
+
+        return "$email@gmail.com"
     }
 }
