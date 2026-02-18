@@ -7,7 +7,7 @@ object ValidationUtils {
     }
 
     fun isValidIccid(iccid: String): Boolean {
-        if (iccid.length !in 18..20 || !iccid.all { it.isDigit() }) return false
+        if (iccid.length !in 19..20 || !iccid.all { it.isDigit() }) return false
         return isLuhnValid(iccid)
     }
 

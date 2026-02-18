@@ -137,10 +137,22 @@ object SpoofingUtils {
     }
 
     fun generateValidImsi(mccMnc: String): String {
-        // IMSI = MCC + MNC + MSIN (usually 15 digits total)
         val needed = 15 - mccMnc.length
-        val msin = (1..needed).map { (0..9).random() }.joinToString("")
-        return mccMnc + msin
+
+        // Primeros 2-3 dígitos del MSIN suelen ser rangos del operador (HLR)
+        val operatorRange = when (mccMnc) {
+            "310260" -> (60..69).random()  // T-Mobile HLR ranges
+            "310410" -> (40..49).random()  // AT&T
+            "310012" -> (10..19).random()  // Verizon
+            else -> (10..99).random()
+        }
+
+        // El MSIN total suele ser de 9 o 10 dígitos. MCC(3) + MNC(2/3) + MSIN = 15
+        // Si needed es 9 (MNC 3 digitos), operatorRange (2) + 7 random
+        val randomPartLen = needed - operatorRange.toString().length
+        val randomPart = (1..randomPartLen).map { (0..9).random() }.joinToString("")
+
+        return mccMnc + operatorRange.toString() + randomPart
     }
 
     fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
@@ -165,7 +177,12 @@ object SpoofingUtils {
         val npa = if (npaList.isNotEmpty()) npaList.random() else "202"
 
         var nxx = (200..999).random()
-        if (nxx == 555) nxx = 556 // Avoid obvious fake block
+        // Bloquear rangos problemáticos (555, 9XX reservados, X11)
+        while (nxx == 555 ||
+               nxx in 950..999 ||
+               (nxx / 100 == 9 && nxx % 10 == 1)) {
+            nxx = (200..999).random()
+        }
 
         val subscriber = (0..9999).random().toString().padStart(4, '0')
         return "+1$npa$nxx$subscriber"
