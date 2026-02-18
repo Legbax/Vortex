@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.lancelot.MainHook
 import com.lancelot.PrefsManager
 import com.lancelot.SpoofingUtils
 import com.lancelot.utils.ValidationUtils
@@ -107,7 +108,9 @@ class IDsFragment : Fragment() {
         }
 
         tilPhone.setEndIconOnClickListener {
-            etPhone.setText(SpoofingUtils.generatePhoneNumber(emptyList()))
+            val mccMnc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
+            val carrier = MainHook.getUsCarriers().find { it.mccMnc == mccMnc }
+            etPhone.setText(SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList()))
         }
 
         tilAndroidId.setEndIconOnClickListener { etAndroidId.setText(SpoofingUtils.generateRandomId(16)) }
@@ -143,7 +146,10 @@ class IDsFragment : Fragment() {
         etImei2.setText(SpoofingUtils.generateValidImei())
         etImsi.setText(SpoofingUtils.generateValidImsi(mccMnc))
         etIccid.setText(SpoofingUtils.generateValidIccid(mccMnc))
-        etPhone.setText(SpoofingUtils.generatePhoneNumber(emptyList()))
+
+        // Use carrier for phone number
+        val carrier = MainHook.getUsCarriers().find { it.mccMnc == mccMnc }
+        etPhone.setText(SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList()))
 
         etAndroidId.setText(SpoofingUtils.generateRandomId(16))
         etGaid.setText(SpoofingUtils.generateRandomGaid())
@@ -157,6 +163,7 @@ class IDsFragment : Fragment() {
     private fun saveData() {
         val imei1 = etImei.text.toString()
         val imei2 = etImei2.text.toString()
+        val iccid = etIccid.text.toString()
 
         if (imei1.isNotEmpty() && !ValidationUtils.isValidImei(imei1)) {
             tilImei.error = "Invalid IMEI (Luhn check failed)"
@@ -172,12 +179,19 @@ class IDsFragment : Fragment() {
             tilImei2.error = null
         }
 
+        if (iccid.isNotEmpty() && !ValidationUtils.isValidIccid(iccid)) {
+            tilIccid.error = "Invalid ICCID (checksum incorrect)"
+            return
+        } else {
+            tilIccid.error = null
+        }
+
         val context = requireContext()
 
         PrefsManager.saveString(context, "imei", imei1)
         PrefsManager.saveString(context, "imei2", imei2)
         PrefsManager.saveString(context, "imsi", etImsi.text.toString())
-        PrefsManager.saveString(context, "iccid", etIccid.text.toString())
+        PrefsManager.saveString(context, "iccid", iccid)
         PrefsManager.saveString(context, "phone_number", etPhone.text.toString())
         PrefsManager.saveString(context, "android_id", etAndroidId.text.toString())
         PrefsManager.saveString(context, "gaid", etGaid.text.toString())

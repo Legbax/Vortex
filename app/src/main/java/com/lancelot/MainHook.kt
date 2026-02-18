@@ -12,10 +12,12 @@ import android.util.Base64
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.io.File
+import java.io.IOException
 import java.net.NetworkInterface
 import java.nio.charset.StandardCharsets
 import java.util.Random
 import com.lancelot.utils.CryptoUtils
+import com.lancelot.utils.OriginalBuildValues
 import com.lancelot.SpoofingUtils
 import com.lancelot.BuildConfig
 
@@ -108,6 +110,9 @@ class MainHook : IXposedHookLoadPackage {
         }
 
         try {
+            // Force initialization of OriginalBuildValues (lazy) before any spoofing
+            val originalTime = OriginalBuildValues.ORIGINAL_BUILD_TIME
+
             val prefs = XSharedPreferences("com.lancelot", PREFS_NAME)
             prefs.reload()
 
@@ -135,6 +140,9 @@ class MainHook : IXposedHookLoadPackage {
 
             // Activate File protection hook
             hookFile()
+
+            // Activate ProcessBuilder protection hook
+            hookProcessBuilder()
 
         } catch (e: Throwable) {
             try {
@@ -168,7 +176,36 @@ class MainHook : IXposedHookLoadPackage {
         }
     }
 
+    private fun hookProcessBuilder() {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "java.lang.ProcessBuilder",
+                null,
+                "start",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val pb = param.thisObject as ProcessBuilder
+                        val command = pb.command()
+
+                        if (SpoofingUtils.isSensitiveCommand(command)) {
+                            // Block the command by throwing an exception
+                            param.throwable = IOException("Permission denied (Lancelot blocked)")
+                            param.result = null
+                        }
+                    }
+                }
+            )
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("ProcessBuilder hook error: ${e.message}")
+        }
+    }
+
     private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
+        // Read MCC/MNC as plain text with fallback
+        val defaultMccMnc = US_CARRIERS.random().mccMnc
+        val rawMccMnc = prefs.getString("mcc_mnc", defaultMccMnc)
+        val mccMnc = CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc ?: defaultMccMnc
+
         if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei())
         if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei())
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
@@ -179,12 +216,16 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", SpoofingUtils.generateRealisticGmail())
         if (cachedSerial == null) cachedSerial = getString("serial", SpoofingUtils.generateRandomSerial())
 
-        val defaultMccMnc = US_CARRIERS.random().mccMnc
-        val mccMnc = getString("mcc_mnc", defaultMccMnc)
-
-        if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
+        if (cachedImsi == null) {
+            // FIX #3: Use generateValidImsi
+            cachedImsi = SpoofingUtils.generateValidImsi(mccMnc)
+        }
         if (cachedIccid == null) cachedIccid = SpoofingUtils.generateValidIccid(mccMnc)
-        if (cachedPhoneNumber == null) cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(emptyList())
+
+        if (cachedPhoneNumber == null) {
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
+            cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(carrier.npas)
+        }
     }
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {

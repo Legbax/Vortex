@@ -6,6 +6,11 @@ object ValidationUtils {
         return isLuhnValid(imei)
     }
 
+    fun isValidIccid(iccid: String): Boolean {
+        if (iccid.length !in 18..20 || !iccid.all { it.isDigit() }) return false
+        return isLuhnValid(iccid)
+    }
+
     fun isLuhnValid(number: String): Boolean {
         var sum = 0
         val len = number.length
@@ -13,10 +18,25 @@ object ValidationUtils {
             val digitChar = number[len - 1 - i]
             val digit = digitChar.digitToIntOrNull() ?: return false
             var d = digit
-            if (i % 2 == 1) d *= 2
-            if (d > 9) d -= 9
+            if (i % 2 == 1) {
+                d *= 2
+                if (d > 9) d -= 9
+            }
             sum += d
         }
         return sum % 10 == 0
+    }
+
+    fun luhnChecksum(number: String): Int {
+        var sum = 0
+        number.reversed().forEachIndexed { i, c ->
+            var d = c.digitToInt()
+            if (i % 2 == 0) {
+                 d *= 2
+                 if (d > 9) d -= 9
+            }
+            sum += d
+        }
+        return (10 - (sum % 10)) % 10
     }
 }
