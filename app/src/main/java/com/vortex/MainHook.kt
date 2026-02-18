@@ -406,7 +406,7 @@ class MainHook : IXposedHookLoadPackage {
 
         if (cachedImsi == null) cachedImsi = getString("imsi", SpoofingUtils.generateValidImsi(mccMnc))
 
-        if (cachedIccid       == null) cachedIccid       = SpoofingUtils.generateValidIccid(mccMnc)
+        if (cachedIccid       == null) cachedIccid       = getString("iccid",          SpoofingUtils.generateValidIccid(mccMnc))
         if (cachedGsfId       == null) cachedGsfId       = getString("gsf_id",        SpoofingUtils.generateRandomId(16))
         if (cachedGaid        == null) cachedGaid        = getString("gaid",           SpoofingUtils.generateRandomGaid())
         if (cachedWifiMac     == null) cachedWifiMac     = getString("wifi_mac",       SpoofingUtils.generateRandomMac())

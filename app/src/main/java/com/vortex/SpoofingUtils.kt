@@ -158,7 +158,13 @@ object SpoofingUtils {
     fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
 
     fun generateRandomGaid(): String {
-        return "${generateRandomId(8)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(4)}-${generateRandomId(12)}"
+        // Fix: UUID v4 format
+        val p1 = generateRandomId(8)
+        val p2 = generateRandomId(4)
+        val p3 = "4" + generateRandomId(3)  // version 4
+        val p4 = listOf("8","9","a","b").random() + generateRandomId(3)  // variant
+        val p5 = generateRandomId(12)
+        return "$p1-$p2-$p3-$p4-$p5"
     }
 
     fun generateRandomSerial(): String {
