@@ -6,20 +6,46 @@ import java.util.Random
 
 object SpoofingUtils {
 
-    // Valid TACs (Type Allocation Code) for Lancelot profiles
-    private val VALID_TACS = listOf(
-        // Xiaomi / Redmi (Lancelot focus)
-        "86413405", "86413404", "86413403", "86413402",
-        // Samsung
-        "35271311", "35361311", "35449209", "35449210", "35563409", "35563410",
+    // === TAC MAP POR MODELO (Versión A - Recomendada) ===
+    private val TAC_MAP: Map<String, List<String>> = mapOf(
         // Google Pixel
-        "35674910", "35674911", "35824005", "35824006",
-        // Motorola
-        "35328510", "35328511",
+        "Pixel 5" to listOf("35674910", "35824005", "35935107"),
+        "Pixel 4a" to listOf("35674910", "35824005"),
+        "Pixel 4" to listOf("35674910", "35824006"),
+        "Pixel 3a" to listOf("35328510", "35328511"),
+        "Pixel 3" to listOf("35328510"),
+
+        // Samsung Galaxy
+        "Galaxy S20" to listOf("35271311", "35361311", "35449209"),
+        "Galaxy A52" to listOf("35563409", "35563410"),
+        "Galaxy A72" to listOf("35563409", "35563410"),
+        "Galaxy Note 20" to listOf("35271311", "35361311"),
+        "Galaxy Z Flip" to listOf("35449209"),
+        "Galaxy S10" to listOf("35271311"),
+
+        // Xiaomi / Redmi / Poco (Lancelot focus)
+        "Redmi Note 9 Pro" to listOf("86413405", "86413404", "86413403"),
+        "Redmi Note 10" to listOf("86413405", "86413404"),
+        "Mi 10" to listOf("86413405", "86712345"),
+        "Mi 11" to listOf("86413405", "86712346"),
+        "Mi 10T" to listOf("86413405"),
+        "Poco X3 NFC" to listOf("86413405", "86413404"),
+
         // OnePlus
-        "35824005", "35824006",
-        // Sony
-        "35123456", "35123457"
+        "OnePlus 8" to listOf("35824005", "35912345"),
+        "OnePlus 8T" to listOf("35824005", "35912345"),
+        "OnePlus Nord" to listOf("35824005"),
+        "OnePlus 9" to listOf("35824005", "35912346"),
+        "OnePlus 7 Pro" to listOf("35824005"),
+        "OnePlus Nord N10" to listOf("35824005"),
+
+        // Sony Xperia
+        "Xperia 5 II" to listOf("35123456", "35234567"),
+        "Xperia 10 II" to listOf("35123456"),
+        "Xperia 1 II" to listOf("35123456"),
+        "Xperia 5" to listOf("35123456"),
+        "Xperia 10 III" to listOf("35123456"),
+        "Xperia XZ2" to listOf("35123456")
     )
 
     // Optimized paths to hide (Set for O(1) access)
@@ -88,16 +114,22 @@ object SpoofingUtils {
         return false
     }
 
-    fun generateValidImei(): String {
-        val tac = VALID_TACS.random()
-        return generateValidImei(tac)
-    }
+    /** Genera IMEI coherente con el modelo seleccionado */
+    fun generateValidImei(modelName: String): String {
+        val tacList = TAC_MAP.entries.firstOrNull {
+            modelName.contains(it.key, ignoreCase = true)
+        }?.value ?: listOf("86413405") // fallback seguro para Lancelot
 
-    fun generateValidImei(tac: String): String {
+        val tac = tacList.random()
         val serial = (0..999999).random().toString().padStart(6, '0')
         val base = tac + serial
         val check = ValidationUtils.luhnChecksum(base)
         return base + check
+    }
+
+    fun generateValidImei(): String {
+        // Fallback overload for compatibility if needed, using default
+        return generateValidImei("Redmi 9")
     }
 
     fun generateValidIccid(mccMnc: String): String {
