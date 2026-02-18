@@ -278,7 +278,7 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookModuleStatus(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             XposedHelpers.findAndHookMethod(
-                "com.lancelot.StatusFragment",
+                "com.vortex.StatusFragment",
                 lpparam.classLoader,
                 "isModuleActive",
                 object : XC_MethodHook() {
