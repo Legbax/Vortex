@@ -67,136 +67,6 @@
                 android:id="@+id/et_latitude"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-<<<<<<< feat-ui-overhaul-dali-8873407970138867091
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/location_mock_settings"
-                    style="@style/Vortex.Text.SectionHeader"
-                    android:layout_marginBottom="12dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_lat"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/location_latitude"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginEnd="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_lat"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal|numberSigned"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_lon"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/location_longitude"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginStart="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_lon"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal|numberSigned"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false"
-                    android:layout_marginTop="12dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_alt"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/location_altitude"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginEnd="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_alt"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_acc"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/location_accuracy"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginStart="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_acc"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:baselineAligned="false"
-                    android:layout_marginTop="12dp">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_speed"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Speed (m/s)"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginEnd="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_speed"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_bearing"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Bearing (°)"
-                        style="@style/Vortex.InputLayout"
-                        android:layout_marginStart="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_bearing"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:textColor="@color/vortex_text_primary" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-=======
                 android:inputType="numberDecimal|numberSigned" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -221,7 +91,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned" />
         </com.google.android.material.textfield.TextInputLayout>
->>>>>>> main
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -238,84 +107,6 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-<<<<<<< feat-ui-overhaul-dali-8873407970138867091
-            style="@style/Vortex.Card">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <!-- Jitter -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/location_jitter"
-                            style="@style/Vortex.Text.Title"
-                            android:textSize="16sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/location_jitter_desc"
-                            style="@style/Vortex.Text.Subtitle"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switch_jitter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/vortex_divider"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Moving -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/location_move_randomly"
-                            style="@style/Vortex.Text.Title"
-                            android:textSize="16sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Simulate movement (random walk)"
-                            style="@style/Vortex.Text.Subtitle"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switch_moving"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-=======
             android:text="Randomize Location" />
 
         <Button
@@ -323,7 +114,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Save Location" />
->>>>>>> main
 
     </LinearLayout>
 </ScrollView>
