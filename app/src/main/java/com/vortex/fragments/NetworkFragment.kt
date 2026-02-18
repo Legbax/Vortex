@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.vortex.MainHook
@@ -38,18 +37,7 @@ class NetworkFragment : Fragment() {
         btnGenerate.setOnClickListener {
             val mccMnc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
             val carrier = MainHook.getUsCarriers().find { it.mccMnc == mccMnc }
-
-            // FIX: Regenerate ALL network IDs when regenerating phone (conceptually linked)
-            val phone = SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList())
-            val imsi = SpoofingUtils.generateValidImsi(mccMnc)
-            val iccid = SpoofingUtils.generateValidIccid(mccMnc)
-
-            PrefsManager.saveString(requireContext(), "phone_number", phone)
-            PrefsManager.saveString(requireContext(), "imsi", imsi)
-            PrefsManager.saveString(requireContext(), "iccid", iccid)
-
-            etPhoneNumber.setText(phone)
-            Toast.makeText(requireContext(), "Network IDs (Phone, IMSI, ICCID) Regenerated!", Toast.LENGTH_SHORT).show()
+            generateAndSavePhoneNumber(carrier?.npas ?: emptyList())
         }
     }
 
@@ -62,5 +50,13 @@ class NetworkFragment : Fragment() {
         etPhoneNumber.setText(PrefsManager.getString(requireContext(), "phone_number", ""))
     }
 
-    // Helper removed as logic is now inline
+    private fun generateAndSavePhoneNumber(npas: List<String>) {
+        val number = SpoofingUtils.generatePhoneNumber(npas)
+
+        // FIX #27: Persist generated phone number
+        PrefsManager.saveString(requireContext(), "phone_number", number)
+
+        // Update UI
+        etPhoneNumber.setText(number)
+    }
 }

@@ -218,61 +218,61 @@ class MainHook : IXposedHookLoadPackage {
                 "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","G991BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
                 "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys","RP1A.200720.012.G991BXXU3AUIE",
-                "o1sxx-user","o1sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
+                "o1sxx-user","o1sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
             "Samsung Galaxy S21 Ultra" to DeviceFingerprint(
                 "samsung","samsung","SM-G998B","p3s","p3sxx","exynos2100","p3s","G998BXXU3AUIE",
                 "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","G998BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
                 "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys","RP1A.200720.012.G998BXXU3AUIE",
-                "p3sxx-user","p3sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
+                "p3sxx-user","p3sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
             "Samsung Galaxy S20 FE" to DeviceFingerprint(
                 "samsung","samsung","SM-G780F","r8q","r8qxx","exynos990","r8q","G780FXXS7CUI1",
                 "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","G780FXXS7CUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
                 "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys","RP1A.200720.012.G780FXXS7CUI1",
-                "r8qxx-user","r8qxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
+                "r8qxx-user","r8qxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
             "Samsung Galaxy Note 20 Ultra" to DeviceFingerprint(
                 "samsung","samsung","SM-N986B","c2s","c2sxx","exynos990","c2s","N986BXXS4DUI1",
                 "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","N986BXXS4DUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
                 "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys","RP1A.200720.012.N986BXXS4DUI1",
-                "c2sxx-user","c2sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
+                "c2sxx-user","c2sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
             "Samsung Galaxy A52" to DeviceFingerprint(
                 "samsung","samsung","SM-A525F","a52q","a52qxx","qcom","a52q","A525FXXU4CVJB",
                 "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
                 "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A525FXXU4CVJB",30,"11","trinket","adreno","196610","SM7125","zygote64_32",
                 "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys","RP1A.200720.012.A525FXXU4CVJB",
-                "a52qxx-user","a52qxx-user","21R3NF12","se.infra","1639497600","2021-12-01","REL","0"),
+                "a52qxx-user","a52qxx-user","21R3NF12","dpi","1639497600","2021-12-01","REL","0"),
             "Samsung Galaxy A72" to DeviceFingerprint(
                 "samsung","samsung","SM-A725F","a72q","a72qxx","qcom","a72q","A725FXXU4AUH2",
                 "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys",
                 "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A725FXXU4AUH2",30,"11","atoll","adreno","196610","SM7225","zygote64_32",
                 "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys","RP1A.200720.012.A725FXXU4AUH2",
-                "a72qxx-user","a72qxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
+                "a72qxx-user","a72qxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
             "Samsung Galaxy S10+" to DeviceFingerprint(
                 "samsung","samsung","SM-G975F","beyond2","beyond2ltexx","exynos9820","beyond2","G975FXXSGHWC1",
                 "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","G975FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
                 "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys","RP1A.200720.012.G975FXXSGHWC1",
-                "beyond2ltexx-user","beyond2ltexx-user","21R3NF12","se.infra","1646236800","2022-03-01","REL","0"),
+                "beyond2ltexx-user","beyond2ltexx-user","21R3NF12","dpi","1646236800","2022-03-01","REL","0"),
             "Samsung Galaxy S10" to DeviceFingerprint(
                 "samsung","samsung","SM-G973F","beyond1","beyond1ltexx","exynos9820","beyond1","G973FXXSGHWC1",
                 "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","G973FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
                 "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys","RP1A.200720.012.G973FXXSGHWC1",
-                "beyond1ltexx-user","beyond1ltexx-user","21R3NF12","se.infra","1646236800","2022-03-01","REL","0"),
+                "beyond1ltexx-user","beyond1ltexx-user","21R3NF12","dpi","1646236800","2022-03-01","REL","0"),
             "Samsung Galaxy Note 10+" to DeviceFingerprint(
                 "samsung","samsung","SM-N975F","d2s","d2sxx","exynos9825","d2s","N975FXXS7FUH3",
                 "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","N975FXXS7FUH3",30,"11","exynos9825","mali","196610","Exynos9825","zygote64_32",
                 "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys","RP1A.200720.012.N975FXXS7FUH3",
-                "d2sxx-user","d2sxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
+                "d2sxx-user","d2sxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
             "Samsung Galaxy M31" to DeviceFingerprint(
                 "samsung","samsung","SM-M315F","m31","m31nsxx","exynos9611","m31","M315FXXU2BUH1",
                 "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys",
                 "RP1A.200720.012","release-keys","user","","M315FXXU2BUH1",30,"11","exynos9611","mali","196610","Exynos9611","zygote64_32",
                 "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys","RP1A.200720.012.M315FXXU2BUH1",
-                "m31nsxx-user","m31nsxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
+                "m31nsxx-user","m31nsxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
 
             // --- ONEPLUS (Android 11) ---
             "OnePlus 9 Pro" to DeviceFingerprint(
@@ -639,30 +639,6 @@ class MainHook : IXposedHookLoadPackage {
                     }
                 )
             } catch (e: NoSuchMethodError) {}
-
-            // FIX #21: Hook Build.getFingerprintedPartitions (Android 11+)
-            try {
-                XposedHelpers.findAndHookMethod(Build::class.java, "getFingerprintedPartitions",
-                    object : XC_MethodHook() {
-                        override fun afterHookedMethod(param: MethodHookParam) {
-                            val partitions = param.result as? List<*> ?: return
-                            val newPartitions = ArrayList<Any>()
-                            for (p in partitions) {
-                                // Clone partition object if possible or just modify field?
-                                // Partition is hidden class. Easier to set fields?
-                                // We cannot easily clone hidden classes without reflection instantiation.
-                                // Instead, we iterate and set "mFingerprint" field on existing objects.
-                                try {
-                                    XposedHelpers.setObjectField(p, "mFingerprint", fingerprint.fingerprint)
-                                } catch (e: Throwable) {}
-                                newPartitions.add(p!!)
-                            }
-                            param.result = newPartitions
-                        }
-                    }
-                )
-            } catch (e: Throwable) {}
-
         } catch (e: Throwable) {}
     }
 

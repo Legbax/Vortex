@@ -19,12 +19,12 @@ object PrefsManager {
     }
 
     fun saveBoolean(context: Context, key: String, value: Boolean) {
-        saveString(context, key, value.toString())
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(key, value).apply()
     }
 
     fun getBoolean(context: Context, key: String, default: Boolean = false): Boolean {
-        val str = getString(context, key, "")
-        if (str.isEmpty()) return default
-        return str.toBoolean()
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(key, default)
     }
 }
