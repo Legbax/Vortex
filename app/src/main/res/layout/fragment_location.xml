@@ -3,9 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/vortex_background"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,7 +12,8 @@
         android:padding="16dp"
         android:clipToPadding="false">
 
-        <TextView
+        <CheckBox
+            android:id="@+id/cb_mock_location_enabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/nav_location"
@@ -54,9 +53,21 @@
             android:layout_height="wrap_content"
             style="@style/Vortex.Card">
 
-            <LinearLayout
+        <CheckBox
+            android:id="@+id/cb_moving"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Simulate Movement" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Latitude">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_latitude"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+<<<<<<< feat-ui-overhaul-dali-8873407970138867091
                 android:orientation="vertical"
                 android:padding="16dp">
 
@@ -185,14 +196,49 @@
                             android:textColor="@color/vortex_text_primary" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+=======
+                android:inputType="numberDecimal|numberSigned" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Longitude">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_longitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal|numberSigned" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Altitude">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_altitude"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal|numberSigned" />
+        </com.google.android.material.textfield.TextInputLayout>
+>>>>>>> main
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Accuracy">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_accuracy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Simulation Controls -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+<<<<<<< feat-ui-overhaul-dali-8873407970138867091
             style="@style/Vortex.Card">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -269,7 +315,15 @@
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+=======
+            android:text="Randomize Location" />
+
+        <Button
+            android:id="@+id/btn_save_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Location" />
+>>>>>>> main
 
     </LinearLayout>
-
-</androidx.core.widget.NestedScrollView>
+</ScrollView>
