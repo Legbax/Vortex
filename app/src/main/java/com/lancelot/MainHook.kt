@@ -161,6 +161,10 @@ class MainHook : IXposedHookLoadPackage {
                     // Optimization 1: Only check absolute paths starting with /
                     if (path.isEmpty() || path[0] != '/') return
 
+                    // Anti-Auto-Sabotage: Never hide our own package files
+                    // This protects prefs and APK access by the module itself (though rare in hooked process)
+                    if (path.contains("com.lancelot")) return
+
                     // Optimization 2: Check sensitive set first (fastest)
                     if (sensitivePaths.contains(path)) {
                         param.result = false
