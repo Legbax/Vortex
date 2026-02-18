@@ -94,8 +94,14 @@ class IDsFragment : Fragment() {
         btnSave.setOnClickListener { saveData() }
 
         // Individual Randomization
-        tilImei.setEndIconOnClickListener { etImei.setText(SpoofingUtils.generateValidImei()) }
-        tilImei2.setEndIconOnClickListener { etImei2.setText(SpoofingUtils.generateValidImei()) }
+        tilImei.setEndIconOnClickListener {
+            val profile = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
+            etImei.setText(SpoofingUtils.generateValidImei(profile))
+        }
+        tilImei2.setEndIconOnClickListener {
+            val profile = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
+            etImei2.setText(SpoofingUtils.generateValidImei(profile))
+        }
 
         tilImsi.setEndIconOnClickListener {
             val mccMnc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
@@ -141,9 +147,10 @@ class IDsFragment : Fragment() {
     private fun randomizeAll() {
         val context = requireContext()
         val mccMnc = PrefsManager.getString(context, "mcc_mnc", "310260")
+        val profile = PrefsManager.getString(context, "profile", "Redmi 9")
 
-        etImei.setText(SpoofingUtils.generateValidImei())
-        etImei2.setText(SpoofingUtils.generateValidImei())
+        etImei.setText(SpoofingUtils.generateValidImei(profile))
+        etImei2.setText(SpoofingUtils.generateValidImei(profile))
         etImsi.setText(SpoofingUtils.generateValidImsi(mccMnc))
         etIccid.setText(SpoofingUtils.generateValidIccid(mccMnc))
 

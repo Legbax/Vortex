@@ -125,7 +125,8 @@ class MainHook : IXposedHookLoadPackage {
             val profileName = getEncryptedString("profile", "Redmi 9")
             val fingerprint = getDeviceFingerprint(profileName)
 
-            initializeCache(prefs, ::getEncryptedString)
+            // Pass fingerprint.model to initializeCache for correct TAC selection
+            initializeCache(prefs, ::getEncryptedString, fingerprint.model)
 
             hookBuildFields(lpparam, fingerprint)
             hookSystemProperties(lpparam, fingerprint)
@@ -142,8 +143,8 @@ class MainHook : IXposedHookLoadPackage {
             // Activate File protection hook
             hookFile()
 
-            // Activate ProcessBuilder protection hook
-            hookProcessBuilder()
+            // Activate ProcessBuilder protection hooks (Runtime + ProcessBuilder)
+            hookProcessBuilderAndRuntime()
 
         } catch (e: Throwable) {
             try {
@@ -177,38 +178,56 @@ class MainHook : IXposedHookLoadPackage {
         }
     }
 
-    private fun hookProcessBuilder() {
+    private fun hookProcessBuilderAndRuntime() {
         try {
+            // 1. Hook para Runtime.exec (el más usado por anti-cheat)
             XposedHelpers.findAndHookMethod(
-                "java.lang.ProcessBuilder",
-                null,
+                Runtime::class.java,
+                "exec",
+                String::class.java,
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        val cmd = param.args[0] as? String ?: return
+                        if (cmd.contains("su") || cmd.contains("magisk") ||
+                            cmd.contains("getenforce") || cmd.contains("getprop ro.build.tags")) {
+                            param.result = null
+                            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Blocked Runtime.exec: $cmd")
+                        }
+                    }
+                }
+            )
+
+            // 2. Hook para ProcessBuilder.start() (cada vez más usado)
+            XposedHelpers.findAndHookMethod(
+                ProcessBuilder::class.java,
                 "start",
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val pb = param.thisObject as ProcessBuilder
-                        val command = pb.command()
-
-                        if (SpoofingUtils.isSensitiveCommand(command)) {
-                            // Block the command by throwing an exception
-                            param.throwable = IOException("Permission denied (Lancelot blocked)")
+                        val command = pb.command().joinToString(" ")
+                        if (command.contains("su") || command.contains("magisk") ||
+                            command.contains("getenforce") || command.contains("getprop")) {
                             param.result = null
+                            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Blocked ProcessBuilder: $command")
                         }
                     }
                 }
             )
         } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("ProcessBuilder hook error: ${e.message}")
+            if (BuildConfig.DEBUG) XposedBridge.log("ProcessBuilder/Runtime hook error: ${e.message}")
         }
     }
 
-    private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
+    private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String, modelName: String) {
         // Read MCC/MNC as plain text with fallback
         val defaultMccMnc = US_CARRIERS.random().mccMnc
         val rawMccMnc = prefs.getString("mcc_mnc", defaultMccMnc)
         val mccMnc = CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc ?: defaultMccMnc
 
-        if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei())
-        if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei())
+        // Pass modelName to generateValidImei for correct TAC selection
+        if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei(modelName))
+        if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei(modelName))
+
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
         if (cachedGsfId == null) cachedGsfId = getString("gsf_id", SpoofingUtils.generateRandomId(16))
         if (cachedGaid == null) cachedGaid = getString("gaid", SpoofingUtils.generateRandomGaid())
