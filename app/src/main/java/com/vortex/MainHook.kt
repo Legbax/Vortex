@@ -65,150 +65,303 @@ class MainHook : IXposedHookLoadPackage {
 
         fun getUsCarriers(): List<UsCarrier> = US_CARRIERS
 
+        // Expanded DEVICE_FINGERPRINTS (40 Android 11 profiles)
         val DEVICE_FINGERPRINTS = mapOf(
+            // --- XIAOMI / POCO ---
             "Redmi 9" to DeviceFingerprint(
                 "Xiaomi","Redmi","Redmi 9","lancelot","lancelot_global","mt6768","lancelot","unknown",
                 "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                "V12.5.3.0.RJCMIXM",30,"11","mt6768","mali","196610","MT6768","zygote64_32",
+                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.3.0.RJCMIXM",
+                30,"11","mt6768","mali","196610","MT6768","zygote64_32",
                 "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "V12.5.3.0.RJCMIXM","lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys",
-                "lancelot_global-user","pangu-build-component-system-177793","builder",
-                "1632960000","2021-09-01","REL","0"),
+                "V12.5.3.0.RJCMIXM","lancelot_global-user","lancelot_global-user",
+                "pangu","builder","1632960000","2021-09-01","REL","0"),
             "Redmi Note 9" to DeviceFingerprint(
                 "Xiaomi","Redmi","Redmi Note 9","merlin","merlin_global","mt6769","merlin","unknown",
                 "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                "V12.5.2.0.RJOMIXM",30,"11","mt6769","mali","196610","MT6769","zygote64_32",
+                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.2.0.RJOMIXM",
+                30,"11","mt6769","mali","196610","MT6769","zygote64_32",
                 "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                "V12.5.2.0.RJOMIXM","merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys",
-                "merlin_global-user","pangu-build-component-system-177793","builder",
-                "1632960000","2021-09-01","REL","0"),
+                "V12.5.2.0.RJOMIXM","merlin_global-user","merlin_global-user","pangu","builder","1632960000","2021-09-01","REL","0"),
             "Redmi 9A" to DeviceFingerprint(
                 "Xiaomi","Redmi","Redmi 9A","dandelion","dandelion_global","mt6762","dandelion","unknown",
                 "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                "V12.5.4.0.RCDMIXM",30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
+                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.4.0.RCDMIXM",
+                30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
                 "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                "V12.5.4.0.RCDMIXM","dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys",
-                "dandelion_global-user","pangu-build-component-system-177793","builder",
-                "1633046400","2021-10-01","REL","0"),
+                "V12.5.4.0.RCDMIXM","dandelion_global-user","dandelion_global-user","pangu","builder","1633046400","2021-10-01","REL","0"),
             "Redmi 9C" to DeviceFingerprint(
                 "Xiaomi","Redmi","Redmi 9C","angelica","angelica_global","mt6762","angelica","unknown",
                 "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47",
-                "V12.5.1.0.RCRMIXM",30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
+                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.1.0.RCRMIXM",
+                30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
                 "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                "V12.5.1.0.RCRMIXM","angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys",
-                "angelica_global-user","pangu-build-component-system-177793","builder",
-                "1632960000","2021-09-01","REL","0"),
+                "V12.5.1.0.RCRMIXM","angelica_global-user","angelica_global-user","pangu","builder","1632960000","2021-09-01","REL","0"),
             "POCO X3 NFC" to DeviceFingerprint(
                 "Xiaomi","POCO","POCO X3 NFC","surya","surya_global","qcom","surya","unknown",
                 "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                "RKQ1.200826.002","release-keys","user","MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
-                "V12.5.7.0.RJGMIXM",30,"11","atoll","adreno","196610","SM7150","zygote64_32",
+                "RKQ1.200826.002","release-keys","user","MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1","V12.5.7.0.RJGMIXM",
+                30,"11","atoll","adreno","196610","SM7150","zygote64_32",
                 "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                "V12.5.7.0.RJGMIXM","surya_global-user 11 RKQ1.200826.002 V12.5.7.0.RJGMIXM release-keys",
-                "surya_global-user","pangu-build-component-system-177793","builder",
-                "1634860800","2021-10-01","REL","0"),
-            "Samsung Galaxy A52" to DeviceFingerprint(
-                "samsung","samsung","SM-A525F","a52q","a52qxx","qcom","a52q","A525FXXU4CVJB",
-                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
-                "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
-                "A525FXXU4CVJB",30,"11","trinket","adreno","196610","SM7125","zygote64_32",
-                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
-                "RP1A.200720.012.A525FXXU4CVJB","a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys",
-                "a52qxx-user","21R3NF12","dpi","1639497600","2021-12-01","REL","0"),
+                "V12.5.7.0.RJGMIXM","surya_global-user","surya_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+            "POCO F3" to DeviceFingerprint(
+                "Xiaomi","POCO","POCO F3","alioth","alioth_global","qcom","alioth","unknown",
+                "POCO/alioth_global/alioth:11/RKQ1.200826.002/V12.5.6.0.RKHMIXM:user/release-keys",
+                "RKQ1.200826.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.6.0.RKHMIXM",
+                30,"11","kona","adreno","196610","SM8250","zygote64_32",
+                "POCO/alioth_global/alioth:11/RKQ1.200826.002/V12.5.6.0.RKHMIXM:user/release-keys",
+                "V12.5.6.0.RKHMIXM","alioth_global-user","alioth_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+            "Mi 10T" to DeviceFingerprint(
+                "Xiaomi","Xiaomi","Mi 10T","apollo","apollo_global","qcom","apollo","unknown",
+                "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.10.0.RJDMIXM:user/release-keys",
+                "RKQ1.200826.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.10.0.RJDMIXM",
+                30,"11","kona","adreno","196610","SM8250","zygote64_32",
+                "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.10.0.RJDMIXM:user/release-keys",
+                "V12.5.10.0.RJDMIXM","apollo_global-user","apollo_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+            "Redmi Note 10 Pro" to DeviceFingerprint(
+                "Xiaomi","Redmi","Redmi Note 10 Pro","sweet","sweet_global","qcom","sweet","unknown",
+                "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.9.0.RKFMIXM:user/release-keys",
+                "RKQ1.200826.002","release-keys","user","MPSS.HI.3.0.c1-00072","V12.5.9.0.RKFMIXM",
+                30,"11","sm6150","adreno","196610","SM7150","zygote64_32",
+                "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.9.0.RKFMIXM:user/release-keys",
+                "V12.5.9.0.RKFMIXM","sweet_global-user","sweet_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+            "Mi 11" to DeviceFingerprint(
+                "Xiaomi","Xiaomi","Mi 11","venus","venus_global","qcom","venus","unknown",
+                "Xiaomi/venus_global/venus:11/RKQ1.201112.002/V12.5.7.0.RKBMIXM:user/release-keys",
+                "RKQ1.201112.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.7.0.RKBMIXM",
+                30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
+                "Xiaomi/venus_global/venus:11/RKQ1.201112.002/V12.5.7.0.RKBMIXM:user/release-keys",
+                "V12.5.7.0.RKBMIXM","venus_global-user","venus_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+            "Redmi 10" to DeviceFingerprint(
+                "Xiaomi","Redmi","Redmi 10","selene","selene_global","mt6768","selene","unknown",
+                "Redmi/selene_global/selene:11/RP1A.200720.011/V12.5.9.0.RKUMIXM:user/release-keys",
+                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.9.0.RKUMIXM",
+                30,"11","mt6768","mali","196610","MT6768","zygote64_32",
+                "Redmi/selene_global/selene:11/RP1A.200720.011/V12.5.9.0.RKUMIXM:user/release-keys",
+                "V12.5.9.0.RKUMIXM","selene_global-user","selene_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+
+            // --- GOOGLE PIXEL (Android 11) ---
             "Google Pixel 5" to DeviceFingerprint(
                 "Google","google","Pixel 5","redfin","redfin","qcom","redfin","r8-0.3-7219051",
                 "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys",
                 "RQ3A.210805.001.A1","release-keys","user","g725-00164-210812-B-7522969","7512229",
                 30,"11","lito","adreno","196610","SM7250","zygote64_32",
                 "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys",
-                "RQ3A.210805.001.A1","redfin-user 11 RQ3A.210805.001.A1 7512229 release-keys",
-                "redfin-user","abfarm-release-rbe-64.hot.corp.google.com","android-build",
-                "1628100000","2021-08-05","REL","0"),
+                "RQ3A.210805.001.A1","redfin-user","redfin-user","abfarm","android-build","1628100000","2021-08-05","REL","0"),
             "Google Pixel 4a 5G" to DeviceFingerprint(
                 "Google","google","Pixel 4a (5G)","bramble","bramble","qcom","bramble","b2-0.3-7214727",
                 "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys",
                 "RQ3A.210705.001","release-keys","user","g7250-00195-210614-B-7352378","7380771",
                 30,"11","lito","adreno","196610","SM7250","zygote64_32",
                 "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys",
-                "RQ3A.210705.001","bramble-user 11 RQ3A.210705.001 7380771 release-keys",
-                "bramble-user","abfarm-release-rbe-64.hot.corp.google.com","android-build",
-                "1625616000","2021-07-05","REL","0"),
-            "Samsung Galaxy S20+" to DeviceFingerprint(
-                "samsung","samsung","SM-G985F","y2s","y2sxx","exynos990","universal990","G985FXXSGHWA3",
-                "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G985FXXSGHWA3",30,"11",
-                "exynos990","mali","196610","Exynos990","zygote64_32",
-                "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
-                "RP1A.200720.012.G985FXXSGHWA3","y2sxx-user 11 RP1A.200720.012 G985FXXSGHWA3 release-keys",
-                "y2sxx-user","21R3NF12","dpi","1639497600","2022-01-01","REL","0"),
-            "Samsung Galaxy S10e" to DeviceFingerprint(
-                "samsung","samsung","SM-G970F","beyond0","beyond0ltexx","exynos9820","universal9820","G970FXXSGHWC1",
-                "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G970FXXSGHWC1",30,"11",
-                "exynos9820","mali","196610","Exynos9820","zygote64_32",
-                "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
-                "RP1A.200720.012.G970FXXSGHWC1","beyond0ltexx-user 11 RP1A.200720.012 G970FXXSGHWC1 release-keys",
-                "beyond0ltexx-user","21R3NF12","dpi","1646236800","2022-03-01","REL","0"),
+                "RQ3A.210705.001","bramble-user","bramble-user","abfarm","android-build","1625616000","2021-07-05","REL","0"),
+            "Google Pixel 4a" to DeviceFingerprint(
+                "Google","google","Pixel 4a","sunfish","sunfish","qcom","sunfish","b2-0.3-7214727",
+                "google/sunfish/sunfish:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","sm7150","adreno","196610","SM7150","zygote64_32",
+                "google/sunfish_vend/sunfish:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","sunfish-user","sunfish-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 4 XL" to DeviceFingerprint(
+                "Google","google","Pixel 4 XL","coral","coral","qcom","coral","b2-0.3-7214727",
+                "google/coral/coral:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","msmnile","adreno","196610","SM8150","zygote64_32",
+                "google/coral_vend/coral:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","coral-user","coral-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 4" to DeviceFingerprint(
+                "Google","google","Pixel 4","flame","flame","qcom","flame","b2-0.3-7214727",
+                "google/flame/flame:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","msmnile","adreno","196610","SM8150","zygote64_32",
+                "google/flame_vend/flame:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","flame-user","flame-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 3a XL" to DeviceFingerprint(
+                "Google","google","Pixel 3a XL","bonito","bonito","qcom","bonito","b2-0.3-7214727",
+                "google/bonito/bonito:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","sdm670","adreno","196610","SDM670","zygote64_32",
+                "google/bonito_vend/bonito:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","bonito-user","bonito-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 3a" to DeviceFingerprint(
+                "Google","google","Pixel 3a","sargo","sargo","qcom","sargo","b2-0.3-7214727",
+                "google/sargo/sargo:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","sdm670","adreno","196610","SDM670","zygote64_32",
+                "google/sargo_vend/sargo:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","sargo-user","sargo-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 3 XL" to DeviceFingerprint(
+                "Google","google","Pixel 3 XL","crosshatch","crosshatch","qcom","crosshatch","b2-0.3-7214727",
+                "google/crosshatch/crosshatch:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","sdm845","adreno","196610","SDM845","zygote64_32",
+                "google/crosshatch_vend/crosshatch:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","crosshatch-user","crosshatch-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 3" to DeviceFingerprint(
+                "Google","google","Pixel 3","blueline","blueline","qcom","blueline","b2-0.3-7214727",
+                "google/blueline/blueline:11/RQ3A.210605.005/7349438:user/release-keys",
+                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
+                30,"11","sdm845","adreno","196610","SDM845","zygote64_32",
+                "google/blueline_vend/blueline:11/RQ3A.210605.005/7349438:vendor/release-keys",
+                "RQ3A.210605.005","blueline-user","blueline-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
+            "Google Pixel 2 XL" to DeviceFingerprint(
+                "Google","google","Pixel 2 XL","taimen","taimen","qcom","taimen","b2-0.3-7214727",
+                "google/taimen/taimen:11/RP1A.201005.004.A1/6934943:user/release-keys",
+                "RP1A.201005.004.A1","release-keys","user","g7250-00195-210614-B-7352378","6934943",
+                30,"11","msm8998","adreno","196610","MSM8998","zygote64_32",
+                "google/taimen_vend/taimen:11/RP1A.201005.004.A1/6934943:vendor/release-keys",
+                "RP1A.201005.004.A1","taimen-user","taimen-user","abfarm","android-build","1601932800","2020-10-05","REL","0"),
+
+            // --- SAMSUNG (Android 11) ---
+            "Samsung Galaxy S21" to DeviceFingerprint(
+                "samsung","samsung","SM-G991B","o1s","o1sxx","exynos2100","o1s","G991BXXU3AUIE",
+                "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","G991BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
+                "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys","RP1A.200720.012.G991BXXU3AUIE",
+                "o1sxx-user","o1sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
+            "Samsung Galaxy S21 Ultra" to DeviceFingerprint(
+                "samsung","samsung","SM-G998B","p3s","p3sxx","exynos2100","p3s","G998BXXU3AUIE",
+                "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","G998BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
+                "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys","RP1A.200720.012.G998BXXU3AUIE",
+                "p3sxx-user","p3sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
+            "Samsung Galaxy S20 FE" to DeviceFingerprint(
+                "samsung","samsung","SM-G780F","r8q","r8qxx","exynos990","r8q","G780FXXS7CUI1",
+                "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","G780FXXS7CUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
+                "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys","RP1A.200720.012.G780FXXS7CUI1",
+                "r8qxx-user","r8qxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
+            "Samsung Galaxy Note 20 Ultra" to DeviceFingerprint(
+                "samsung","samsung","SM-N986B","c2s","c2sxx","exynos990","c2s","N986BXXS4DUI1",
+                "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","N986BXXS4DUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
+                "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys","RP1A.200720.012.N986BXXS4DUI1",
+                "c2sxx-user","c2sxx-user","21R3NF12","dpi","1632873600","2021-09-01","REL","0"),
+            "Samsung Galaxy A52" to DeviceFingerprint(
+                "samsung","samsung","SM-A525F","a52q","a52qxx","qcom","a52q","A525FXXU4CVJB",
+                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
+                "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A525FXXU4CVJB",30,"11","trinket","adreno","196610","SM7125","zygote64_32",
+                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys","RP1A.200720.012.A525FXXU4CVJB",
+                "a52qxx-user","a52qxx-user","21R3NF12","dpi","1639497600","2021-12-01","REL","0"),
+            "Samsung Galaxy A72" to DeviceFingerprint(
+                "samsung","samsung","SM-A725F","a72q","a72qxx","qcom","a72q","A725FXXU4AUH2",
+                "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys",
+                "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A725FXXU4AUH2",30,"11","atoll","adreno","196610","SM7225","zygote64_32",
+                "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys","RP1A.200720.012.A725FXXU4AUH2",
+                "a72qxx-user","a72qxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
+            "Samsung Galaxy S10+" to DeviceFingerprint(
+                "samsung","samsung","SM-G975F","beyond2","beyond2ltexx","exynos9820","beyond2","G975FXXSGHWC1",
+                "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","G975FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
+                "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys","RP1A.200720.012.G975FXXSGHWC1",
+                "beyond2ltexx-user","beyond2ltexx-user","21R3NF12","dpi","1646236800","2022-03-01","REL","0"),
+            "Samsung Galaxy S10" to DeviceFingerprint(
+                "samsung","samsung","SM-G973F","beyond1","beyond1ltexx","exynos9820","beyond1","G973FXXSGHWC1",
+                "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","G973FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
+                "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys","RP1A.200720.012.G973FXXSGHWC1",
+                "beyond1ltexx-user","beyond1ltexx-user","21R3NF12","dpi","1646236800","2022-03-01","REL","0"),
+            "Samsung Galaxy Note 10+" to DeviceFingerprint(
+                "samsung","samsung","SM-N975F","d2s","d2sxx","exynos9825","d2s","N975FXXS7FUH3",
+                "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","N975FXXS7FUH3",30,"11","exynos9825","mali","196610","Exynos9825","zygote64_32",
+                "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys","RP1A.200720.012.N975FXXS7FUH3",
+                "d2sxx-user","d2sxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
+            "Samsung Galaxy M31" to DeviceFingerprint(
+                "samsung","samsung","SM-M315F","m31","m31nsxx","exynos9611","m31","M315FXXU2BUH1",
+                "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys",
+                "RP1A.200720.012","release-keys","user","","M315FXXU2BUH1",30,"11","exynos9611","mali","196610","Exynos9611","zygote64_32",
+                "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys","RP1A.200720.012.M315FXXU2BUH1",
+                "m31nsxx-user","m31nsxx-user","21R3NF12","dpi","1629849600","2021-08-01","REL","0"),
+
+            // --- ONEPLUS (Android 11) ---
+            "OnePlus 9 Pro" to DeviceFingerprint(
+                "OnePlus","OnePlus","LE2123","OnePlus9Pro","OnePlus9Pro_EEA","qcom","OnePlus9Pro","2109102035",
+                "OnePlus/OnePlus9Pro_EEA/OnePlus9Pro:11/RKQ1.201105.002/2109102035:user/release-keys",
+                "RKQ1.201105.002","release-keys","user","","2109102035",30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
+                "OnePlus/OnePlus9Pro_EEA/OnePlus9Pro:11/RKQ1.201105.002/2109102035:user/release-keys","RKQ1.201105.002",
+                "OnePlus9Pro_EEA-user","OnePlus9Pro_EEA-user","OnePlus","OnePlus","1631278800","2021-09-01","REL","0"),
+            "OnePlus 9" to DeviceFingerprint(
+                "OnePlus","OnePlus","LE2113","OnePlus9","OnePlus9_EEA","qcom","OnePlus9","2109102035",
+                "OnePlus/OnePlus9_EEA/OnePlus9:11/RKQ1.201105.002/2109102035:user/release-keys",
+                "RKQ1.201105.002","release-keys","user","","2109102035",30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
+                "OnePlus/OnePlus9_EEA/OnePlus9:11/RKQ1.201105.002/2109102035:user/release-keys","RKQ1.201105.002",
+                "OnePlus9_EEA-user","OnePlus9_EEA-user","OnePlus","OnePlus","1631278800","2021-09-01","REL","0"),
+            "OnePlus 8T" to DeviceFingerprint(
+                "OnePlus","OnePlus","KB2003","OnePlus8T","OnePlus8T_EEA","qcom","OnePlus8T","2110091915",
+                "OnePlus/OnePlus8T_EEA/OnePlus8T:11/RP1A.201005.001/2110091915:user/release-keys",
+                "RP1A.201005.001","release-keys","user","","2110091915",30,"11","kona","adreno","196610","SM8250","zygote64_32",
+                "OnePlus/OnePlus8T_EEA/OnePlus8T:11/RP1A.201005.001/2110091915:user/release-keys","RP1A.201005.001",
+                "OnePlus8T_EEA-user","OnePlus8T_EEA-user","OnePlus","OnePlus","1633784400","2021-10-01","REL","0"),
+            "OnePlus 8 Pro" to DeviceFingerprint(
+                "OnePlus","OnePlus","IN2023","OnePlus8Pro","OnePlus8Pro_EEA","qcom","OnePlus8Pro","2110091915",
+                "OnePlus/OnePlus8Pro_EEA/OnePlus8Pro:11/RP1A.201005.001/2110091915:user/release-keys",
+                "RP1A.201005.001","release-keys","user","","2110091915",30,"11","kona","adreno","196610","SM8250","zygote64_32",
+                "OnePlus/OnePlus8Pro_EEA/OnePlus8Pro:11/RP1A.201005.001/2110091915:user/release-keys","RP1A.201005.001",
+                "OnePlus8Pro_EEA-user","OnePlus8Pro_EEA-user","OnePlus","OnePlus","1633784400","2021-10-01","REL","0"),
+            "OnePlus Nord" to DeviceFingerprint(
+                "OnePlus","OnePlus","AC2003","Nord","Nord_EEA","qcom","Nord","2108231920",
+                "OnePlus/Nord_EEA/Nord:11/RP1A.201005.001/2108231920:user/release-keys",
+                "RP1A.201005.001","release-keys","user","","2108231920",30,"11","lito","adreno","196610","SM7250","zygote64_32",
+                "OnePlus/Nord_EEA/Nord:11/RP1A.201005.001/2108231920:user/release-keys","RP1A.201005.001",
+                "Nord_EEA-user","Nord_EEA-user","OnePlus","OnePlus","1629723600","2021-08-01","REL","0"),
+
+            // --- OTHERS (Android 11) ---
+            "Xperia 5 II" to DeviceFingerprint(
+                "Sony","Sony","XQ-AS52","XQ-AS52","XQ-AS52_EEA","qcom","XQ-AS52","unknown",
+                "Sony/XQ-AS52_EEA/XQ-AS52:11/58.1.A.5.441/058001A005044102927236206:user/release-keys",
+                "58.1.A.5.441","release-keys","user","","058001A005044102927236206",30,"11","kona","adreno","196610","SM8250","zygote64_32",
+                "Sony/XQ-AS52_EEA/XQ-AS52:11/58.1.A.5.441/058001A005044102927236206:user/release-keys","58.1.A.5.441",
+                "XQ-AS52_EEA-user","XQ-AS52_EEA-user","Sony","Sony","1632747600","2021-09-01","REL","0"),
             "Vivo Y53s" to DeviceFingerprint(
                 "vivo","vivo","V2058","V2058","V2058","mt6769","V2058","unknown",
                 "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
                 "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V98","compiler08272021",
                 30,"11","mt6769","mali","196610","MT6769","zygote64_32",
                 "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
-                "RP1A.200720.011","V2058-user 11 RP1A.200720.011 compiler08272021 release-keys",
-                "V2058-user","compiler","build","1630022400","2021-08-01","REL","0"),
+                "RP1A.200720.011","V2058-user","V2058-user","compiler","build","1630022400","2021-08-01","REL","0"),
             "Realme 7 5G" to DeviceFingerprint(
                 "realme","realme","RMX2111","RMX2111","RMX2111","mt6853","RMX2111","unknown",
                 "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
                 "RP1A.200720.011","release-keys","user","MOLY.LR14A.R3.MP.V62","1626245367375",
                 30,"11","mt6853","mali","196610","MT6853","zygote64_32",
                 "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","RMX2111-user 11 RP1A.200720.011 1626245367375 release-keys",
-                "RMX2111-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
+                "RP1A.200720.011","RMX2111-user","RMX2111-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
             "Oppo Reno5" to DeviceFingerprint(
                 "OPPO","OPPO","CPH2159","OP4E75L1","CPH2159","qcom","OP4E75L1","unknown",
                 "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
                 "RP1A.200720.011","release-keys","user","MPSS.HI.2.0.c4-00165","1622635284",
                 30,"11","atoll","adreno","196610","SM7225","zygote64_32",
                 "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
-                "RP1A.200720.011","CPH2159-user 11 RP1A.200720.011 1622635284 release-keys",
-                "CPH2159-user","ubuntu","jenkins","1622635284","2021-06-01","REL","0"),
+                "RP1A.200720.011","CPH2159-user","CPH2159-user","ubuntu","jenkins","1622635284","2021-06-01","REL","0"),
             "Vivo X60" to DeviceFingerprint(
                 "vivo","vivo","V2046","V2046","V2046","qcom","V2046","unknown",
                 "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
                 "RP1A.200720.012","release-keys","user","MPSS.HI.2.0.c4-00165","compiler05211516",
                 30,"11","kona","adreno","196610","SM8250","zygote64_32",
                 "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
-                "RP1A.200720.012","V2046-user 11 RP1A.200720.012 compiler05211516 release-keys",
-                "V2046-user","compiler","build","1621584000","2021-05-01","REL","0"),
+                "RP1A.200720.012","V2046-user","V2046-user","compiler","build","1621584000","2021-05-01","REL","0"),
             "Vivo X70 Pro" to DeviceFingerprint(
                 "vivo","vivo","V2105","V2105","V2105","mt6893","V2105","unknown",
                 "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
                 "RP1A.200720.012","release-keys","user","MOLY.LR12A.R3.MP.V98","compiler10212015",
                 30,"11","mt6893","mali","196610","MT6893","zygote64_32",
                 "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
-                "RP1A.200720.012","V2105-user 11 RP1A.200720.012 compiler10212015 release-keys",
-                "V2105-user","compiler","build","1634860800","2021-10-01","REL","0"),
+                "RP1A.200720.012","V2105-user","V2105-user","compiler","build","1634860800","2021-10-01","REL","0"),
             "Realme 8 Pro" to DeviceFingerprint(
                 "realme","realme","RMX3081","RMX3081","RMX3081","qcom","RMX3081","unknown",
                 "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
                 "RP1A.200720.011","release-keys","user","MPSS.HI.2.0.c4-00165","1626245367375",
                 30,"11","atoll","adreno","196610","SM7125","zygote64_32",
                 "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","RMX3081-user 11 RP1A.200720.011 1626245367375 release-keys",
-                "RMX3081-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
+                "RP1A.200720.011","RMX3081-user","RMX3081-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
             "Asus Zenfone 8" to DeviceFingerprint(
                 "asus","asus","ASUS_I006D","ASUS_I006D","WW_I006D","qcom","sake","unknown",
                 "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
                 "RKQ1.201112.002","release-keys","user","M3.13.24.51-Sake_0000100","30.11.51.115",
                 30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
                 "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
-                "RKQ1.201112.002.30.11.51.115","WW_I006D-user 11 RKQ1.201112.002 30.11.51.115 release-keys",
-                "WW_I006D-user","android-build","jenkins","1629859200","2021-08-01","REL","0")
+                "RKQ1.201112.002.30.11.51.115","WW_I006D-user","WW_I006D-user","android-build","jenkins","1629859200","2021-08-01","REL","0")
         )
     }
 
@@ -261,8 +414,6 @@ class MainHook : IXposedHookLoadPackage {
             hookWebView(lpparam, fingerprint)
             hookAccountManager(lpparam)
 
-            // FIX #3 REMOVED: hookXposedDetection is deleted.
-
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
             hookFile()
@@ -270,7 +421,7 @@ class MainHook : IXposedHookLoadPackage {
 
         } catch (e: Throwable) {
             try {
-                if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
+                if (BuildConfig.DEBUG) XposedBridge.log("Vortex Error: ${e.message}")
             } catch (ex: Throwable) {}
         }
     }
@@ -356,7 +507,7 @@ class MainHook : IXposedHookLoadPackage {
                     }
                     if (shouldBlockCommand(cmd)) {
                         param.result = createDummyProcess()
-                        if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Blocked Runtime.exec: $cmd")
+                        if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked Runtime.exec: $cmd")
                     }
                 }
             }
@@ -374,7 +525,7 @@ class MainHook : IXposedHookLoadPackage {
                         val command = (param.thisObject as ProcessBuilder).command().joinToString(" ")
                         if (shouldBlockCommand(command)) {
                             param.result = createDummyProcess()
-                            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Blocked ProcessBuilder: $command")
+                            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked ProcessBuilder: $command")
                         }
                     }
                 }
@@ -435,7 +586,7 @@ class MainHook : IXposedHookLoadPackage {
         val cleanName = profileName.replace(Regex(" - Android \\d+"), "").trim()
         val fp = DEVICE_FINGERPRINTS.entries.find { it.key == cleanName }?.value
         if (fp == null && BuildConfig.DEBUG) {
-            XposedBridge.log("Lancelot: Perfil desconocido '$profileName', fallback Redmi 9")
+            XposedBridge.log("Vortex: Perfil desconocido '$profileName', fallback Redmi 9")
         }
         return fp
             ?: DEVICE_FINGERPRINTS.values.firstOrNull()
@@ -635,12 +786,12 @@ class MainHook : IXposedHookLoadPackage {
                                 param.result = macStringToBytes(SpoofingUtils.generateRandomMac())
                         }
                     } catch (e: Exception) {
-                        if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Error spoofing network interface: ${e.message}")
+                        if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Error spoofing network interface: ${e.message}")
                     }
                 }
             })
         } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Error hooking NetworkInterface: ${e.message}")
+            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Error hooking NetworkInterface: ${e.message}")
         }
     }
 

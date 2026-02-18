@@ -37,7 +37,7 @@ class StatusFragment : Fragment() {
         }
 
         view.findViewById<TextView>(R.id.tv_status_description).text = if (active) {
-            "El módulo Lancelot está cargado correctamente por Xposed/LSPosed."
+            "El módulo Vortex está cargado correctamente por Xposed/LSPosed."
         } else {
             "El módulo no está activo. Asegúrate de haberlo habilitado en LSPosed " +
             "y de haber reiniciado el dispositivo."

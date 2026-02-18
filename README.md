@@ -1,4 +1,4 @@
-# Lancelot - Device Spoofer
+# Vortex - Device Spoofer
 
 **Advanced Android 11 Device Spoofing Module**
 
@@ -23,14 +23,14 @@
 ## Installation
 
 1. Download the latest APK from [Actions](../../actions) or Releases.
-2. Install Lancelot APK.
+2. Install Vortex APK.
 3. Enable module in LSPosed.
 4. Select target apps (Snapchat, Instagram, etc.) in the scope.
 5. Restart target apps.
 
 ## Usage
 
-1. Open **Lancelot** app.
+1. Open **Vortex** app.
 2. Select a device profile from the list (e.g., "Redmi Note 9 Pro - Android 11").
 3. Select a US Carrier (e.g., "T-Mobile", "Verizon").
 4. Optionally enable **Mock Location** and set coordinates.

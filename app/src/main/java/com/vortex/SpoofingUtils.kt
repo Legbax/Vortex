@@ -23,7 +23,7 @@ object SpoofingUtils {
         "Galaxy Z Flip" to listOf("35449209"),
         "Galaxy S10" to listOf("35271311"),
 
-        // Xiaomi / Redmi / Poco (Lancelot focus)
+        // Xiaomi / Redmi / Poco (Vortex focus)
         "Redmi Note 9 Pro" to listOf("86413405", "86413404", "86413403"),
         "Redmi Note 10" to listOf("86413405", "86413404"),
         "Mi 10" to listOf("86413405", "86712345"),
