@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets
 import java.util.Random
 import com.lancelot.utils.CryptoUtils
 import com.lancelot.SpoofingUtils
+import com.lancelot.BuildConfig
 
 class MainHook : IXposedHookLoadPackage {
 
@@ -73,31 +74,8 @@ class MainHook : IXposedHookLoadPackage {
             "Redmi Note 9" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi Note 9", "merlin", "merlin_global", "mt6769", "merlin", "unknown", "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.2.0.RJOMIXM", 30, "11", "mt6769", "mali", "196610", "MT6769", "zygote64_32", "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys", "V12.5.2.0.RJOMIXM", "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys", "merlin_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
             "Redmi 9A" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9A", "dandelion", "dandelion_global", "mt6762", "dandelion", "unknown", "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.4.0.RCDMIXM", 30, "11", "mt6762", "pvrsrvkm", "196608", "MT6762", "zygote64_32", "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys", "V12.5.4.0.RCDMIXM", "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys", "dandelion_global-user", "pangu-build-component-system-177793", "builder", "1633046400", "2021-10-01", "REL", "0"),
             "Redmi 9C" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi 9C", "angelica", "angelica_global", "mt6762", "angelica", "unknown", "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47,MOLY.LR12A.R3.MP.V84.P47", "V12.5.1.0.RCRMIXM", 30, "11", "mt6762", "pvrsrvkm", "196608", "MT6762", "zygote64_32", "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys", "V12.5.1.0.RCRMIXM", "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys", "angelica_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "Redmi Note 9S" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi Note 9S", "curtana", "curtana_global", "qcom", "curtana", "unknown", "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "V12.5.1.0.RJWMIXM", 30, "11", "trinket", "adreno", "196610", "SM7125", "zygote64_32", "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys", "V12.5.1.0.RJWMIXM", "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys", "curtana_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "Redmi Note 9 Pro" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi Note 9 Pro", "joyeuse", "joyeuse_global", "qcom", "joyeuse", "unknown", "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "V12.5.3.0.RJZMIXM", 30, "11", "trinket", "adreno", "196610", "SM7125", "zygote64_32", "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys", "V12.5.3.0.RJZMIXM", "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys", "joyeuse_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
             "POCO X3 NFC" to DeviceFingerprint("Xiaomi", "POCO", "POCO X3 NFC", "surya", "surya_global", "qcom", "surya", "unknown", "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.7.0.RJGMIXM", 30, "11", "atoll", "adreno", "196610", "SM7150", "zygote64_32", "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys", "V12.5.7.0.RJGMIXM", "surya_global-user 11 RKQ1.200826.002 V12.5.7.0.RJGMIXM release-keys", "surya_global-user", "pangu-build-component-system-177793", "builder", "1634860800", "2021-10-01", "REL", "0"),
-            "POCO X3 Pro" to DeviceFingerprint("Xiaomi", "POCO", "POCO X3 Pro", "vayu", "vayu_global", "qcom", "vayu", "unknown", "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.5.0.RJUMIXM", 30, "11", "msmnile", "adreno", "196610", "SM8150-AC", "zygote64_32", "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys", "V12.5.5.0.RJUMIXM", "vayu_global-user 11 RKQ1.200826.002 V12.5.5.0.RJUMIXM release-keys", "vayu_global-user", "cr3-buildbot-02", "builder", "1634860800", "2021-10-01", "REL", "0"),
-            "POCO M3" to DeviceFingerprint("Xiaomi", "POCO", "POCO M3", "citrus", "citrus_global", "qcom", "citrus", "unknown", "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "V12.5.2.0.RJBMIXM", 30, "11", "bengal", "adreno", "196610", "SM6115", "zygote64_32", "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys", "V12.5.2.0.RJBMIXM", "citrus_global-user 11 RKQ1.200826.002 V12.5.2.0.RJBMIXM release-keys", "citrus_global-user", "cr3-buildbot-02", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "POCO M3 Pro 5G" to DeviceFingerprint("Xiaomi", "POCO", "POCO M3 Pro 5G", "camellia", "camellia_global", "mt6833", "camellia", "unknown", "POCO/camellia_global/camellia:11/RP1A.200720.011/V12.5.3.0.RKSMIXM:user/release-keys", "RP1A.200720.011", "release-keys", "user", "MOLY.LR12A.R3.MP.V84.P47", "V12.5.3.0.RKSMIXM", 30, "11", "mt6833", "mali", "196610", "MT6833", "zygote64_32", "POCO/camellia_global/camellia:11/RP1A.200720.011/V12.5.3.0.RKSMIXM:user/release-keys", "V12.5.3.0.RKSMIXM", "camellia_global-user 11 RP1A.200720.011 V12.5.3.0.RKSMIXM release-keys", "camellia_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "Mi 10T" to DeviceFingerprint("Xiaomi", "Xiaomi", "Mi 10T", "apollo", "apollo_global", "qcom", "apollo", "unknown", "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.11.0.RJDMIXM", 30, "11", "kona", "adreno", "196610", "SM8250", "zygote64_32", "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys", "V12.5.11.0.RJDMIXM", "apollo_global-user 11 RKQ1.200826.002 V12.5.11.0.RJDMIXM release-keys", "apollo_global-user", "cr3-buildbot-02", "builder", "1634860800", "2021-10-01", "REL", "0"),
-            "Mi 11 Lite" to DeviceFingerprint("Xiaomi", "Xiaomi", "Mi 11 Lite", "courbet", "courbet_global", "qcom", "courbet", "unknown", "Xiaomi/courbet_global/courbet:11/RKQ1.200826.002/V12.5.5.0.RKQMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.5.0.RKQMIXM", 30, "11", "atoll", "adreno", "196610", "SM7150", "zygote64_32", "Xiaomi/courbet_global/courbet:11/RKQ1.200826.002/V12.5.5.0.RKQMIXM:user/release-keys", "V12.5.5.0.RKQMIXM", "courbet_global-user 11 RKQ1.200826.002 V12.5.5.0.RKQMIXM release-keys", "courbet_global-user", "cr3-buildbot-02", "builder", "1634860800", "2021-10-01", "REL", "0"),
-            "Redmi Note 10 Pro" to DeviceFingerprint("Xiaomi", "Redmi", "Redmi Note 10 Pro", "sweet", "sweet_global", "qcom", "sweet", "unknown", "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.3.0.RKIMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.3.0.RKIMIXM", 30, "11", "atoll", "adreno", "196610", "SM7150", "zygote64_32", "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.3.0.RKIMIXM:user/release-keys", "V12.5.3.0.RKIMIXM", "sweet_global-user 11 RKQ1.200826.002 V12.5.3.0.RKIMIXM release-keys", "sweet_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "Mi 10 Lite" to DeviceFingerprint("Xiaomi", "Xiaomi", "Mi 10 Lite", "vangogh", "vangogh_global", "qcom", "vangogh", "unknown", "Xiaomi/vangogh_global/vangogh:11/RKQ1.200826.002/V12.5.2.0.RJEMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "V12.5.2.0.RJEMIXM", 30, "11", "lito", "adreno", "196610", "SM7250", "zygote64_32", "Xiaomi/vangogh_global/vangogh:11/RKQ1.200826.002/V12.5.2.0.RJEMIXM:user/release-keys", "V12.5.2.0.RJEMIXM", "vangogh_global-user 11 RKQ1.200826.002 V12.5.2.0.RJEMIXM release-keys", "vangogh_global-user", "pangu-build-component-system-177793", "builder", "1632960000", "2021-09-01", "REL", "0"),
-            "Mi 11i" to DeviceFingerprint("Xiaomi", "Xiaomi", "Mi 11i", "haydn", "haydn_global", "qcom", "haydn", "unknown", "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys", "RKQ1.200826.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "V12.5.7.0.RKKMIXM", 30, "11", "lahaina", "adreno", "196610", "SM8350", "zygote64_32", "Xiaomi/haydn_global/haydn:11/RKQ1.200826.002/V12.5.7.0.RKKMIXM:user/release-keys", "V12.5.7.0.RKKMIXM", "haydn_global-user 11 RKQ1.200826.002 V12.5.7.0.RKKMIXM release-keys", "haydn_global-user", "cr3-buildbot-02", "builder", "1634860800", "2021-10-01", "REL", "0"),
             "Samsung Galaxy A52" to DeviceFingerprint("samsung", "samsung", "SM-A525F", "a52q", "a52qxx", "qcom", "a52q", "A525FXXU4CVJB", "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys", "RP1A.200720.012", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "A525FXXU4CVJB", 30, "11", "trinket", "adreno", "196610", "SM7125", "zygote64_32", "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys", "RP1A.200720.012.A525FXXU4CVJB", "a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys", "a52qxx-user", "21R3NF12", "dpi", "1639497600", "2021-12-01", "REL", "0"),
-            "Samsung Galaxy A32" to DeviceFingerprint("samsung", "samsung", "SM-A325F", "a32", "a32xxx", "mt6853", "a32", "A325FXXU2BUG1", "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys", "RP1A.200720.012", "release-keys", "user", "MOLY.LR14A.R3.MP.V62.P4,MOLY.LR14A.R3.MP.V62.P4", "A325FXXU2BUG1", 30, "11", "mt6853", "mali", "196610", "MT6853", "zygote64_32", "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys", "RP1A.200720.012.A325FXXU2BUG1", "a32xxx-user 11 RP1A.200720.012 A325FXXU2BUG1 release-keys", "a32xxx-user", "21R3NF12", "dpi", "1625097600", "2021-07-01", "REL", "0"),
-            "Samsung Galaxy A12" to DeviceFingerprint("samsung", "samsung", "SM-A125F", "a12", "a12xxx", "exynos850", "a12", "A125FXXU4BUL1", "samsung/a12xxx/a12:11/RP1A.200720.012/A125FXXU4BUL1:user/release-keys", "RP1A.200720.012", "release-keys", "user", "", "A125FXXU4BUL1", 30, "11", "exynos850", "mali", "196610", "S5E3830", "zygote64_32", "samsung/a12xxx/a12:11/RP1A.200720.012/A125FXXU4BUL1:user/release-keys", "RP1A.200720.012.A125FXXU4BUL1", "a12xxx-user 11 RP1A.200720.012 A125FXXU4BUL1 release-keys", "a12xxx-user", "21R3NF12", "dpi", "1639497600", "2021-12-01", "REL", "0"),
-            "Samsung Galaxy A51" to DeviceFingerprint("samsung", "samsung", "SM-A515F", "a51", "a51xxx", "exynos9610", "a51", "A515FXXU4CUG1", "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys", "RP1A.200720.012", "release-keys", "user", "", "A515FXXU4CUG1", 30, "11", "exynos9610", "mali", "196610", "Exynos9611", "zygote64_32", "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys", "RP1A.200720.012.A515FXXU4CUG1", "a51xxx-user 11 RP1A.200720.012 A515FXXU4CUG1 release-keys", "a51xxx-user", "21R3NF12", "dpi", "1625097600", "2021-07-01", "REL", "0"),
-            "Samsung Galaxy M12" to DeviceFingerprint("samsung", "samsung", "SM-M127F", "m12", "m12xid", "exynos850", "m12", "M127FXXU3BUK1", "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys", "RP1A.200720.012", "release-keys", "user", "", "M127FXXU3BUK1", 30, "11", "exynos850", "mali", "196610", "S5E3830", "zygote64_32", "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys", "RP1A.200720.012.M127FXXU3BUK1", "m12xid-user 11 RP1A.200720.012 M127FXXU3BUK1 release-keys", "m12xid-user", "21R3NF12", "dpi", "1636934400", "2021-11-01", "REL", "0"),
-            "OnePlus Nord" to DeviceFingerprint("OnePlus", "OnePlus", "OnePlus Nord", "avicii", "OnePlus Nord", "qcom", "avicii", "avicii_11_A.11", "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys", "RKQ1.201022.002", "release-keys", "user", "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1", "2107141742", 30, "11", "lito", "adreno", "196610", "SM7250", "zygote64_32", "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys", "RKQ1.201022.002.2107141742", "OnePlus Nord-user 11 RKQ1.201022.002 2107141742 release-keys", "OnePlus Nord-user", "buildserver12", "jenkins", "1626307200", "2021-07-01", "REL", "0"),
-            "OnePlus 8T" to DeviceFingerprint("OnePlus", "OnePlus", "KB2005", "kebab", "OnePlus8T", "qcom", "kebab", "kebab_21_A.14", "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys", "RKQ1.201022.002", "release-keys", "user", "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1", "2106051219", 30, "11", "kona", "adreno", "196610", "SM8250", "zygote64_32", "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys", "RKQ1.201022.002.2106051219", "OnePlus8T-user 11 RKQ1.201022.002 2106051219 release-keys", "OnePlus8T-user", "buildserver12", "jenkins", "1622937600", "2021-06-01", "REL", "0"),
-            "OnePlus Nord CE" to DeviceFingerprint("OnePlus", "OnePlus", "EB2101", "ebba", "OnePlus Nord CE 5G", "qcom", "ebba", "ebba_11_A.06", "OnePlus/OnePlus Nord CE 5G/ebba:11/RKQ1.201217.002/2106171000:user/release-keys", "RKQ1.201217.002", "release-keys", "user", "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1", "2106171000", 30, "11", "atoll", "adreno", "196610", "SM7225", "zygote64_32", "OnePlus/OnePlus Nord CE 5G/ebba:11/RKQ1.201217.002/2106171000:user/release-keys", "RKQ1.201217.002.2106171000", "OnePlus Nord CE 5G-user 11 RKQ1.201217.002 2106171000 release-keys", "OnePlus Nord CE 5G-user", "buildserver12", "jenkins", "1624060800", "2021-06-01", "REL", "0"),
-            "Moto G30" to DeviceFingerprint("motorola", "motorola", "moto g30", "caprip", "caprip", "qcom", "caprip", "unknown", "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys", "RRHS31.Q3-47-32", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "a57fec", 30, "11", "bengal", "adreno", "196610", "SM6115", "zygote64_32", "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys", "RRHS31.Q3-47-32", "caprip-user 11 RRHS31.Q3-47-32 a57fec release-keys", "caprip-user", "buildbot-motoauto06.mcd.mot.com", "hudsoncm", "1630022400", "2021-08-01", "REL", "0"),
-            "Moto G Power 2021" to DeviceFingerprint("motorola", "motorola", "moto g power (2021)", "borneo", "borneo", "qcom", "borneo", "unknown", "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys", "RRQ31.Q3-47-22", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "2b4fae", 30, "11", "bengal", "adreno", "196610", "SM6115", "zygote64_32", "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys", "RRQ31.Q3-47-22", "borneo-user 11 RRQ31.Q3-47-22 2b4fae release-keys", "borneo-user", "buildbot-motoauto06.mcd.mot.com", "hudsoncm", "1619827200", "2021-05-01", "REL", "0"),
-            "Moto G50" to DeviceFingerprint("motorola", "motorola", "moto g50", "ibis", "ibis", "qcom", "ibis", "unknown", "motorola/ibis/ibis:11/RRQS31.Q3-47-18/a7d2a1:user/release-keys", "RRQS31.Q3-47-18", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "a7d2a1", 30, "11", "bengal", "adreno", "196610", "SM4350", "zygote64_32", "motorola/ibis/ibis:11/RRQS31.Q3-47-18/a7d2a1:user/release-keys", "RRQS31.Q3-47-18", "ibis-user 11 RRQS31.Q3-47-18 a7d2a1 release-keys", "ibis-user", "buildbot-motoauto06.mcd.mot.com", "hudsoncm", "1627344000", "2021-07-01", "REL", "0"),
-            "Nokia 5.4" to DeviceFingerprint("Nokia", "Nokia", "Nokia 5.4", "DPL-N05", "DPL_sprout", "qcom", "DPL-N05", "unknown", "Nokia/DPL_sprout/DPL-N05:11/00WW_4_350/00WW350_360_131:user/release-keys", "00WW_4_350", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "00WW350_360_131", 30, "11", "bengal", "adreno", "196610", "SM6115", "zygote64_32", "Nokia/DPL_sprout/DPL-N05:11/00WW_4_350/00WW350_360_131:user/release-keys", "00WW_4_350", "DPL_sprout-user 11 00WW_4_350 00WW350_360_131 release-keys", "DPL_sprout-user", "android-build", "android-build", "1627430400", "2021-07-01", "REL", "0"),
-            "Nokia X10" to DeviceFingerprint("Nokia", "Nokia", "Nokia X10", "CAP-N05", "CAP_sprout", "qcom", "CAP-N05", "unknown", "Nokia/CAP_sprout/CAP-N05:11/00WW_2_390/00WW390_390_141:user/release-keys", "00WW_2_390", "release-keys", "user", "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1", "00WW390_390_141", 30, "11", "bengal", "adreno", "196610", "SM4350", "zygote64_32", "Nokia/CAP_sprout/CAP-N05:11/00WW_2_390/00WW390_390_141:user/release-keys", "00WW_2_390", "CAP_sprout-user 11 00WW_2_390 00WW390_390_141 release-keys", "CAP_sprout-user", "android-build", "android-build", "1633046400", "2021-10-01", "REL", "0"),
-            "Google Pixel 4a" to DeviceFingerprint("Google", "google", "Pixel 4a", "sunfish", "sunfish", "qcom", "sunfish", "s5-0.5-9637172", "google/sunfish/sunfish:11/RQ3A.210705.001/7380771:user/release-keys", "RQ3A.210705.001", "release-keys", "user", "g7150-00023-210610-B-7310372", "7380771", 30, "11", "atoll", "adreno", "196610", "SM7150", "zygote64_32", "google/sunfish_vend/sunfish:11/RQ3A.210705.001/7380771:vendor/release-keys", "RQ3A.210705.001", "sunfish-user 11 RQ3A.210705.001 7380771 release-keys", "sunfish-user", "abfarm-release-rbe-64.hot.corp.google.com", "android-build", "1625616000", "2021-07-05", "REL", "0"),
             "Google Pixel 5" to DeviceFingerprint("Google", "google", "Pixel 5", "redfin", "redfin", "qcom", "redfin", "r8-0.3-7219051", "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys", "RQ3A.210805.001.A1", "release-keys", "user", "g725-00164-210812-B-7522969", "7512229", 30, "11", "lito", "adreno", "196610", "SM7250", "zygote64_32", "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys", "RQ3A.210805.001.A1", "redfin-user 11 RQ3A.210805.001.A1 7512229 release-keys", "redfin-user", "abfarm-release-rbe-64.hot.corp.google.com", "android-build", "1628100000", "2021-08-05", "REL", "0"),
             "Google Pixel 4a 5G" to DeviceFingerprint("Google", "google", "Pixel 4a (5G)", "bramble", "bramble", "qcom", "bramble", "b2-0.3-7214727", "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys", "RQ3A.210705.001", "release-keys", "user", "g7250-00195-210614-B-7352378", "7380771", 30, "11", "lito", "adreno", "196610", "SM7250", "zygote64_32", "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys", "RQ3A.210705.001", "bramble-user 11 RQ3A.210705.001 7380771 release-keys", "bramble-user", "abfarm-release-rbe-64.hot.corp.google.com", "android-build", "1625616000", "2021-07-05", "REL", "0"),
             "Samsung Galaxy S20+" to DeviceFingerprint("samsung", "samsung", "SM-G985F", "y2s", "y2sxx", "exynos990", "universal990", "G985FXXSGHWA3", "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys", "RP1A.200720.012", "release-keys", "user", "", "G985FXXSGHWA3", 30, "11", "exynos990", "mali", "196610", "Exynos990", "zygote64_32", "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys", "RP1A.200720.012.G985FXXSGHWA3", "y2sxx-user 11 RP1A.200720.012 G985FXXSGHWA3 release-keys", "y2sxx-user", "21R3NF12", "dpi", "1639497600", "2022-01-01", "REL", "0"),
@@ -155,6 +133,9 @@ class MainHook : IXposedHookLoadPackage {
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
 
+            // Activate File protection hook
+            hookFile()
+
         } catch (e: Throwable) {
             try {
                 if (BuildConfig.DEBUG) XposedBridge.log("Lancelot Error: ${e.message}")
@@ -162,7 +143,73 @@ class MainHook : IXposedHookLoadPackage {
         }
     }
 
+    private fun hookFile() {
+        try {
+            // Optimized paths to hide (Set for O(1) access)
+            val sensitivePaths = setOf(
+                "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
+                "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
+                "/system/sd/xbin/su", "/system/bin/failsafe/su",
+                "/su/bin/su", "/system/xbin/daemonsu",
+                "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
+            )
+
+            val hook = object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val file = param.thisObject as File
+                    val path = file.absolutePath
+
+                    // Optimization 1: Only check absolute paths starting with /
+                    if (path.isEmpty() || path[0] != '/') return
+
+                    // Anti-Auto-Sabotage: Never hide our own package files
+                    // This protects prefs and APK access by the module itself (though rare in hooked process)
+                    if (path.contains("com.lancelot")) return
+
+                    // Optimization 2: Check sensitive set first (fastest)
+                    if (sensitivePaths.contains(path)) {
+                        param.result = false
+                        return
+                    }
+
+                    // Optimization 3: Check for keywords only if path length suggests it might contain them
+                    // Avoid scanning very short paths for long keywords
+                    if (path.length > 6) {
+                        if (path.startsWith("/data/adb/modules")) { // Magisk modules
+                            param.result = false
+                            return
+                        }
+                        // Fallback to slower contains for specific keywords
+                        // "magisk", "xposed", "lsposed"
+                        if (path.contains("magisk", true) ||
+                            path.contains("xposed", true) ||
+                            path.contains("lsposed", true)) {
+                            param.result = false
+                        }
+                    }
+                }
+            }
+
+            // Apply hook to all File check methods
+            XposedHelpers.findAndHookMethod(File::class.java, "exists", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canRead", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canExecute", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "isFile", hook)
+            XposedHelpers.findAndHookMethod(File::class.java, "isDirectory", hook)
+
+        } catch (e: Throwable) {
+            if (BuildConfig.DEBUG) XposedBridge.log("File hook error: ${e.message}")
+        }
+    }
+
     private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
+        // Fix #11: Read MCC/MNC as plain text if it fails decryption (compatibility)
+        // Also used for phone number generation with correct NPA
+        val defaultMccMnc = US_CARRIERS.random().mccMnc
+        val rawMccMnc = prefs.getString("mcc_mnc", defaultMccMnc)
+        // Try decrypt, fallback to raw
+        val mccMnc = CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc ?: defaultMccMnc
+
         if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei())
         if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei())
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
@@ -173,12 +220,14 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", SpoofingUtils.generateRealisticGmail())
         if (cachedSerial == null) cachedSerial = getString("serial", SpoofingUtils.generateRandomSerial())
 
-        val defaultMccMnc = US_CARRIERS.random().mccMnc
-        val mccMnc = getString("mcc_mnc", defaultMccMnc)
-
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
         if (cachedIccid == null) cachedIccid = SpoofingUtils.generateValidIccid(mccMnc)
-        if (cachedPhoneNumber == null) cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(emptyList())
+
+        // Fix #12: Use correct carrier NPAs
+        if (cachedPhoneNumber == null) {
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
+            cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(carrier.npas)
+        }
     }
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
@@ -410,17 +459,24 @@ class MainHook : IXposedHookLoadPackage {
             mockAccuracy = accStr.toFloatOrNull() ?: 10.0f
 
             val random = Random()
-            mockBearing = random.nextFloat() * 360.0f
-            mockSpeed = random.nextFloat() * 5.0f
+            // Fix #8: Make jitter optional
+            val applyJitter = prefs.getBoolean("location_jitter_enabled", true)
+            // Fix #9: Respect static location
+            val isMoving = prefs.getBoolean("location_is_moving", false)
 
-            // Gaussian Noise
-            mockAccuracy = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
-            mockAltitude = mockAltitude + (random.nextGaussian() * 0.5)
+            if (applyJitter) {
+                // Gaussian Noise
+                mockAccuracy = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
+                mockAltitude = mockAltitude + (random.nextGaussian() * 0.5)
 
-            // Small jitter for location
-            val jitterDeg = 0.00001
-            mockLatitude += random.nextGaussian() * jitterDeg
-            mockLongitude += random.nextGaussian() * jitterDeg
+                // Small jitter for location
+                val jitterDeg = 0.00001
+                mockLatitude += random.nextGaussian() * jitterDeg
+                mockLongitude += random.nextGaussian() * jitterDeg
+            }
+
+            mockBearing = if (isMoving) random.nextFloat() * 360.0f else 0.0f
+            mockSpeed = if (isMoving) random.nextFloat() * 5.0f else 0.0f
 
             if (!mockLocationEnabled) return
 
