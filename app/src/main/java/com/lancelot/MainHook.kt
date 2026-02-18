@@ -134,7 +134,10 @@ class MainHook : IXposedHookLoadPackage {
             hookLocation(lpparam, prefs, ::getEncryptedString)
             hookWebView(lpparam, fingerprint)
             hookAccountManager(lpparam)
-            hookXposedDetection(lpparam)
+            // Skip GMS for Xposed detection hooks to avoid self-check triggers
+            if (lpparam.packageName != "com.google.android.gms") {
+                hookXposedDetection(lpparam)
+            }
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
 
