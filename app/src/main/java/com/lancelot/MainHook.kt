@@ -154,6 +154,7 @@ class MainHook : IXposedHookLoadPackage {
             hookXposedDetection(lpparam)
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
+            hookFileEvasion(lpparam)
 
         } catch (e: Throwable) {
             try {
@@ -578,5 +579,26 @@ class MainHook : IXposedHookLoadPackage {
             if (parts.size != 6) throw IllegalArgumentException()
             ByteArray(6) { i -> parts[i].toInt(16).toByte() }
         } catch (e: Exception) { byteArrayOf(0x02, 0x00, 0x00, 0x00, 0x00, 0x00) }
+    }
+
+    private fun hookFileEvasion(lpparam: XC_LoadPackage.LoadPackageParam) {
+        // Evasion for file system checks (root, magisk, xposed) specific to Lancelot/MTK
+        try {
+            val fileHook = object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val file = param.thisObject as File
+                    if (SpoofingUtils.isSensitivePath(file.absolutePath)) {
+                        param.result = false
+                    }
+                }
+            }
+
+            XposedHelpers.findAndHookMethod(File::class.java, "exists", fileHook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canRead", fileHook)
+            XposedHelpers.findAndHookMethod(File::class.java, "canExecute", fileHook)
+
+        } catch (e: Throwable) {
+             if (BuildConfig.DEBUG) XposedBridge.log("Lancelot: Error hooking File: ${e.message}")
+        }
     }
 }

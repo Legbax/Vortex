@@ -115,4 +115,40 @@ object SpoofingUtils {
         val subscriber = (0..9999).random().toString().padStart(4, '0')
         return "+1$npa$nxx$subscriber"
     }
+
+    // Lancelot-specific sensitive paths for Android 11 / MTK devices
+    private val SENSITIVE_PATHS = setOf(
+        "/system/bin/su",
+        "/system/xbin/su",
+        "/sbin/su",
+        "/system/sd/xbin/su",
+        "/system/bin/failsafe/su",
+        "/data/local/su",
+        "/su/bin/su",
+        "/vendor/bin/su",
+        "/system/app/Superuser.apk",
+        "/system/framework/XposedBridge.jar"
+    )
+
+    private val SENSITIVE_PREFIXES = listOf(
+        "/sbin/.magisk",
+        "/cache/.disable_magisk",
+        "/dev/magisk",
+        "/data/adb",
+        "/data/user_de/0/de.robv.android.xposed.installer"
+    )
+
+    fun isSensitivePath(path: String): Boolean {
+        if (path.isEmpty()) return false
+        // Optimization: Root paths almost always start with /
+        if (!path.startsWith("/")) return false
+
+        // Exact match check (fastest for common checks)
+        if (SENSITIVE_PATHS.contains(path)) return true
+
+        // Prefix check for dynamic paths (Magisk modules, etc.)
+        if (path.length < 5) return false
+
+        return SENSITIVE_PREFIXES.any { path.startsWith(it) }
+    }
 }
