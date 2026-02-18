@@ -22,19 +22,13 @@ object CryptoUtils {
     private const val GCM_IV_LENGTH = 12
     private const val GCM_TAG_LENGTH = 128
 
-    // ThreadLocal for Cipher reuse to improve performance
-    private val CIPHER_THREAD_LOCAL = object : ThreadLocal<Cipher>() {
-        override fun initialValue(): Cipher {
-            return Cipher.getInstance(TRANSFORMATION)
-        }
-    }
-
     private val secureRandom = SecureRandom()
 
     fun encrypt(value: String): String {
         return try {
             val key = SecretKeySpec(KEY_BYTES, ALGO)
-            val cipher = CIPHER_THREAD_LOCAL.get() ?: Cipher.getInstance(TRANSFORMATION)
+            // Fix #10: Create new Cipher instance every time to avoid state issues
+            val cipher = Cipher.getInstance(TRANSFORMATION)
 
             val iv = ByteArray(GCM_IV_LENGTH)
             secureRandom.nextBytes(iv)
@@ -51,7 +45,6 @@ object CryptoUtils {
 
             "GCM:" + Base64.encodeToString(combined, Base64.NO_WRAP)
         } catch (e: Exception) {
-            // Fail safe
             ""
         }
     }
@@ -67,15 +60,14 @@ object CryptoUtils {
                 val ciphertext = decodedBytes.copyOfRange(GCM_IV_LENGTH, decodedBytes.size)
 
                 val key = SecretKeySpec(KEY_BYTES, ALGO)
-                val cipher = CIPHER_THREAD_LOCAL.get() ?: Cipher.getInstance(TRANSFORMATION)
+                val cipher = Cipher.getInstance(TRANSFORMATION)
                 val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
 
                 cipher.init(Cipher.DECRYPT_MODE, key, spec)
 
                 String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8)
             } else if (encrypted.startsWith("ENC:")) {
-                // Legacy AES/ECB fallback (if needed for old prefs, though GCM is now standard)
-                // We recreate cipher here because ThreadLocal is configured for GCM
+                // Legacy AES/ECB fallback
                 val key = SecretKeySpec(KEY_BYTES, ALGO)
                 val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
                 cipher.init(Cipher.DECRYPT_MODE, key)

@@ -51,19 +51,28 @@ class NetworkFragment : Fragment() {
 
     private fun saveCarrierPreference(carrier: MainHook.Companion.UsCarrier) {
         val context = requireContext()
-        // Save encrypted preferences without world-readable permissions
-        PrefsManager.saveString(context, "mcc_mnc", carrier.mccMnc)
-        PrefsManager.saveString(context, "sim_operator", carrier.mccMnc)
-        PrefsManager.saveString(context, "sim_country", "us")
+
+        // FIX #11: Save MCC/MNC and SIM data as PLAIN TEXT using standard SharedPreferences
+        // This avoids issues where encryption overhead isn't needed for non-sensitive public data
+        // and improves compatibility with MainHook reading logic that might expect standard prefs.
+        val prefs = context.getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putString("mcc_mnc", carrier.mccMnc)
+            putString("sim_operator", carrier.mccMnc)
+            putString("sim_country", "us")
+            apply()
+        }
 
         Toast.makeText(context, "Carrier saved: ${carrier.name}", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadSavedData() {
         val context = requireContext()
-        val savedMccMnc = PrefsManager.getString(context, "mcc_mnc", "310260")
+        // Load from standard prefs (plain text)
+        val prefs = context.getSharedPreferences("spoof_prefs", Context.MODE_PRIVATE)
+        val savedMccMnc = prefs.getString("mcc_mnc", "310260")
 
-        if (savedMccMnc.isNotEmpty()) {
+        if (savedMccMnc != null) {
             adapter.setSelected(savedMccMnc)
 
             // Also display info for this carrier

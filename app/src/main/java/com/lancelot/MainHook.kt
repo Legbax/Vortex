@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets
 import java.util.Random
 import com.lancelot.utils.CryptoUtils
 import com.lancelot.SpoofingUtils
+import com.lancelot.BuildConfig
 
 class MainHook : IXposedHookLoadPackage {
 
@@ -202,6 +203,13 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
+        // Fix #11: Read MCC/MNC as plain text if it fails decryption (compatibility)
+        // Also used for phone number generation with correct NPA
+        val defaultMccMnc = US_CARRIERS.random().mccMnc
+        val rawMccMnc = prefs.getString("mcc_mnc", defaultMccMnc)
+        // Try decrypt, fallback to raw
+        val mccMnc = CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc ?: defaultMccMnc
+
         if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei())
         if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei())
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
@@ -212,12 +220,14 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", SpoofingUtils.generateRealisticGmail())
         if (cachedSerial == null) cachedSerial = getString("serial", SpoofingUtils.generateRandomSerial())
 
-        val defaultMccMnc = US_CARRIERS.random().mccMnc
-        val mccMnc = getString("mcc_mnc", defaultMccMnc)
-
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
         if (cachedIccid == null) cachedIccid = SpoofingUtils.generateValidIccid(mccMnc)
-        if (cachedPhoneNumber == null) cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(emptyList())
+
+        // Fix #12: Use correct carrier NPAs
+        if (cachedPhoneNumber == null) {
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
+            cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(carrier.npas)
+        }
     }
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
@@ -449,17 +459,24 @@ class MainHook : IXposedHookLoadPackage {
             mockAccuracy = accStr.toFloatOrNull() ?: 10.0f
 
             val random = Random()
-            mockBearing = random.nextFloat() * 360.0f
-            mockSpeed = random.nextFloat() * 5.0f
+            // Fix #8: Make jitter optional
+            val applyJitter = prefs.getBoolean("location_jitter_enabled", true)
+            // Fix #9: Respect static location
+            val isMoving = prefs.getBoolean("location_is_moving", false)
 
-            // Gaussian Noise
-            mockAccuracy = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
-            mockAltitude = mockAltitude + (random.nextGaussian() * 0.5)
+            if (applyJitter) {
+                // Gaussian Noise
+                mockAccuracy = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
+                mockAltitude = mockAltitude + (random.nextGaussian() * 0.5)
 
-            // Small jitter for location
-            val jitterDeg = 0.00001
-            mockLatitude += random.nextGaussian() * jitterDeg
-            mockLongitude += random.nextGaussian() * jitterDeg
+                // Small jitter for location
+                val jitterDeg = 0.00001
+                mockLatitude += random.nextGaussian() * jitterDeg
+                mockLongitude += random.nextGaussian() * jitterDeg
+            }
+
+            mockBearing = if (isMoving) random.nextFloat() * 360.0f else 0.0f
+            mockSpeed = if (isMoving) random.nextFloat() * 5.0f else 0.0f
 
             if (!mockLocationEnabled) return
 
