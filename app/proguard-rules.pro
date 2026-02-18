@@ -14,11 +14,11 @@
 # estáticos del Companion via reflexión y el nombre original es obligatorio.
 -keep class com.vortex.MainHook$Companion { *; }
 
-# FIX #18: Los campos de DeviceFingerprint y UsCarrier son accedidos por nombre
-# en tiempo de ejecución (data class Kotlin). Sin esto ProGuard los renombra
-# y los accesos via reflexión fallan silenciosamente.
--keepclassmembers class com.vortex.MainHook$DeviceFingerprint { *; }
+# FIX #18: UsCarrier es accedido por nombre en tiempo de ejecución.
 -keepclassmembers class com.vortex.MainHook$UsCarrier { *; }
+
+# FIX #18 (Update): DeviceFingerprint moved to utils, must be kept for reflection.
+-keep class com.vortex.utils.DeviceFingerprint { *; }
 
 # Todas las inner classes de MainHook
 -keep class com.vortex.MainHook$* { *; }
