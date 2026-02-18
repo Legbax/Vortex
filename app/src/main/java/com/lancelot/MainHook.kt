@@ -145,47 +145,13 @@ class MainHook : IXposedHookLoadPackage {
 
     private fun hookFile() {
         try {
-            // Optimized paths to hide (Set for O(1) access)
-            val sensitivePaths = setOf(
-                "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
-                "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
-                "/system/sd/xbin/su", "/system/bin/failsafe/su",
-                "/su/bin/su", "/system/xbin/daemonsu",
-                "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
-            )
-
             val hook = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val file = param.thisObject as File
                     val path = file.absolutePath
 
-                    // Optimization 1: Only check absolute paths starting with /
-                    if (path.isEmpty() || path[0] != '/') return
-
-                    // Anti-Auto-Sabotage: Never hide our own package files
-                    // This protects prefs and APK access by the module itself (though rare in hooked process)
-                    if (path.contains("com.lancelot")) return
-
-                    // Optimization 2: Check sensitive set first (fastest)
-                    if (sensitivePaths.contains(path)) {
+                    if (SpoofingUtils.isSensitivePath(path)) {
                         param.result = false
-                        return
-                    }
-
-                    // Optimization 3: Check for keywords only if path length suggests it might contain them
-                    // Avoid scanning very short paths for long keywords
-                    if (path.length > 6) {
-                        if (path.startsWith("/data/adb/modules")) { // Magisk modules
-                            param.result = false
-                            return
-                        }
-                        // Fallback to slower contains for specific keywords
-                        // "magisk", "xposed", "lsposed"
-                        if (path.contains("magisk", true) ||
-                            path.contains("xposed", true) ||
-                            path.contains("lsposed", true)) {
-                            param.result = false
-                        }
                     }
                 }
             }
@@ -203,13 +169,6 @@ class MainHook : IXposedHookLoadPackage {
     }
 
     private fun initializeCache(prefs: XSharedPreferences, getString: (String, String) -> String) {
-        // Fix #11: Read MCC/MNC as plain text if it fails decryption (compatibility)
-        // Also used for phone number generation with correct NPA
-        val defaultMccMnc = US_CARRIERS.random().mccMnc
-        val rawMccMnc = prefs.getString("mcc_mnc", defaultMccMnc)
-        // Try decrypt, fallback to raw
-        val mccMnc = CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc ?: defaultMccMnc
-
         if (cachedImei == null) cachedImei = getString("imei", SpoofingUtils.generateValidImei())
         if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei())
         if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
@@ -220,14 +179,12 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedGmail == null) cachedGmail = getString("gmail", SpoofingUtils.generateRealisticGmail())
         if (cachedSerial == null) cachedSerial = getString("serial", SpoofingUtils.generateRandomSerial())
 
+        val defaultMccMnc = US_CARRIERS.random().mccMnc
+        val mccMnc = getString("mcc_mnc", defaultMccMnc)
+
         if (cachedImsi == null) cachedImsi = mccMnc + (1..10).map { (0..9).random() }.joinToString("")
         if (cachedIccid == null) cachedIccid = SpoofingUtils.generateValidIccid(mccMnc)
-
-        // Fix #12: Use correct carrier NPAs
-        if (cachedPhoneNumber == null) {
-            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
-            cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(carrier.npas)
-        }
+        if (cachedPhoneNumber == null) cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(emptyList())
     }
 
     private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {

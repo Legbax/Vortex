@@ -12,6 +12,40 @@ object SpoofingUtils {
         "35674910", "35674911"    // Google Pixel
     )
 
+    // Optimized paths to hide (Set for O(1) access)
+    private val SENSITIVE_PATHS = setOf(
+        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
+        "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
+        "/system/sd/xbin/su", "/system/bin/failsafe/su",
+        "/su/bin/su", "/system/xbin/daemonsu",
+        "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
+    )
+
+    fun isSensitivePath(path: String): Boolean {
+        // Optimization 1: Only check absolute paths starting with /
+        if (path.isEmpty() || path[0] != '/') return false
+
+        // Anti-Auto-Sabotage: Never hide our own package files
+        if (path.contains("com.lancelot")) return false
+
+        // Optimization 2: Check sensitive set first (fastest)
+        if (SENSITIVE_PATHS.contains(path)) return true
+
+        // Optimization 3: Check for keywords only if path length suggests it might contain them
+        // Avoid scanning very short paths for long keywords
+        if (path.length > 6) {
+            if (path.startsWith("/data/adb/modules")) return true // Magisk modules
+
+            // Fallback to slower contains for specific keywords
+            if (path.contains("magisk", true) ||
+                path.contains("xposed", true) ||
+                path.contains("lsposed", true)) {
+                return true
+            }
+        }
+        return false
+    }
+
     fun generateValidImei(): String {
         val tac = VALID_TACS.random()
         val serial = (1..6).map { (0..9).random() }.joinToString("")
