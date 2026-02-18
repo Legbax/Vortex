@@ -41,4 +41,22 @@ class CommandEvasionTest {
     fun testEmptyCommand() {
         assertFalse(SpoofingUtils.isSensitiveCommand(emptyList()))
     }
+
+    @Test
+    fun testLancelotSpecificCommands() {
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getenforce")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("sh", "-c", "getenforce")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.boot.verifiedbootstate")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("sh", "-c", "getprop ro.boot.verifiedbootstate")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.build.tags")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.build.type")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.build.selinux")))
+    }
+
+    @Test
+    fun testLancelotSpecificPaths() {
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("cat", "/proc/cmdline")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("ls", "/proc/net/unix")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("cat", "/proc/net/unix")))
+    }
 }
