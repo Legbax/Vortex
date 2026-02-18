@@ -1,8 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App Meta -->
     <string name="app_name">Lancelot</string>
     <string name="xposed_description">Spoofer anti-detección (Redmi 9 Lancelot) - Hooks avanzados para evadir fingerprinting</string>
-
-    <!-- Theme -->
     <string name="theme_name">Lancelot Theme</string>
+
+    <!-- Navigation -->
+    <string name="nav_status">Status</string>
+    <string name="nav_device">Device</string>
+    <string name="nav_network">Network</string>
+    <string name="nav_ids">IDs</string>
+    <string name="nav_location">Location</string>
+    <string name="nav_advanced">Advanced</string>
+
+    <!-- Status Fragment -->
+    <string name="status_evasion_score">Evasion Score</string>
+    <string name="status_evasion_excellent">Excellent</string>
+    <string name="status_evasion_risk">At Risk</string>
+    <string name="status_master_switch">Master Switch</string>
+    <string name="status_master_switch_desc">Enable or disable all hooks globally. Requires reboot.</string>
+    <string name="status_active_hooks">Active Hooks</string>
+    <string name="status_system_integrity">System Integrity</string>
+    <string name="status_device_profile">Device Profile</string>
+    <string name="status_not_spoofed">Not Spoofed</string>
+    <string name="status_protected">Protected</string>
+
+    <!-- Device Fragment -->
+    <string name="device_search_hint">Search device profile...</string>
+    <string name="device_current_fingerprint">Current Fingerprint</string>
+    <string name="device_build_prop">build.prop</string>
+    <string name="device_randomize">Randomize Profile</string>
+    <string name="device_apply_profile">Apply Profile</string>
+    <string name="device_no_profile_selected">No profile selected</string>
+    <string name="device_brand">Brand</string>
+    <string name="device_model">Model</string>
+    <string name="device_os_version">OS Version</string>
+
+    <!-- Network Fragment -->
+    <string name="network_carrier_config">Carrier Configuration</string>
+    <string name="network_sim_info">SIM Information</string>
+    <string name="network_operator_name">Operator Name</string>
+    <string name="network_mcc">MCC</string>
+    <string name="network_mnc">MNC</string>
+    <string name="network_sim_serial">SIM Serial (ICCID)</string>
+    <string name="network_phone_number">Phone Number</string>
+    <string name="network_country_iso">Country ISO</string>
+    <string name="network_randomize">Randomize Network</string>
+    <string name="network_wifi_ssid">WiFi SSID</string>
+    <string name="network_wifi_mac">WiFi MAC</string>
+
+    <!-- IDs Fragment -->
+    <string name="ids_identifiers">Device Identifiers</string>
+    <string name="ids_imei">IMEI</string>
+    <string name="ids_android_id">Android ID (SSAID)</string>
+    <string name="ids_gsf">Google Service Framework (GSF)</string>
+    <string name="ids_serial">Serial Number</string>
+    <string name="ids_bluetooth_mac">Bluetooth MAC</string>
+    <string name="ids_validate_valid">Valid</string>
+    <string name="ids_validate_invalid">Invalid Checksum</string>
+    <string name="ids_randomize_all">Randomize All IDs</string>
+    <string name="ids_luhn_check">Luhn Check</string>
+
+    <!-- Location Fragment -->
+    <string name="location_mock_settings">Mock Settings</string>
+    <string name="location_latitude">Latitude</string>
+    <string name="location_longitude">Longitude</string>
+    <string name="location_altitude">Altitude</string>
+    <string name="location_accuracy">Accuracy</string>
+    <string name="location_jitter">Location Jitter</string>
+    <string name="location_jitter_desc">Add random noise to avoid static detection</string>
+    <string name="location_move_randomly">Move Randomly</string>
+
+    <!-- Advanced Fragment -->
+    <string name="advanced_hooks_title">Granular Hooks</string>
+    <string name="advanced_hide_root">Hide Root</string>
+    <string name="advanced_hide_root_desc">Intercepts su binary checks and common paths.</string>
+    <string name="advanced_hide_debug">Hide Debugging</string>
+    <string name="advanced_hide_debug_desc">Clears FLAG_DEBUGGABLE and blocks debugger attach.</string>
+    <string name="advanced_spoof_battery">Spoof Battery</string>
+    <string name="advanced_spoof_battery_desc">Simulate realistic battery drain and levels.</string>
+    <string name="advanced_spoof_cpu">Spoof CPU</string>
+    <string name="advanced_spoof_cpu_desc">Override /proc/cpuinfo to match profile.</string>
+    <string name="advanced_spoof_ram">Spoof RAM</string>
+    <string name="advanced_spoof_ram_desc">Override MemTotal to match profile.</string>
+    <string name="advanced_disable_sensors">Disable Sensors</string>
+    <string name="advanced_bypass_safetynet">Bypass SafetyNet</string>
+
+    <!-- General Actions -->
+    <string name="action_save">Save Configuration</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="msg_saved">Configuration saved successfully</string>
+    <string name="msg_reboot_required">Reboot required to apply changes</string>
+
 </resources>

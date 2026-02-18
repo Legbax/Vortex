@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Typography -->
+    <style name="Vortex.Text.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">@color/vortex_text_primary</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Vortex.Text.Subtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/vortex_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Vortex.Text.SectionHeader" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textColor">@color/vortex_accent</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- Cards -->
+    <style name="Vortex.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/vortex_card_background</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <!-- Buttons -->
+    <style name="Vortex.Button" parent="Widget.Material3.Button">
+        <item name="android:backgroundTint">@color/vortex_accent</item>
+        <item name="android:textColor">@color/vortex_background</item> <!-- Contrast text on bright accent -->
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <style name="Vortex.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/vortex_accent</item>
+        <item name="strokeColor">@color/vortex_accent</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <style name="Vortex.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/vortex_accent</item>
+    </style>
+
+    <!-- Inputs -->
+    <style name="Vortex.InputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/vortex_accent</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxBackgroundColor">@color/vortex_background</item> <!-- Slight contrast inside card -->
+        <item name="hintTextColor">@color/vortex_text_secondary</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+    </style>
+
+    <!-- Dividers -->
+    <style name="Vortex.Divider" parent="Widget.Material3.Divider">
+        <item name="android:background">@color/vortex_divider</item>
+    </style>
+
+</resources>

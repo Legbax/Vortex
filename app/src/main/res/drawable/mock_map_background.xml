@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#1A1D24" />
+        </shape>
+    </item>
+    <!-- Simple Grid Lines Simulation -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke android:width="1dp" android:color="#2A2E35" android:dashWidth="2dp" android:dashGap="20dp"/>
+        </shape>
+    </item>
+</layer-list>
