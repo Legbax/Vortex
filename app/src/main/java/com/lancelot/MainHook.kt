@@ -256,7 +256,11 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.setStaticObjectField(buildClass, "USER", fingerprint.buildUser)
             XposedHelpers.setStaticLongField(buildClass, "TIME", fingerprint.buildDateUtc.toLong() * 1000)
 
-            XposedHelpers.setStaticObjectField(buildClass, "SERIAL", cachedSerial)
+            // Only spoof SERIAL field for apps targeting < Android 10 (API 29) to match system behavior.
+            // Modern apps expect "unknown" and use getSerial().
+            if (lpparam.appInfo != null && lpparam.appInfo.targetSdkVersion < 29) {
+                XposedHelpers.setStaticObjectField(buildClass, "SERIAL", cachedSerial)
+            }
 
             val versionClass = Build.VERSION::class.java
             XposedHelpers.setStaticIntField(versionClass, "SDK_INT", fingerprint.sdkInt)

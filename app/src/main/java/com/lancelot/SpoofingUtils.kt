@@ -20,12 +20,13 @@ object SpoofingUtils {
         "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
         "/system/sd/xbin/su", "/system/bin/failsafe/su",
         "/su/bin/su", "/system/xbin/daemonsu",
-        "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
+        "/system/app/Superuser.apk", "/system/app/SuperSU.apk",
+        "/proc/cmdline", "/proc/net/unix"
     )
 
     // Sensitive commands to block
     private val SENSITIVE_COMMANDS = setOf(
-        "su", "which su", "mount", "getprop ro.secure"
+        "su", "which su", "mount", "getprop ro.secure", "getenforce"
     )
 
     fun isSensitivePath(path: String): Boolean {
@@ -60,7 +61,14 @@ object SpoofingUtils {
 
         if (fullCmd.contains("which su") ||
             fullCmd.contains("ls /sbin") ||
-            fullCmd.contains("ls /data/adb")) {
+            fullCmd.contains("ls /data/adb") ||
+            fullCmd.contains("getenforce") ||
+            fullCmd.contains("getprop ro.boot.verifiedbootstate") ||
+            fullCmd.contains("getprop ro.boot.flash.locked") ||
+            fullCmd.contains("getprop ro.build.tags") ||
+            fullCmd.contains("getprop ro.build.type") ||
+            fullCmd.contains("getprop ro.build.selinux") ||
+            fullCmd.contains("getprop ro.debuggable")) {
             return true
         }
 
