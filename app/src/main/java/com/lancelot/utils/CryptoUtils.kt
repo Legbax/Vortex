@@ -1,82 +1,81 @@
 package com.lancelot.utils
 
 import android.util.Base64
+import android.util.Log
+import com.lancelot.BuildConfig
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
-    // Shared key for encryption/decryption
-    // Obfuscated key generation (lazy loaded)
-    private val KEY_BYTES by lazy {
-        byteArrayOf(
-            76, 97, 110, 99, 101, 108, 111, 116,
-            83, 116, 101, 97, 108, 116, 104, 49
-        )
-    }
+    private const val ALGO = "AES/GCM/NoPadding"
+    private const val PREFIX = "ENC:"
 
-    private const val ALGO = "AES"
-    private const val TRANSFORMATION = "AES/GCM/NoPadding"
-    private const val GCM_IV_LENGTH = 12
-    private const val GCM_TAG_LENGTH = 128
+    // Dynamic key derived from Build.TIME (immutable per firmware)
+    // Safe because OriginalBuildValues captures it before Xposed hooks
+    private val SECRET_KEY by lazy {
+        val time = OriginalBuildValues.ORIGINAL_BUILD_TIME.toString()
+        val salt = "Lancelot2026SecureSalt"
+        val keyMaterial = (time + salt).toByteArray(Charsets.UTF_8)
+        val hash = MessageDigest.getInstance("SHA-256").digest(keyMaterial)
+        SecretKeySpec(hash, "AES")   // AES-256
+    }
 
     private val secureRandom = SecureRandom()
 
     fun encrypt(value: String): String {
+        if (value.isEmpty()) return ""
         return try {
-            val key = SecretKeySpec(KEY_BYTES, ALGO)
-            // Fix #10: Create new Cipher instance every time to avoid state issues
-            val cipher = Cipher.getInstance(TRANSFORMATION)
+            val cipher = Cipher.getInstance(ALGO)
 
-            val iv = ByteArray(GCM_IV_LENGTH)
+            val iv = ByteArray(12)
             secureRandom.nextBytes(iv)
 
-            val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
-            cipher.init(Cipher.ENCRYPT_MODE, key, spec)
+            val gcmSpec = GCMParameterSpec(128, iv)
+            cipher.init(Cipher.ENCRYPT_MODE, SECRET_KEY, gcmSpec)
 
-            val encryptedBytes = cipher.doFinal(value.toByteArray(StandardCharsets.UTF_8))
+            val encryptedBytes = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
 
             // Combine IV + Ciphertext
             val combined = ByteArray(iv.size + encryptedBytes.size)
             System.arraycopy(iv, 0, combined, 0, iv.size)
             System.arraycopy(encryptedBytes, 0, combined, iv.size, encryptedBytes.size)
 
-            "GCM:" + Base64.encodeToString(combined, Base64.NO_WRAP)
+            PREFIX + Base64.encodeToString(combined, Base64.NO_WRAP)
         } catch (e: Exception) {
+            if (BuildConfig.DEBUG) Log.e("CryptoUtils", "Encrypt failed", e)
             ""
         }
     }
 
     fun decrypt(encrypted: String?): String? {
         if (encrypted.isNullOrEmpty()) return null
+        // Check for our new prefix. If not present, maybe return raw if it's old/legacy
+        if (!encrypted.startsWith(PREFIX)) {
+            // Legacy handling or plain text fallback
+            // If it starts with GCM: (old implementation), we can't decrypt it with the NEW key.
+            // Since this is a breaking change for security, we accept old prefs might be lost/reset.
+            return encrypted
+        }
+
         return try {
-            if (encrypted.startsWith("GCM:")) {
-                val decodedBytes = Base64.decode(encrypted.substring(4), Base64.NO_WRAP)
+            val decodedBytes = Base64.decode(encrypted.removePrefix(PREFIX), Base64.NO_WRAP)
 
-                // Extract IV and Ciphertext
-                val iv = decodedBytes.copyOfRange(0, GCM_IV_LENGTH)
-                val ciphertext = decodedBytes.copyOfRange(GCM_IV_LENGTH, decodedBytes.size)
+            val iv = decodedBytes.copyOfRange(0, 12)
+            val ciphertext = decodedBytes.copyOfRange(12, decodedBytes.size)
 
-                val key = SecretKeySpec(KEY_BYTES, ALGO)
-                val cipher = Cipher.getInstance(TRANSFORMATION)
-                val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
+            val cipher = Cipher.getInstance(ALGO)
+            val gcmSpec = GCMParameterSpec(128, iv)
 
-                cipher.init(Cipher.DECRYPT_MODE, key, spec)
+            cipher.init(Cipher.DECRYPT_MODE, SECRET_KEY, gcmSpec)
 
-                String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8)
-            } else if (encrypted.startsWith("ENC:")) {
-                // Legacy AES/ECB fallback
-                val key = SecretKeySpec(KEY_BYTES, ALGO)
-                val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-                cipher.init(Cipher.DECRYPT_MODE, key)
-                val decodedBytes = Base64.decode(encrypted.substring(4), Base64.NO_WRAP)
-                String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8)
-            } else {
-                null
-            }
+            val decryptedBytes = cipher.doFinal(ciphertext)
+            String(decryptedBytes, Charsets.UTF_8)
         } catch (e: Exception) {
+            if (BuildConfig.DEBUG) Log.e("CryptoUtils", "Decrypt failed", e)
             null
         }
     }
