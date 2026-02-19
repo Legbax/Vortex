@@ -29,10 +29,14 @@ class IDsFragment : Fragment() {
     private lateinit var etPhone: TextInputEditText
     private lateinit var tilAndroidId: TextInputLayout
     private lateinit var etAndroidId: TextInputEditText
+    private lateinit var tilSsaid: TextInputLayout
+    private lateinit var etSsaid: TextInputEditText
     private lateinit var tilGaid: TextInputLayout
     private lateinit var etGaid: TextInputEditText
     private lateinit var tilGsfId: TextInputLayout
     private lateinit var etGsfId: TextInputEditText
+    private lateinit var tilMediaDrm: TextInputLayout
+    private lateinit var etMediaDrm: TextInputEditText
     private lateinit var tilSerial: TextInputLayout
     private lateinit var etSerial: TextInputEditText
     private lateinit var tilWifiMac: TextInputLayout
@@ -72,10 +76,14 @@ class IDsFragment : Fragment() {
 
         tilAndroidId = view.findViewById(R.id.til_android_id)
         etAndroidId = view.findViewById(R.id.et_android_id)
+        tilSsaid = view.findViewById(R.id.til_ssaid)
+        etSsaid = view.findViewById(R.id.et_ssaid)
         tilGaid = view.findViewById(R.id.til_gaid)
         etGaid = view.findViewById(R.id.et_gaid)
         tilGsfId = view.findViewById(R.id.til_gsf_id)
         etGsfId = view.findViewById(R.id.et_gsf_id)
+        tilMediaDrm = view.findViewById(R.id.til_media_drm)
+        etMediaDrm = view.findViewById(R.id.et_media_drm)
         tilSerial = view.findViewById(R.id.til_serial)
         etSerial = view.findViewById(R.id.et_serial)
         tilWifiMac = view.findViewById(R.id.til_wifi_mac)
@@ -120,8 +128,10 @@ class IDsFragment : Fragment() {
         }
 
         tilAndroidId.setEndIconOnClickListener { etAndroidId.setText(SpoofingUtils.generateRandomId(16)) }
+        tilSsaid.setEndIconOnClickListener { etSsaid.setText(SpoofingUtils.generateRandomId(16)) }
         tilGaid.setEndIconOnClickListener { etGaid.setText(SpoofingUtils.generateRandomGaid()) }
         tilGsfId.setEndIconOnClickListener { etGsfId.setText(SpoofingUtils.generateRandomId(16)) }
+        tilMediaDrm.setEndIconOnClickListener { etMediaDrm.setText(SpoofingUtils.generateRandomId(32)) }
         tilSerial.setEndIconOnClickListener { etSerial.setText(SpoofingUtils.generateRandomSerial()) }
         tilWifiMac.setEndIconOnClickListener { etWifiMac.setText(SpoofingUtils.generateRandomMac()) }
         tilBtMac.setEndIconOnClickListener { etBtMac.setText(SpoofingUtils.generateRandomMac()) }
@@ -136,8 +146,10 @@ class IDsFragment : Fragment() {
         etIccid.setText(PrefsManager.getString(context, "iccid", ""))
         etPhone.setText(PrefsManager.getString(context, "phone_number", ""))
         etAndroidId.setText(PrefsManager.getString(context, "android_id", ""))
+        etSsaid.setText(PrefsManager.getString(context, "ssaid_snapchat", ""))
         etGaid.setText(PrefsManager.getString(context, "gaid", ""))
         etGsfId.setText(PrefsManager.getString(context, "gsf_id", ""))
+        etMediaDrm.setText(PrefsManager.getString(context, "media_drm_id", ""))
         etSerial.setText(PrefsManager.getString(context, "serial", ""))
         etWifiMac.setText(PrefsManager.getString(context, "wifi_mac", ""))
         etBtMac.setText(PrefsManager.getString(context, "bluetooth_mac", ""))
@@ -159,8 +171,10 @@ class IDsFragment : Fragment() {
         etPhone.setText(SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList()))
 
         etAndroidId.setText(SpoofingUtils.generateRandomId(16))
+        etSsaid.setText(SpoofingUtils.generateRandomId(16))
         etGaid.setText(SpoofingUtils.generateRandomGaid())
         etGsfId.setText(SpoofingUtils.generateRandomId(16))
+        etMediaDrm.setText(SpoofingUtils.generateRandomId(32))
         etSerial.setText(SpoofingUtils.generateRandomSerial())
         etWifiMac.setText(SpoofingUtils.generateRandomMac())
         etBtMac.setText(SpoofingUtils.generateRandomMac())
@@ -235,8 +249,10 @@ class IDsFragment : Fragment() {
         PrefsManager.saveString(context, "iccid", iccid)
         PrefsManager.saveString(context, "phone_number", etPhone.text.toString())
         PrefsManager.saveString(context, "android_id", etAndroidId.text.toString())
+        PrefsManager.saveString(context, "ssaid_snapchat", etSsaid.text.toString())
         PrefsManager.saveString(context, "gaid", etGaid.text.toString())
         PrefsManager.saveString(context, "gsf_id", etGsfId.text.toString())
+        PrefsManager.saveString(context, "media_drm_id", etMediaDrm.text.toString())
         PrefsManager.saveString(context, "serial", etSerial.text.toString())
         PrefsManager.saveString(context, "wifi_mac", etWifiMac.text.toString())
         PrefsManager.saveString(context, "bluetooth_mac", etBtMac.text.toString())
