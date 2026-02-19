@@ -28,6 +28,27 @@
 
         <!-- Carrier Context Selection -->
         <TextView android:text="Carrier Context (MCC/MNC)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_search_carrier"
+            style="@style/Vortex.InputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Search Carriers..."
+            android:layout_marginBottom="8dp"
+            app:startIconDrawable="@drawable/ic_search"
+            app:startIconTint="@color/vortex_text_secondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search_carrier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textColor="@color/vortex_text_primary" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_carriers"
             android:layout_width="match_parent"

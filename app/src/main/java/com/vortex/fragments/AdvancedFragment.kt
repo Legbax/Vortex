@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -26,10 +26,11 @@ class AdvancedFragment : Fragment() {
     private lateinit var swPackages: SwitchMaterial
     private lateinit var swWebView: SwitchMaterial
 
-    // Root Utils
-    private lateinit var cbSnapchat: CheckBox
-    private lateinit var cbPlayStore: CheckBox
-    private lateinit var cbGms: CheckBox
+    // Root Utils (Dalí: Changed to CompoundButton for SwitchMaterial compatibility)
+    private lateinit var cbSnapchat: CompoundButton
+    private lateinit var cbPlayStore: CompoundButton
+    private lateinit var cbGms: CompoundButton
+
     private lateinit var btnForceStop: Button
     private lateinit var btnClearData: Button
     private lateinit var btnReboot: Button
@@ -47,6 +48,7 @@ class AdvancedFragment : Fragment() {
         cbSnapchat = view.findViewById(R.id.cb_snapchat)
         cbPlayStore = view.findViewById(R.id.cb_play_store)
         cbGms = view.findViewById(R.id.cb_gms)
+
         btnForceStop = view.findViewById(R.id.btn_force_stop)
         btnClearData = view.findViewById(R.id.btn_clear_data)
         btnReboot = view.findViewById(R.id.btn_reboot)

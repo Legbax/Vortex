@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Paleta Vortex / Legba (Dark Purple & Neon) -->
+    <!-- Paleta Vortex / Dalí (Dark Purple & Neon) -->
     <!-- Fondo: Negro profundo/Azul oscuro -->
-    <color name="vortex_background">#050505</color>
+    <color name="vortex_background">#080A0F</color>
 
     <!-- Cards: Gris oscuro con tinte violeta -->
-    <color name="vortex_card_background">#121212</color>
+    <color name="vortex_card_background">#12151A</color>
 
     <!-- Acento: Morado neón (Ghost Eye) -->
     <color name="vortex_accent">#E040FB</color>
