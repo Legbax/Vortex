@@ -389,7 +389,9 @@ class MainHook : IXposedHookLoadPackage {
         }
 
         if (lpparam.packageName == "android" ||
-            lpparam.packageName.startsWith("com.android.")) {
+            lpparam.packageName.startsWith("com.android.") ||
+            lpparam.packageName.startsWith("com.miui.") ||
+            lpparam.packageName.startsWith("com.xiaomi.")) {
             return
         }
 
@@ -457,11 +459,6 @@ class MainHook : IXposedHookLoadPackage {
                     val path = file.absolutePath
                     if (path.length < 5) return
 
-                    if (!path.contains("su")        && !path.contains("magisk")    &&
-                        !path.contains("xposed")    && !path.contains("busybox")   &&
-                        !path.contains("supersu")   && !path.contains("frida")     &&
-                        !path.contains("substrate") && !path.contains("riru")      &&
-                        !path.contains("zygisk"))    return
                     if (SpoofingUtils.isSensitivePath(path)) {
                         param.result = false
                     }
@@ -488,21 +485,6 @@ class MainHook : IXposedHookLoadPackage {
         override fun destroy()         = Unit
     }
 
-    private fun shouldBlockCommand(cmd: String): Boolean =
-        cmd.contains("magisk",              ignoreCase = true)  ||
-        cmd.contains("busybox",             ignoreCase = true)  ||
-        cmd.contains("frida-server",        ignoreCase = true)  ||
-        cmd.contains("zygisk",              ignoreCase = true)  ||
-        cmd.contains("getenforce")                              ||
-        cmd.contains("/system/xbin/su")                         ||
-        cmd.contains("/sbin/su")                                ||
-        cmd.contains("/system/bin/su")                          ||
-        cmd.contains("getprop ro.build.tags")                   ||
-        cmd.contains("getprop ro.debuggable")                   ||
-        cmd.contains("getprop ro.secure")                       ||
-        cmd.trim() == "su"                                      ||
-        cmd.startsWith("su ")
-
     private fun hookProcessBuilderAndRuntime() {
         try {
             val runtimeHook = object : XC_MethodHook() {
@@ -512,7 +494,7 @@ class MainHook : IXposedHookLoadPackage {
                         is Array<*>   -> arg.joinToString(" ")
                         else          -> return
                     }
-                    if (shouldBlockCommand(cmd)) {
+                    if (SpoofingUtils.isSensitiveCommand(cmd.split("\\s+".toRegex()))) {
                         param.result = createDummyProcess()
                         if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked Runtime.exec: $cmd")
                     }
@@ -529,10 +511,10 @@ class MainHook : IXposedHookLoadPackage {
                 ProcessBuilder::class.java, "start",
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
-                        val command = (param.thisObject as ProcessBuilder).command().joinToString(" ")
-                        if (shouldBlockCommand(command)) {
+                        val commandList = (param.thisObject as ProcessBuilder).command()
+                        if (SpoofingUtils.isSensitiveCommand(commandList)) {
                             param.result = createDummyProcess()
-                            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked ProcessBuilder: $command")
+                            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked ProcessBuilder: $commandList")
                         }
                     }
                 }
