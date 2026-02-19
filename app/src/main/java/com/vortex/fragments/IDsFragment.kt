@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -137,6 +139,14 @@ class IDsFragment : Fragment() {
         etGmail.setText(SpoofingUtils.generateRealisticGmail())
     }
 
+    private fun setValidationIcon(til: TextInputLayout, isValid: Boolean) {
+        val icon = if (isValid) R.drawable.ic_check_circle else R.drawable.ic_error_circle
+        val color = if (isValid) R.color.vortex_success else R.color.vortex_error
+
+        til.setStartIconDrawable(icon)
+        til.setStartIconTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), color)))
+    }
+
     private fun saveData(): Boolean {
         val ctx = requireContext()
         val imei1 = etImei.text.toString()
@@ -148,19 +158,35 @@ class IDsFragment : Fragment() {
 
         if (imei1.isNotEmpty() && !ValidationUtils.isValidImei(imei1)) {
             tilImei.error = "Invalid IMEI (Luhn check failed)"; ok = false
-        } else tilImei.error = null
+            setValidationIcon(tilImei, false)
+        } else {
+            tilImei.error = null
+            if (imei1.isNotEmpty()) setValidationIcon(tilImei, true)
+        }
 
         if (imei2.isNotEmpty() && !ValidationUtils.isValidImei(imei2)) {
             tilImei2.error = "Invalid IMEI (Luhn check failed)"; ok = false
-        } else tilImei2.error = null
+            setValidationIcon(tilImei2, false)
+        } else {
+            tilImei2.error = null
+            if (imei2.isNotEmpty()) setValidationIcon(tilImei2, true)
+        }
 
         if (iccid.isNotEmpty() && !ValidationUtils.isValidIccid(iccid)) {
             tilIccid.error = "Invalid ICCID (must be 19-20 digits starting with 89)"; ok = false
-        } else tilIccid.error = null
+            setValidationIcon(tilIccid, false)
+        } else {
+            tilIccid.error = null
+            if (iccid.isNotEmpty()) setValidationIcon(tilIccid, true)
+        }
 
         if (imsi.isNotEmpty() && !ValidationUtils.isValidImsi(imsi)) {
             tilImsi.error = "Invalid IMSI (must be 14-15 digits)"; ok = false
-        } else tilImsi.error = null
+            setValidationIcon(tilImsi, false)
+        } else {
+            tilImsi.error = null
+            if (imsi.isNotEmpty()) setValidationIcon(tilImsi, true)
+        }
 
         if (!ok) return false
 

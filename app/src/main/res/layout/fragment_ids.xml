@@ -1,398 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/vortex_background"
-    android:fillViewport="true">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/vortex_background" android:fillViewport="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp" android:clipToPadding="false">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="IDENTITY SPOOFING"
-            android:textColor="@color/vortex_text_secondary"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:layout_marginBottom="16dp"
-            app:drawableStartCompat="@drawable/ic_ids"
-            android:drawablePadding="8dp"
-            app:drawableTint="@color/vortex_accent" />
+        <!-- Header -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="@string/ids_identifiers"
+                style="@style/Vortex.Text.Title" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_generate_random"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/ids_randomize_all" style="@style/Vortex.Button.Text"
+                android:textColor="@color/vortex_accent"
+                app:icon="@drawable/ic_refresh" app:iconTint="@color/vortex_accent" />
+        </LinearLayout>
 
-        <!-- Cellular IDs -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/vortex_card_background"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
-            android:layout_marginBottom="12dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Cellular Identifiers"
-                    android:textColor="@color/vortex_accent"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_imei"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="IMEI (Slot 1)"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_imei"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"
-                        android:inputType="number"/>
+        <!-- IMEI 1 -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ids_imei" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_imei" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_imei" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" />
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_imei2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="IMEI (Slot 2)"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_imei2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"
-                        android:inputType="number"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_imsi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="IMSI"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_imsi"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"
-                        android:inputType="number"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_iccid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="ICCID (Sim Serial)"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_iccid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"
-                        android:inputType="number"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_phone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Phone Number"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_phone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"
-                        android:inputType="phone"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Hardware IDs -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/vortex_card_background"
-            app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
-            android:layout_marginBottom="12dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hardware &amp; System"
-                    android:textColor="@color/vortex_accent"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_android_id"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Android ID (Global)"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_android_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
+        <!-- IMEI 2 -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IMEI 2 (Slot 2)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_imei2" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_imei2" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" />
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_ssaid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="SSAID (Snapchat)"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_ssaid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_gaid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Google Advertising ID (GAID)"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_gaid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_gsf_id"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="GSF ID"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_gsf_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_media_drm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Media DRM ID"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_media_drm"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_serial"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Serial Number"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_serial"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_wifi_mac"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Wifi MAC"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_wifi_mac"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_bt_mac"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Bluetooth MAC"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_bt_mac"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_gmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Gmail Account"
-                    android:layout_marginTop="8dp"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:textColorHint="@color/vortex_text_secondary"
-                    app:boxStrokeColor="@color/vortex_accent"
-                    app:hintTextColor="@color/vortex_accent"
-                    app:endIconMode="custom"
-                    app:endIconDrawable="@drawable/ic_refresh"
-                    app:endIconTint="@color/vortex_accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_gmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/vortex_text_primary"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/btn_generate_random"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="RANDOMIZE ALL"
-            android:backgroundTint="@color/vortex_accent"
-            android:textColor="#000000"
-            android:layout_marginBottom="8dp"/>
+        <!-- IMSI -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IMSI (Subscriber ID)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_imsi" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_imsi" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <Button
+        <!-- ICCID -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ICCID (SIM Serial)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_iccid" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_iccid" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Phone Number -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/network_phone_number" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_phone" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="phone" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Android ID -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ids_android_id" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_android_id" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_android_id" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SSAID (Snapchat) -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SSAID (Snapchat)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_ssaid" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_ssaid" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- GAID -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Advertising ID (GAID)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_gaid" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_gaid" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- GSF ID -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ids_gsf" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_gsf_id" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_gsf_id" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- MediaDRM -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MediaDRM Device ID" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_media_drm" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_media_drm" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Serial -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ids_serial" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_serial" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_serial" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- WiFi MAC -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/network_wifi_mac" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_wifi_mac" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_wifi_mac" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Bluetooth MAC -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/ids_bluetooth_mac" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_bt_mac" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_bt_mac" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Gmail -->
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Google Account" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
+                <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_gmail" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout" app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_gmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress" android:textColor="@color/vortex_text_primary" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="SAVE SETTINGS"
-            android:backgroundTint="@color/vortex_accent"
-            android:textColor="@color/vortex_text_primary"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            app:strokeColor="@color/vortex_accent"
-            android:layout_marginBottom="32dp"/>
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/action_save" android:layout_marginTop="16dp"
+            style="@style/Widget.MaterialComponents.Button" />
 
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>

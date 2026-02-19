@@ -27,16 +27,16 @@ class NetworkFragment : Fragment() {
 
         adapter = CarrierAdapter(MainHook.getUsCarriers()) { carrier ->
             val ctx = requireContext()
-            // Guardar MCC/MNC y nombre del carrier (para diferenciar T-Mobile vs Metro vs Google Fi)
+            // Guardar MCC/MNC y nombre del carrier (Contexto de red)
             PrefsManager.saveString(ctx, "mcc_mnc",       carrier.mccMnc)
             PrefsManager.saveString(ctx, "carrier_name",  carrier.name)
             PrefsManager.saveString(ctx, "sim_country",   "us")
-            // [FIX U4] Regenerar IDs dependientes automáticamente
-            PrefsManager.saveString(ctx, "imsi",          SpoofingUtils.generateValidImsi(carrier.mccMnc))
-            PrefsManager.saveString(ctx, "iccid",         SpoofingUtils.generateValidIccid(carrier.mccMnc))
-            PrefsManager.saveString(ctx, "phone_number",  SpoofingUtils.generatePhoneNumber(carrier.npas))
-            showInfo(carrier)
-            Toast.makeText(ctx, "Carrier saved: ${carrier.name}. SIM IDs regenerated.", Toast.LENGTH_LONG).show()
+
+            // [LOGIC FIX] NO generar ni guardar IDs automáticamente.
+            // El usuario debe ir a IDsFragment para generarlos si lo desea.
+
+            updateInfoDisplay()
+            Toast.makeText(ctx, "Carrier Context Set: ${carrier.name}", Toast.LENGTH_SHORT).show()
         }
 
         rvCarriers.layoutManager = LinearLayoutManager(context)
@@ -44,14 +44,19 @@ class NetworkFragment : Fragment() {
 
         val savedMcc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
         adapter.setSelected(savedMcc)
-        MainHook.getUsCarriers().find { it.mccMnc == savedMcc }?.let { showInfo(it) }
+        updateInfoDisplay()
 
         return view
     }
 
-    private fun showInfo(c: MainHook.Companion.UsCarrier) {
-        val imsi  = PrefsManager.getString(requireContext(), "imsi", SpoofingUtils.generateValidImsi(c.mccMnc))
-        val phone = PrefsManager.getString(requireContext(), "phone_number", SpoofingUtils.generatePhoneNumber(c.npas))
-        tvInfo.text = "Carrier: ${c.name}\nMCC/MNC: ${c.mccMnc}\nSPN: ${c.spn}\nIMSI: $imsi\nPhone: $phone"
+    private fun updateInfoDisplay() {
+        val ctx = requireContext()
+        val carrierName = PrefsManager.getString(ctx, "carrier_name", "Unknown")
+        val mccMnc      = PrefsManager.getString(ctx, "mcc_mnc", "—")
+        // Mostrar valores GUARDADOS, no generados al vuelo
+        val imsi        = PrefsManager.getString(ctx, "imsi", "Not generated")
+        val phone       = PrefsManager.getString(ctx, "phone_number", "Not generated")
+
+        tvInfo.text = getString(R.string.network_info_format, carrierName, mccMnc, carrierName, imsi, phone)
     }
 }
