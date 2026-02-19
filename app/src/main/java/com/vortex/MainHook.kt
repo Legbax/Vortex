@@ -414,6 +414,7 @@ class MainHook : IXposedHookLoadPackage {
             hookTelephonyManager(lpparam)
             hookUnifiedSettingsSecure(lpparam)
             hookNetworkInterfaces(lpparam)
+            hookBluetooth(lpparam)
             hookWifiInfo(lpparam)
             hookMediaDrm(lpparam)
             hookLocation(lpparam, prefs, ::getEncryptedString)
@@ -783,6 +784,18 @@ class MainHook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(tmClass, "getSimOperatorName",     object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = carrier.name } })
             XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso",   object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = "us" } })
             XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso",       object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = "us" } })
+
+            try {
+                XposedHelpers.findAndHookMethod(tmClass, "getMeid", object : XC_MethodHook() {
+                    override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedImei }
+                })
+                XposedHelpers.findAndHookMethod(tmClass, "getMeid", Int::class.javaPrimitiveType, object : XC_MethodHook() {
+                    override fun afterHookedMethod(p: MethodHookParam) {
+                        p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2
+                    }
+                })
+            } catch (e: NoSuchMethodError) {}
+
         } catch (e: Throwable) {}
     }
 
@@ -1028,13 +1041,37 @@ class MainHook : IXposedHookLoadPackage {
         } catch (e: Throwable) {}
     }
 
+    private fun hookBluetooth(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val btClass = XposedHelpers.findClass("android.bluetooth.BluetoothAdapter", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(btClass, "getAddress", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    param.result = cachedBtMac
+                }
+            })
+        } catch (e: Throwable) {}
+    }
+
     private fun hookMediaDrm(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val drmClass = XposedHelpers.findClass("android.media.MediaDrm", lpparam.classLoader)
+
+            // Hook getPropertyByteArray
             XposedHelpers.findAndHookMethod(drmClass, "getPropertyByteArray", String::class.java, object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
-                    if (param.args[0] == "deviceUniqueId" && cachedMediaDrmId != null) {
+                    val key = param.args[0] as String
+                    if ((key == "deviceUniqueId" || key == "deviceId") && cachedMediaDrmId != null) {
                          param.result = hexStringToByteArray(cachedMediaDrmId!!)
+                    }
+                }
+            })
+
+            // Hook getPropertyString (New)
+            XposedHelpers.findAndHookMethod(drmClass, "getPropertyString", String::class.java, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val key = param.args[0] as String
+                    if ((key == "deviceUniqueId" || key == "deviceId") && cachedMediaDrmId != null) {
+                         param.result = cachedMediaDrmId
                     }
                 }
             })
