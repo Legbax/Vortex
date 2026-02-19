@@ -3,282 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vortex UI Preview</title>
+    <title>Vortex UI Preview (Dalí Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vortex: {
+                            bg: '#080A0F',
+                            surface: '#12151A',
+                            accent: '#E040FB',
+                            accent20: 'rgba(224, 64, 251, 0.2)',
+                            text: '#FFFFFF',
+                            textSec: '#B0B0B0',
+                            success: '#00E676',
+                            error: '#FF1744'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #050505;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .device-screen {
-            width: 360px;
-            height: 740px;
-            background-color: #050505;
-            border-radius: 20px;
+        /* Redmi 9 Lancelot Dimensions & Bezel */
+        .device-frame {
+            width: 360px; /* Scaled down for preview */
+            height: 800px; /* 20:9 Aspect Ratio */
+            border-radius: 24px;
+            box-shadow: 0 0 50px rgba(224, 64, 251, 0.15);
+            position: relative;
+            overflow: hidden;
             border: 8px solid #000;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
-            display: flex;
-            flex-direction: column;
         }
-        .status-bar {
-            height: 24px;
-            background-color: #000;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px;
-            box-sizing: border-box;
-            font-size: 10px;
-            align-items: center;
-            color: #aaa;
-        }
-        .app-bar {
-            background-color: #050505;
-            padding: 16px;
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            color: #E040FB;
-            text-shadow: 0 0 10px rgba(224, 64, 251, 0.5);
-        }
-        .app-bar .subtitle {
-            font-size: 10px;
-            color: #B0B0B0;
-            margin-top: 4px;
-            text-shadow: none;
-        }
-        .content {
-            padding: 16px;
-            flex: 1;
-        }
-        .card {
-            background-color: #121212;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid #333;
-        }
-        .card-title {
-            font-size: 14px;
-            color: #E040FB;
-            margin-bottom: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .progress-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 10px solid #121212;
-            border-top: 10px solid #E040FB;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            box-shadow: 0 0 15px rgba(224, 64, 251, 0.2);
-        }
-        .score-text {
-            font-size: 40px;
-            font-weight: bold;
-            color: #fff;
-        }
-        .score-label {
-            font-size: 10px;
-            color: #aaa;
-        }
-        .row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 12px;
-        }
-        .label {
-            color: #aaa;
-        }
-        .value {
-            font-weight: bold;
-        }
-        .input-group {
-            margin-bottom: 12px;
-            position: relative;
-        }
-        .input-field {
-            width: 100%;
-            background-color: #050505;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 12px;
-            color: #fff;
-            box-sizing: border-box;
-            font-family: monospace;
-        }
-        .input-icon {
+        .notch {
             position: absolute;
-            right: 12px;
-            top: 12px;
-            color: #E040FB;
-            cursor: pointer;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 28px;
+            background-color: #000;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 50;
         }
-        .btn {
-            background-color: #E040FB;
-            color: #000;
-            border: none;
-            padding: 12px;
-            border-radius: 4px;
-            width: 100%;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            margin-top: 8px;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
         }
-        .btn-danger {
-            background-color: #D32F2F;
-            color: #fff;
+        ::-webkit-scrollbar-track {
+            background: #080A0F;
         }
-        .btn-dark {
-            background-color: #212121;
-            color: #fff;
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
         }
-        .nav-bar {
-            height: 56px;
-            background-color: #121212;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #333;
-        }
-        .nav-item {
-            font-size: 10px;
-            color: #666;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .nav-item.active {
-            color: #E040FB;
-        }
-        .screen-title {
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            color: #fff;
-        }
-        .checkbox {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #E040FB;
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        ::-webkit-scrollbar-thumb:hover {
             background: #E040FB;
+        }
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple::after {
+            content: "";
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-10 font-sans text-vortex-text selection:bg-vortex-accent selection:text-black">
 
-    <!-- STATUS SCREEN -->
-    <div>
-        <div class="screen-title">Status Tab</div>
-        <div class="device-screen">
-            <div class="status-bar"><span>12:00</span><span>100%</span></div>
-            <div class="app-bar">
-                VORTEX
-                <div class="subtitle">Developed by Legba</div>
+    <!-- Alpine.js State Management -->
+    <div x-data="{
+        tab: 'status',
+        score: 0,
+        mockLocation: false,
+        wifiToggle: true,
+        bluetoothToggle: true,
+        apps: {
+            snapchat: true,
+            playstore: false,
+            gms: false
+        },
+        profile: 'Redmi 9 (Global)',
+        init() {
+            // Animate Score on load
+            setTimeout(() => {
+                let i = 0;
+                const interval = setInterval(() => {
+                    this.score = i;
+                    i++;
+                    if (i > 100) clearInterval(interval);
+                }, 15);
+            }, 500);
+        }
+    }">
+
+        <!-- Device Wrapper -->
+        <div class="device-frame bg-vortex-bg flex flex-col relative">
+
+            <!-- Notch -->
+            <div class="notch"></div>
+
+            <!-- Status Bar -->
+            <div class="h-8 flex justify-between items-center px-6 pt-1 text-xs text-vortex-textSec font-medium z-40 bg-vortex-bg">
+                <span>12:00</span>
+                <div class="flex gap-1">
+                    <span class="material-icons-outlined text-[14px]">signal_cellular_4_bar</span>
+                    <span class="material-icons-outlined text-[14px]">wifi</span>
+                    <span class="material-icons-outlined text-[14px]">battery_full</span>
+                </div>
             </div>
-            <div class="content">
-                <div class="progress-circle">
-                    <div class="score-text">100%</div>
-                    <div class="score-label">Integrity Score</div>
+
+            <!-- Content Area (Scrollable) -->
+            <div class="flex-1 overflow-y-auto pb-20 relative">
+
+                <!-- STATUS TAB -->
+                <div x-show="tab === 'status'" x-transition.opacity.duration.300ms class="p-4 space-y-6">
+                    <div class="text-center mt-4">
+                        <h1 class="text-3xl font-bold tracking-tight">VORTEX</h1>
+                        <p class="text-vortex-textSec text-xs tracking-widest mt-1">DEVELOPED BY LEGBA</p>
+                    </div>
+
+                    <!-- Evasion Score -->
+                    <div class="relative w-48 h-48 mx-auto flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="96" cy="96" r="88" stroke="#12151A" stroke-width="8" fill="transparent"/>
+                            <circle cx="96" cy="96" r="88" stroke="#E040FB" stroke-width="8" fill="transparent"
+                                    :stroke-dasharray="2 * Math.PI * 88"
+                                    :stroke-dashoffset="2 * Math.PI * 88 - (2 * Math.PI * 88 * score / 100)"
+                                    class="transition-all duration-1000 ease-out"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-5xl font-bold" x-text="score + '%'"></span>
+                            <span class="text-[10px] text-vortex-textSec uppercase tracking-wider mt-1">Evasion Score</span>
+                        </div>
+                    </div>
+
+                    <!-- Active Configuration -->
+                    <div class="bg-vortex-surface rounded-xl p-5 border border-white/5 shadow-lg">
+                        <h3 class="text-xs font-bold text-vortex-textSec uppercase mb-4 tracking-wider">Active Configuration</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-vortex-textSec">Fingerprint</span>
+                                <span class="font-medium text-vortex-accent" x-text="profile"></span>
+                            </div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-vortex-textSec">SIM Country</span>
+                                <span class="font-medium">US (T-Mobile)</span>
+                            </div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-vortex-textSec">Location</span>
+                                <span class="font-medium" x-text="mockLocation ? 'Spoofed (NY)' : 'Real'"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title">Active Configuration</div>
-                    <div class="row">
-                        <span class="label">Fingerprint:</span>
-                        <span class="value">Redmi 9 (Global)</span>
+                <!-- DEVICE TAB -->
+                <div x-show="tab === 'device'" x-transition.opacity.duration.300ms class="p-4 space-y-4">
+                    <h2 class="text-xl font-bold mb-2">Device Profiles</h2>
+
+                    <!-- Search Bar -->
+                    <div class="relative">
+                        <span class="material-icons-outlined absolute left-3 top-3 text-vortex-textSec">search</span>
+                        <input type="text" placeholder="Search devices..."
+                               class="w-full bg-vortex-surface border border-white/10 rounded-lg py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-vortex-accent focus:ring-1 focus:ring-vortex-accent transition-all placeholder-gray-600">
                     </div>
-                    <div class="row">
-                        <span class="label">SIM Country:</span>
-                        <span class="value">US (T-Mobile)</span>
-                    </div>
-                    <div class="row">
-                        <span class="label">Location:</span>
-                        <span class="value">Spoofed (NY)</span>
+
+                    <!-- Random Button -->
+                    <button @click="profile = 'Pixel 5 (Redfin)'" class="w-full bg-vortex-accent text-black font-bold py-3 rounded-lg shadow-lg shadow-purple-900/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                        <span class="material-icons-outlined text-lg">shuffle</span>
+                        SELECT RANDOM PROFILE
+                    </button>
+
+                    <!-- List -->
+                    <div class="space-y-2 mt-4">
+                        <template x-for="device in ['Redmi 9 (Global)', 'Pixel 5 (Redfin)', 'Galaxy S21 (Ultra)', 'OnePlus 9 Pro']">
+                            <div @click="profile = device"
+                                 class="bg-vortex-surface p-4 rounded-lg border border-white/5 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors"
+                                 :class="profile === device ? 'border-vortex-accent bg-vortex-accent20' : ''">
+                                <div>
+                                    <div class="font-medium text-sm" x-text="device"></div>
+                                    <div class="text-xs text-vortex-textSec mt-0.5">Android 11 • API 30</div>
+                                </div>
+                                <div x-show="profile === device" class="w-2 h-2 rounded-full bg-vortex-accent shadow-[0_0_8px_#E040FB]"></div>
+                            </div>
+                        </template>
                     </div>
                 </div>
+
+                <!-- NETWORK TAB -->
+                <div x-show="tab === 'network'" x-transition.opacity.duration.300ms class="p-4 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold">Network</h2>
+                        <button class="text-vortex-accent p-2 hover:bg-vortex-surface rounded-full transition-colors">
+                            <span class="material-icons-outlined">refresh</span>
+                        </button>
+                    </div>
+
+                    <!-- Carrier Context -->
+                    <div class="bg-vortex-surface rounded-xl p-4 border border-white/5">
+                        <h3 class="text-xs font-bold text-vortex-textSec uppercase mb-3">Carrier Context</h3>
+                        <div class="relative mb-3">
+                             <input type="text" placeholder="Search Carriers (e.g. Verizon)"
+                               class="w-full bg-black/30 border border-white/10 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-vortex-accent transition-all">
+                        </div>
+                        <div class="h-24 overflow-y-auto space-y-1 pr-1">
+                             <div class="p-2 bg-vortex-accent20 rounded text-xs border border-vortex-accent/30 flex justify-between">
+                                <span>T-Mobile (USA)</span>
+                                <span class="text-vortex-accent font-bold">310-260</span>
+                             </div>
+                             <div class="p-2 hover:bg-white/5 rounded text-xs text-vortex-textSec flex justify-between cursor-pointer">
+                                <span>Verizon (USA)</span>
+                                <span>311-480</span>
+                             </div>
+                             <div class="p-2 hover:bg-white/5 rounded text-xs text-vortex-textSec flex justify-between cursor-pointer">
+                                <span>AT&T (USA)</span>
+                                <span>310-410</span>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Identity Fields -->
+                    <div class="space-y-4">
+                        <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 relative group">
+                            <label class="text-[10px] text-vortex-accent uppercase font-bold absolute top-2 left-4">IMSI</label>
+                            <input type="text" value="310260492819203" readonly class="w-full bg-transparent pt-4 pb-1 text-sm font-mono text-vortex-text outline-none border-b border-white/10 focus:border-vortex-accent">
+                            <span class="material-icons-outlined absolute right-4 top-4 text-vortex-textSec cursor-pointer hover:text-vortex-accent">refresh</span>
+                        </div>
+                        <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 relative group">
+                            <label class="text-[10px] text-vortex-accent uppercase font-bold absolute top-2 left-4">Phone Number</label>
+                            <input type="text" value="+1 (202) 555-0192" readonly class="w-full bg-transparent pt-4 pb-1 text-sm font-mono text-vortex-text outline-none border-b border-white/10 focus:border-vortex-accent">
+                            <span class="material-icons-outlined absolute right-4 top-4 text-vortex-textSec cursor-pointer hover:text-vortex-accent">refresh</span>
+                        </div>
+                    </div>
+
+                    <!-- Toggles -->
+                    <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium">WiFi Emulation</div>
+                                <div class="text-[10px] text-vortex-textSec">Spoof MAC & SSID</div>
+                            </div>
+                            <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in" @click="wifiToggle = !wifiToggle">
+                                <div :class="wifiToggle ? 'bg-vortex-accent/50' : 'bg-gray-700'" class="w-10 h-6 rounded-full block cursor-pointer"></div>
+                                <div :class="wifiToggle ? 'translate-x-4 bg-vortex-accent' : 'translate-x-0 bg-white'" class="absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ease-in shadow-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IDs TAB -->
+                <div x-show="tab === 'ids'" x-transition.opacity.duration.300ms class="p-4 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold">Identifiers</h2>
+                        <button class="text-vortex-accent flex items-center gap-1 text-sm font-bold active:scale-95 transition-transform">
+                            <span class="material-icons-outlined text-sm">refresh</span>
+                            RANDOMIZE ALL
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <template x-for="label in ['IMEI 1', 'IMEI 2', 'Android ID', 'GSF ID', 'Serial Number']">
+                            <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 relative group hover:border-vortex-accent/30 transition-colors">
+                                <label class="text-[10px] text-vortex-textSec group-focus-within:text-vortex-accent uppercase font-bold absolute top-2 left-4 transition-colors" x-text="label"></label>
+                                <input type="text" value="864910041293810" class="w-full bg-transparent pt-5 pb-1 text-sm font-mono text-vortex-text outline-none border-b border-white/10 focus:border-vortex-accent transition-colors">
+                                <span class="material-icons-outlined absolute right-4 top-4 text-vortex-textSec cursor-pointer hover:text-vortex-accent active:rotate-180 transition-all duration-300">refresh</span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <button class="w-full bg-vortex-surface border border-vortex-accent text-vortex-accent font-bold py-3 rounded-lg active:bg-vortex-accent active:text-black transition-colors">
+                        SAVE CHANGES
+                    </button>
+                </div>
+
+                <!-- LOCATION TAB -->
+                <div x-show="tab === 'location'" x-transition.opacity.duration.300ms class="p-4 space-y-6">
+                    <h2 class="text-xl font-bold">Location Spoofing</h2>
+
+                    <!-- Map Mock -->
+                    <div class="w-full h-48 bg-gray-800 rounded-xl relative overflow-hidden group border border-white/10">
+                        <img src="https://maps.googleapis.com/maps/api/staticmap?center=40.7128,-74.0060&zoom=13&size=600x300&maptype=roadmap&style=feature:all|element:all|saturation:-100|lightness:-70&key=YOUR_API_KEY"
+                             alt="Map Preview"
+                             class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                             onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/New_York_City_location_map.svg/2000px-New_York_City_location_map.svg.png'">
+
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="material-icons text-vortex-accent text-4xl drop-shadow-lg animate-bounce">location_on</span>
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] text-white">Google Maps Data</div>
+                    </div>
+
+                    <!-- Toggle -->
+                    <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 flex justify-between items-center">
+                         <div>
+                            <div class="text-sm font-medium">Enable Mock Location</div>
+                            <div class="text-[10px] text-vortex-textSec">Override GPS Coordinates</div>
+                        </div>
+                        <div class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in" @click="mockLocation = !mockLocation">
+                            <div :class="mockLocation ? 'bg-vortex-accent/50' : 'bg-gray-700'" class="w-10 h-6 rounded-full block cursor-pointer"></div>
+                            <div :class="mockLocation ? 'translate-x-4 bg-vortex-accent' : 'translate-x-0 bg-white'" class="absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ease-in shadow-md"></div>
+                        </div>
+                    </div>
+
+                    <!-- Coordinates -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-vortex-surface rounded-xl p-3 border border-white/5">
+                            <label class="text-[10px] text-vortex-textSec uppercase">Latitude</label>
+                            <input type="text" value="40.7128" class="w-full bg-transparent text-sm font-mono border-none focus:ring-0 p-0 text-white">
+                        </div>
+                        <div class="bg-vortex-surface rounded-xl p-3 border border-white/5">
+                            <label class="text-[10px] text-vortex-textSec uppercase">Longitude</label>
+                            <input type="text" value="-74.0060" class="w-full bg-transparent text-sm font-mono border-none focus:ring-0 p-0 text-white">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                         <button class="flex-1 bg-transparent border border-white/20 text-white py-3 rounded-lg text-xs font-bold hover:bg-white/5 transition-colors">
+                            RANDOM CITY
+                        </button>
+                        <button class="flex-1 bg-vortex-accent text-black py-3 rounded-lg text-xs font-bold hover:opacity-90 transition-opacity">
+                            APPLY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ADVANCED TAB -->
+                <div x-show="tab === 'advanced'" x-transition.opacity.duration.300ms class="p-4 space-y-6">
+                    <h2 class="text-xl font-bold">Advanced Settings</h2>
+
+                    <!-- App Management -->
+                    <div class="space-y-2">
+                        <h3 class="text-xs font-bold text-vortex-textSec uppercase ml-2 mb-2">Target Applications</h3>
+
+                        <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium">Snapchat</div>
+                                <div class="text-[10px] text-vortex-textSec">Deep Hooking & Bypass</div>
+                            </div>
+                            <div class="relative inline-block w-10 h-6 align-middle select-none" @click="apps.snapchat = !apps.snapchat">
+                                <div :class="apps.snapchat ? 'bg-vortex-accent/50' : 'bg-gray-700'" class="w-10 h-6 rounded-full block cursor-pointer transition-colors"></div>
+                                <div :class="apps.snapchat ? 'translate-x-4 bg-vortex-accent' : 'translate-x-0 bg-white'" class="absolute left-1 top-1 w-4 h-4 rounded-full transition-transform shadow-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-vortex-surface rounded-xl p-4 border border-white/5 flex justify-between items-center">
+                            <div>
+                                <div class="text-sm font-medium">Google Play Store</div>
+                                <div class="text-[10px] text-vortex-textSec">Spoof Package Info</div>
+                            </div>
+                            <div class="relative inline-block w-10 h-6 align-middle select-none" @click="apps.playstore = !apps.playstore">
+                                <div :class="apps.playstore ? 'bg-vortex-accent/50' : 'bg-gray-700'" class="w-10 h-6 rounded-full block cursor-pointer transition-colors"></div>
+                                <div :class="apps.playstore ? 'translate-x-4 bg-vortex-accent' : 'translate-x-0 bg-white'" class="absolute left-1 top-1 w-4 h-4 rounded-full transition-transform shadow-md"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Actions -->
+                    <div class="space-y-2 mt-6">
+                        <h3 class="text-xs font-bold text-vortex-textSec uppercase ml-2 mb-2">System</h3>
+                        <button class="w-full bg-gray-800 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 transition-colors">
+                            <span class="material-icons-outlined text-sm">power_settings_new</span>
+                            REBOOT DEVICE
+                        </button>
+                         <button class="w-full bg-red-900/30 text-red-400 font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-red-900/50 transition-colors">
+                            <span class="material-icons-outlined text-sm">delete_forever</span>
+                            RESET VORTEX CONFIG
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Spacer for Nav -->
+                <div class="h-20"></div>
+
             </div>
-            <div class="nav-bar">
-                <div class="nav-item active">Status</div>
-                <div class="nav-item">Device</div>
-                <div class="nav-item">Network</div>
-                <div class="nav-item">IDs</div>
-                <div class="nav-item">Adv</div>
+
+            <!-- Bottom Navigation -->
+            <div class="absolute bottom-0 w-full bg-vortex-surface border-t border-white/5 flex justify-around items-center h-16 pb-2 z-50 rounded-b-[16px]">
+                <button @click="tab = 'status'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'status' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">dashboard</span>
+                    <span class="text-[10px] font-medium">Status</span>
+                </button>
+                <button @click="tab = 'device'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'device' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">smartphone</span>
+                    <span class="text-[10px] font-medium">Device</span>
+                </button>
+                 <button @click="tab = 'network'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'network' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">wifi</span>
+                    <span class="text-[10px] font-medium">Net</span>
+                </button>
+                <button @click="tab = 'ids'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'ids' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">fingerprint</span>
+                    <span class="text-[10px] font-medium">IDs</span>
+                </button>
+                 <button @click="tab = 'location'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'location' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">place</span>
+                    <span class="text-[10px] font-medium">Loc</span>
+                </button>
+                <button @click="tab = 'advanced'" class="flex flex-col items-center justify-center w-full h-full space-y-1" :class="tab === 'advanced' ? 'text-vortex-accent' : 'text-gray-500'">
+                    <span class="material-icons-outlined text-2xl">settings</span>
+                    <span class="text-[10px] font-medium">Adv</span>
+                </button>
             </div>
+
+            <!-- Home Bar Indicator -->
+            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-1/3 h-1 bg-gray-500 rounded-full z-50"></div>
+
         </div>
+
     </div>
-
-    <!-- ADVANCED SCREEN (RESTORED) -->
-    <div>
-        <div class="screen-title">Advanced Tab (Restored)</div>
-        <div class="device-screen">
-            <div class="status-bar"><span>12:00</span><span>100%</span></div>
-            <div class="content">
-                <div class="card-title" style="color: #aaa; margin-bottom: 16px;">APP MANAGEMENT</div>
-
-                <div class="card">
-                    <div class="card-title">Target Applications</div>
-
-                    <div class="checkbox-row">
-                        <div class="checkbox">✓</div>
-                        <span>Snapchat</span>
-                    </div>
-                    <div class="checkbox-row">
-                        <div style="width:20px; height:20px; border:2px solid #666; margin-right:12px;"></div>
-                        <span>Google Play Store</span>
-                    </div>
-                    <div class="checkbox-row">
-                        <div style="width:20px; height:20px; border:2px solid #666; margin-right:12px;"></div>
-                        <span>Google Play Services</span>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 16px;">
-                        <button class="btn">FORCE STOP</button>
-                        <button class="btn btn-danger">CLEAR DATA</button>
-                    </div>
-                </div>
-
-                <div class="card-title" style="color: #aaa; margin-top: 24px; margin-bottom: 16px;">SYSTEM</div>
-
-                <button class="btn btn-dark">REBOOT DEVICE</button>
-
-            </div>
-            <div class="nav-bar">
-                <div class="nav-item">Status</div>
-                <div class="nav-item">Device</div>
-                <div class="nav-item">Network</div>
-                <div class="nav-item">IDs</div>
-                <div class="nav-item active">Adv</div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

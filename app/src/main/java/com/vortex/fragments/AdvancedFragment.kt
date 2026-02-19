@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.vortex.R
@@ -18,9 +18,9 @@ class AdvancedFragment : Fragment() {
     private val PKG_PLAY_STORE = "com.android.vending"
     private val PKG_GMS = "com.google.android.gms"
 
-    private lateinit var cbSnapchat: CheckBox
-    private lateinit var cbPlayStore: CheckBox
-    private lateinit var cbGms: CheckBox
+    private lateinit var cbSnapchat: CompoundButton
+    private lateinit var cbPlayStore: CompoundButton
+    private lateinit var cbGms: CompoundButton
     private lateinit var btnForceStop: Button
     private lateinit var btnClearData: Button
     private lateinit var btnReboot: Button
