@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="vortex_background">#080A0F</color>
-    <color name="vortex_card_background">#12151A</color>
-    <color name="vortex_accent">#00D4FF</color>
+    <!-- Paleta Vortex / Legba (Dark Purple & Neon) -->
+    <!-- Fondo: Negro profundo/Azul oscuro -->
+    <color name="vortex_background">#050505</color>
+
+    <!-- Cards: Gris oscuro con tinte violeta -->
+    <color name="vortex_card_background">#121212</color>
+
+    <!-- Acento: Morado neón (Ghost Eye) -->
+    <color name="vortex_accent">#E040FB</color>
+    <color name="vortex_accent_20">#33E040FB</color>
+
+    <!-- Texto -->
     <color name="vortex_text_primary">#FFFFFF</color>
-    <color name="vortex_text_secondary">#8F9BB3</color>
-    <color name="vortex_nav_background">#080A0F</color>
-    <color name="vortex_error">#FF5252</color>
+    <color name="vortex_text_secondary">#B0B0B0</color>
+
+    <!-- Estados -->
     <color name="vortex_success">#00E676</color>
-    <color name="vortex_warning">#FFD600</color>
-    <color name="vortex_accent_25">#4000D4FF</color>
-    <color name="vortex_accent_20">#3300D4FF</color>
-    <color name="vortex_error_10">#1AFF5252</color>
-    <color name="vortex_error_20">#33FF5252</color>
-    <color name="vortex_surface_alt">#2C2C2C</color>
+    <color name="vortex_error">#FF1744</color>
+
+    <!-- Legacy Overrides -->
+    <color name="purple_200">#E040FB</color>
+    <color name="purple_500">#9C27B0</color>
+    <color name="purple_700">#7B1FA2</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

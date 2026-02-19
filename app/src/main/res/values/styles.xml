@@ -35,7 +35,7 @@
     </style>
 
     <style name="Vortex.InputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/vortex_accent_25</item>
+        <item name="boxStrokeColor">@color/vortex_accent_20</item>
         <item name="hintTextColor">@color/vortex_text_secondary</item>
         <item name="android:textColorHint">@color/vortex_text_secondary</item>
         <item name="boxBackgroundColor">@color/vortex_card_background</item>

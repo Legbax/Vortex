@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #121212;
+            background-color: #050505;
             color: #ffffff;
             margin: 0;
             padding: 20px;
@@ -19,12 +19,12 @@
         .device-screen {
             width: 360px;
             height: 740px;
-            background-color: #1e1e1e;
+            background-color: #050505;
             border-radius: 20px;
             border: 8px solid #000;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
             display: flex;
             flex-direction: column;
         }
@@ -41,7 +41,7 @@
             color: #aaa;
         }
         .app-bar {
-            background-color: #1e1e1e;
+            background-color: #050505;
             padding: 16px;
             font-size: 20px;
             font-weight: bold;
@@ -49,25 +49,29 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            color: #E040FB;
+            text-shadow: 0 0 10px rgba(224, 64, 251, 0.5);
         }
         .app-bar .subtitle {
             font-size: 10px;
-            color: #aaa;
+            color: #B0B0B0;
             margin-top: 4px;
+            text-shadow: none;
         }
         .content {
             padding: 16px;
             flex: 1;
         }
         .card {
-            background-color: #2c2c2c;
+            background-color: #121212;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
+            border: 1px solid #333;
         }
         .card-title {
             font-size: 14px;
-            color: #03dac6;
+            color: #E040FB;
             margin-bottom: 8px;
             font-weight: bold;
             text-transform: uppercase;
@@ -76,17 +80,19 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            border: 10px solid #2c2c2c;
-            border-top: 10px solid #03dac6;
+            border: 10px solid #121212;
+            border-top: 10px solid #E040FB;
             margin: 20px auto;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            box-shadow: 0 0 15px rgba(224, 64, 251, 0.2);
         }
         .score-text {
             font-size: 40px;
             font-weight: bold;
+            color: #fff;
         }
         .score-label {
             font-size: 10px;
@@ -110,7 +116,7 @@
         }
         .input-field {
             width: 100%;
-            background-color: #121212;
+            background-color: #050505;
             border: 1px solid #444;
             border-radius: 4px;
             padding: 12px;
@@ -122,11 +128,11 @@
             position: absolute;
             right: 12px;
             top: 12px;
-            color: #03dac6;
+            color: #E040FB;
             cursor: pointer;
         }
         .btn {
-            background-color: #03dac6;
+            background-color: #E040FB;
             color: #000;
             border: none;
             padding: 12px;
@@ -137,56 +143,52 @@
             text-transform: uppercase;
             margin-top: 8px;
         }
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid #03dac6;
-            color: #03dac6;
+        .btn-danger {
+            background-color: #D32F2F;
+            color: #fff;
+        }
+        .btn-dark {
+            background-color: #212121;
+            color: #fff;
         }
         .nav-bar {
             height: 56px;
-            background-color: #2c2c2c;
+            background-color: #121212;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid #444;
+            border-top: 1px solid #333;
         }
         .nav-item {
             font-size: 10px;
-            color: #aaa;
+            color: #666;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .nav-item.active {
-            color: #03dac6;
-        }
-        .switch-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .switch {
-            width: 36px;
-            height: 20px;
-            background-color: #03dac6;
-            border-radius: 10px;
-            position: relative;
-        }
-        .switch::after {
-            content: '';
-            width: 16px;
-            height: 16px;
-            background-color: #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            right: 2px;
+            color: #E040FB;
         }
         .screen-title {
             text-align: center;
             color: #aaa;
             margin-bottom: 10px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #E040FB;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #E040FB;
         }
     </style>
 </head>
@@ -228,129 +230,52 @@
                 <div class="nav-item">Device</div>
                 <div class="nav-item">Network</div>
                 <div class="nav-item">IDs</div>
-                <div class="nav-item">Loc</div>
+                <div class="nav-item">Adv</div>
             </div>
         </div>
     </div>
 
-    <!-- NETWORK SCREEN -->
+    <!-- ADVANCED SCREEN (RESTORED) -->
     <div>
-        <div class="screen-title">Network Tab</div>
+        <div class="screen-title">Advanced Tab (Restored)</div>
         <div class="device-screen">
             <div class="status-bar"><span>12:00</span><span>100%</span></div>
             <div class="content">
-                <div class="row" style="align-items: center; margin-bottom: 16px;">
-                    <span class="value" style="font-size: 18px;">Network Identity</span>
-                    <span style="color: #03dac6; font-size: 12px; font-weight: bold;">RANDOM ALL ↻</span>
-                </div>
+                <div class="card-title" style="color: #aaa; margin-bottom: 16px;">APP MANAGEMENT</div>
 
                 <div class="card">
-                    <div class="card-title">Carrier Context</div>
-                    <div style="height: 60px; background: #121212; border: 1px solid #444; border-radius: 4px; padding: 8px; overflow-y: scroll;">
-                        <div style="padding: 4px; color: #03dac6;">T-Mobile (310260)</div>
-                        <div style="padding: 4px;">AT&T (310410)</div>
-                        <div style="padding: 4px;">Verizon (310012)</div>
+                    <div class="card-title">Target Applications</div>
+
+                    <div class="checkbox-row">
+                        <div class="checkbox">✓</div>
+                        <span>Snapchat</span>
+                    </div>
+                    <div class="checkbox-row">
+                        <div style="width:20px; height:20px; border:2px solid #666; margin-right:12px;"></div>
+                        <span>Google Play Store</span>
+                    </div>
+                    <div class="checkbox-row">
+                        <div style="width:20px; height:20px; border:2px solid #666; margin-right:12px;"></div>
+                        <span>Google Play Services</span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <button class="btn">FORCE STOP</button>
+                        <button class="btn btn-danger">CLEAR DATA</button>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title">Cellular Identity</div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="T-Mobile (310260)" readonly>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="310260123456789" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="8931012345678901234" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="+1 202-555-0123" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                </div>
+                <div class="card-title" style="color: #aaa; margin-top: 24px; margin-bottom: 16px;">SYSTEM</div>
 
-                <div class="card">
-                    <div class="card-title">WiFi & Bluetooth</div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="Home_WiFi_5G" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="00:11:22:33:44:55" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="AA:BB:CC:DD:EE:FF" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                </div>
+                <button class="btn btn-dark">REBOOT DEVICE</button>
 
-                <button class="btn">Save Configuration</button>
-            </div>
-            <div class="nav-bar">
-                <div class="nav-item">Status</div>
-                <div class="nav-item">Device</div>
-                <div class="nav-item active">Network</div>
-                <div class="nav-item">IDs</div>
-                <div class="nav-item">Loc</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- IDs SCREEN -->
-    <div>
-        <div class="screen-title">IDs Tab</div>
-        <div class="device-screen">
-            <div class="status-bar"><span>12:00</span><span>100%</span></div>
-            <div class="content">
-                <div class="row" style="align-items: center; margin-bottom: 16px;">
-                    <span class="value" style="font-size: 18px;">Device Identifiers</span>
-                    <span style="color: #03dac6; font-size: 12px; font-weight: bold;">RANDOM ALL ↻</span>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">Hardware IDs</div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="864134050123456" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="864134050987654" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="a1b2c3d4e5f67890" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="MediaDRM ID..." readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="Serial No..." readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">Accounts</div>
-                    <div class="input-group">
-                        <input type="text" class="input-field" value="john.doe.123@gmail.com" readonly>
-                        <span class="input-icon">↻</span>
-                    </div>
-                </div>
-
-                <button class="btn">Save Configuration</button>
             </div>
             <div class="nav-bar">
                 <div class="nav-item">Status</div>
                 <div class="nav-item">Device</div>
                 <div class="nav-item">Network</div>
-                <div class="nav-item active">IDs</div>
-                <div class="nav-item">Loc</div>
+                <div class="nav-item">IDs</div>
+                <div class="nav-item active">Adv</div>
             </div>
         </div>
     </div>
