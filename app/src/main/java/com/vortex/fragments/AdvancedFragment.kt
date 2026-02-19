@@ -36,9 +36,9 @@ class AdvancedFragment : Fragment() {
     }
 
     private fun bindViews(view: View) {
-        cbSnapchat = view.findViewById(R.id.cb_snapchat)
-        cbPlayStore = view.findViewById(R.id.cb_play_store)
-        cbGms = view.findViewById(R.id.cb_gms)
+        cbSnapchat = view.findViewById(R.id.switch_snapchat)
+        cbPlayStore = view.findViewById(R.id.switch_play_store)
+        cbGms = view.findViewById(R.id.switch_gms)
         btnForceStop = view.findViewById(R.id.btn_force_stop)
         btnClearData = view.findViewById(R.id.btn_clear_data)
         btnReboot = view.findViewById(R.id.btn_reboot)

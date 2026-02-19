@@ -17,6 +17,8 @@
     <color name="vortex_text_secondary">#8F9BB3</color>
     <color name="vortex_nav_background">#080A0F</color>
     <color name="vortex_error">#FF5252</color>
+    <color name="vortex_success">#00E676</color>
+    <color name="vortex_warning">#FFAB00</color>
 
     <!-- Vortex Theme Alphas & Variations -->
     <color name="vortex_accent_25">#4000D4FF</color>

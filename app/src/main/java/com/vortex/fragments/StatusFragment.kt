@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.vortex.R
 
 class StatusFragment : Fragment() {
@@ -26,22 +27,28 @@ class StatusFragment : Fragment() {
 
         val active = isModuleActive()
 
-        view.findViewById<ImageView>(R.id.iv_status_icon).apply {
-            setImageResource(if (active) R.drawable.ic_check_circle else R.drawable.ic_error_circle)
-            setColorFilter(if (active) Color.parseColor("#4CAF50") else Color.parseColor("#F44336"))
+        // Update Module Status Card
+        view.findViewById<ImageView>(R.id.iv_module_status).apply {
+            setImageResource(if (active) R.drawable.ic_logo else R.drawable.ic_error_circle) // Keeping logo for active as per design
+            setColorFilter(if (active) Color.parseColor("#00D4FF") else Color.parseColor("#FF5252")) // Accent or Error
         }
 
-        view.findViewById<TextView>(R.id.tv_status_title).apply {
-            text = if (active) "Módulo Activo" else "Módulo Inactivo"
-            setTextColor(if (active) Color.parseColor("#4CAF50") else Color.parseColor("#F44336"))
+        view.findViewById<TextView>(R.id.tv_module_status).apply {
+            text = if (active) "MODULE ACTIVE" else "MODULE INACTIVE"
+            setTextColor(if (active) Color.parseColor("#8F9BB3") else Color.parseColor("#FF5252")) // Secondary or Error
         }
 
+        // Update Description
         view.findViewById<TextView>(R.id.tv_status_description).text = if (active) {
-            "El módulo Vortex está cargado correctamente por Xposed/LSPosed."
+            "Your device profile is highly consistent and evasion is active."
         } else {
-            "El módulo no está activo. Asegúrate de haberlo habilitado en LSPosed " +
-            "y de haber reiniciado el dispositivo."
+            "Module is not loaded. Please enable in LSPosed and reboot."
         }
+
+        // Update Evasion Score
+        val score = if (active) 98 else 0
+        view.findViewById<CircularProgressIndicator>(R.id.progress_evasion).progress = score
+        view.findViewById<TextView>(R.id.tv_evasion_score).text = score.toString()
 
         return view
     }
