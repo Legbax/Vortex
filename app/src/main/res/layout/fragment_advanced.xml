@@ -7,7 +7,7 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:padding="16dp">
 
-        <!-- HOOK CONFIGURATION -->
+        <!-- HOOK CONFIGURATION (Preserved from Main) -->
         <TextView android:text="HOOK CONFIGURATION" android:textColor="@color/vortex_text_secondary"
             android:textStyle="bold" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
@@ -36,7 +36,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- APP MANAGEMENT (Existing Code) -->
+        <!-- APP MANAGEMENT (Dalí Redesign) -->
         <TextView android:text="APP MANAGEMENT" android:textColor="@color/vortex_text_secondary"
             android:textStyle="bold" android:layout_marginTop="24dp" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
@@ -61,30 +61,108 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
 
-                <CheckBox
-                    android:id="@+id/cb_snapchat"
+                <!-- Snapchat -->
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Snapchat"
-                    android:checked="true"
-                    android:textColor="@color/vortex_text_primary"
-                    android:buttonTint="@color/vortex_accent"/>
+                    android:paddingVertical="8dp">
 
-                <CheckBox
-                    android:id="@+id/cb_play_store"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Google Play Store"
-                    android:textColor="@color/vortex_text_primary"
-                    android:buttonTint="@color/vortex_accent"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toStartOf="@+id/cb_snapchat"
+                        android:layout_centerVertical="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Snapchat"
+                            android:textColor="@color/vortex_text_primary"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Deep Hooking &amp; Bypass"
+                            android:textColor="@color/vortex_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
 
-                <CheckBox
-                    android:id="@+id/cb_gms"
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/cb_snapchat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:checked="true" />
+                </RelativeLayout>
+
+                <!-- Play Store -->
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Google Play Services"
-                    android:textColor="@color/vortex_text_primary"
-                    android:buttonTint="@color/vortex_accent"/>
+                    android:paddingVertical="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toStartOf="@+id/cb_play_store"
+                        android:layout_centerVertical="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Google Play Store"
+                            android:textColor="@color/vortex_text_primary"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Spoof Package Info"
+                            android:textColor="@color/vortex_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/cb_play_store"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <!-- GMS -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toStartOf="@+id/cb_gms"
+                        android:layout_centerVertical="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Google Play Services"
+                            android:textColor="@color/vortex_text_primary"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hide Root &amp; Analytics"
+                            android:textColor="@color/vortex_text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/cb_gms"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
 
                 <!-- Botones de Acción -->
                 <LinearLayout
@@ -115,6 +193,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- SYSTEM -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
