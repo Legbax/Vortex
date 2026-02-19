@@ -21,7 +21,7 @@
         android:layout_marginBottom="16dp"
         android:background="@color/vortex_card_background"
         android:padding="12dp"
-        android:text="Select a carrier to generate IDs" />
+        android:text="@string/network_select_carrier_prompt" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_carriers"

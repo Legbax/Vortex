@@ -1,11 +1,11 @@
 package com.vortex
 
 import java.util.Random
+import java.util.UUID
 
 object SpoofingUtils {
 
     // TACs mapeados POR FABRICANTE para correlacionar con el perfil activo.
-    // Fuente: GSMA IMEI DB pública. Cada entrada: TAC → (modelo aproximado)
     private val TACS_BY_BRAND = mapOf(
         "Xiaomi"   to listOf("86413404", "86413405", "35271311", "35361311", "86814904"),
         "POCO"     to listOf("86814904", "86814905", "35847611", "35847612"),
@@ -22,42 +22,50 @@ object SpoofingUtils {
         "default"  to listOf("35271311", "35449209", "35674910")
     )
 
+    private val OUIS = listOf(
+        byteArrayOf(0x40, 0x4E, 0x36),  // Qualcomm Atheros
+        byteArrayOf(0x60, 0x57, 0x18),  // MediaTek / Ralink
+        byteArrayOf(0x8C.toByte(), 0xDE.toByte(), 0x52),  // Realtek
+        byteArrayOf(0xD4.toByte(), 0x61, 0x9D.toByte()),  // Broadcom
+        byteArrayOf(0xF0.toByte(), 0x1F, 0xAF.toByte()),  // Qualcomm (nuevo)
+        byteArrayOf(0xA4.toByte(), 0xC3.toByte(), 0xF0.toByte()),  // Google
+        byteArrayOf(0x00, 0x23, 0x76),  // Intel
+        byteArrayOf(0x00, 0x26, 0x86.toByte()),  // Cisco-Linksys
+        byteArrayOf(0xD4.toByte(), 0xBE.toByte(), 0xD9.toByte()),  // Samsung
+        byteArrayOf(0xAC.toByte(), 0x37, 0x43)   // Huawei/MediaTek
+    )
+
     /**
      * Genera un IMEI válido correlacionado con la marca del perfil activo.
-     * Si no se pasa perfil, usa la lista genérica.
      */
-    fun generateValidImei(profileName: String = ""): String {
-        // Buscar la marca del perfil en DEVICE_FINGERPRINTS
+    fun generateValidImei(profileName: String = "", seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
         val brand = MainHook.DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
         val tacList = TACS_BY_BRAND[brand] ?: TACS_BY_BRAND["default"]!!
-        val tac = tacList.random()
-        val serial = (1..6).map { (0..9).random() }.joinToString("")
+        // Use deterministic index if seeded, otherwise random
+        val tac = if (seed != null) tacList[Math.abs(rng.nextInt()) % tacList.size] else tacList.random()
+
+        val serial = (1..6).map { rng.nextInt(10) }.joinToString("")
         val base = tac + serial
         return base + luhnChecksum(base)
     }
 
-    /**
-     * Genera un ICCID válido para el MCC/MNC dado.
-     * Formato estándar: 89 + MCC(3) + MNC(2-3) + account(9-10) + check
-     */
-    fun generateValidIccid(mccMnc: String): String {
-        // mccMnc típicamente 6 dígitos para US (MCC=310, MNC=3 dígitos)
-        val issuer = (10..99).random().toString()
-        val prefix = "89$mccMnc$issuer"             // "89" + 6 + 2 = 10 chars
-        val needed = 18 - prefix.length              // necesitamos llegar a 19 sin check
-        val account = (1..needed.coerceAtLeast(1)).map { (0..9).random() }.joinToString("")
+    fun generateValidIccid(mccMnc: String, seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        val issuer = (10 + rng.nextInt(90)).toString() // 10..99
+        val prefix = "89$mccMnc$issuer"
+        val needed = 18 - prefix.length
+        val account = (1..needed.coerceAtLeast(1)).map { rng.nextInt(10) }.joinToString("")
         val base = prefix + account
-        return base + luhnChecksum(base)             // total: 19-20 dígitos
+        return base + luhnChecksum(base)
     }
 
-    /**
-     * Genera un IMSI válido de exactamente 15 dígitos.
-     * IMSI = MCC(3) + MNC(3) + MSIN(9) = 15 dígitos totales
-     */
-    fun generateValidImsi(mccMnc: String): String {
-        // mccMnc debe tener 6 dígitos para US (MCC 310 + MNC 3 dígitos)
-        val msin = (1..9).map { (0..9).random() }.joinToString("")   // siempre 9 dígitos
-        return mccMnc + msin                                          // 6 + 9 = 15 ✓
+    fun generateValidImsi(mccMnc: String, seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        // [FIX D10] Primer dígito MSIN: 2-9 (evitar 0,1 reservados)
+        val firstDigit = 2 + rng.nextInt(8)
+        val rest = (1..8).map { rng.nextInt(10) }.joinToString("")
+        return mccMnc + firstDigit.toString() + rest
     }
 
     fun isLuhnValid(number: String): Boolean {
@@ -81,82 +89,137 @@ object SpoofingUtils {
         return (10 - (sum % 10)) % 10
     }
 
-    fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
-
-    /**
-     * GAID como UUID v4 correcto:
-     * xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-     * donde y ∈ {8,9,a,b}
-     */
-    fun generateRandomGaid(): String {
-        val p1 = generateRandomId(8)
-        val p2 = generateRandomId(4)
-        val p3 = "4" + generateRandomId(3)                    // versión 4 ✓
-        val p4 = listOf("8","9","a","b").random() + generateRandomId(3)  // variante ✓
-        val p5 = generateRandomId(12)
-        return "$p1-$p2-$p3-$p4-$p5"
+    fun generateRandomId(len: Int, seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        val chars = "0123456789abcdef"
+        return (1..len).map { chars[rng.nextInt(chars.length)] }.joinToString("")
     }
 
-    /**
-     * Serial: formato realista por marca.
-     * Xiaomi/Redmi: alfanumérico 8-12 chars
-     * Samsung: RX + año + mes + letras + dígitos
-     */
-    fun generateRandomSerial(brand: String = ""): String {
+    fun generateRandomGaid(seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        // Si usamos seed, construimos UUID determinista, si no, randomUUID
+        if (seed != null) {
+            val mostSigBits = rng.nextLong()
+            val leastSigBits = rng.nextLong()
+            return UUID(mostSigBits, leastSigBits).toString()
+        }
+        return UUID.randomUUID().toString()
+    }
+
+    fun generateRandomSerial(brand: String = "", seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        val alphaNum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
         return when (brand.lowercase()) {
             "samsung" -> {
-                val year = listOf("21","22").random()
-                val month = (1..12).random().toString().padStart(2,'0')
-                val suffix = (1..6).map { "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789".random() }.joinToString("")
+                val year = if (rng.nextBoolean()) "21" else "22"
+                val month = (1 + rng.nextInt(12)).toString().padStart(2,'0')
+                val suffix = (1..6).map { "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"[rng.nextInt(34)] }.joinToString("")
                 "R${year}${month}${suffix}"
             }
             "google" -> {
-                // Pixel: 14 chars alfanuméricos
-                (1..14).map { "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".random() }.joinToString("")
+                (1..14).map { alphaNum[rng.nextInt(alphaNum.length)] }.joinToString("")
             }
             else -> {
-                // Xiaomi/genérico: 8-12 chars
-                val len = (8..12).random()
-                (1..len).map { "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".random() }.joinToString("")
+                val len = 8 + rng.nextInt(5) // 8..12
+                (1..len).map { alphaNum[rng.nextInt(alphaNum.length)] }.joinToString("")
             }
         }
     }
 
-    fun generateRandomMac(): String {
-        val bytes = ByteArray(6)
-        Random().nextBytes(bytes)
-        // Bit 0 del primer octeto = 0 (unicast), bit 1 = 1 (locally administered)
-        bytes[0] = (bytes[0].toInt() and 0xFE or 0x02).toByte()
-        return bytes.joinToString(":") { "%02X".format(it) }
+    fun generateRandomMac(seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        // [FIX D13] Usar OUI real
+        val oui = OUIS[rng.nextInt(OUIS.size)]
+        val suffix = ByteArray(3)
+        rng.nextBytes(suffix)
+        val full = oui + suffix
+        // No forzar bit 'locally administered' (0x02) para parecer hardware real
+        return full.joinToString(":") { "%02X".format(it) }
     }
 
-    /**
-     * Gmail realista con nombres anglo-americanos coherentes con US carrier.
-     * Se eliminan los nombres españoles/apellidos italianos del original.
-     */
-    fun generateRealisticGmail(): String {
+    fun generateRealisticGmail(seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
         val first = listOf(
             "james","john","robert","michael","william","david","joseph","charles",
             "thomas","daniel","matthew","anthony","mark","donald","steven","paul",
             "andrew","joshua","kenneth","kevin","brian","george","timothy","ronald",
             "edward","jason","jeffrey","ryan","jacob","gary","nicholas","eric"
-        ).random()
+        )
         val last = listOf(
             "smith","johnson","williams","brown","jones","garcia","miller","davis",
             "wilson","taylor","anderson","thomas","jackson","white","harris","martin",
             "thompson","young","robinson","lewis","walker","allen","hall","wright",
             "scott","green","adams","baker","nelson","carter","mitchell","perez"
-        ).random()
-        val sep = listOf("", ".", "_").random()
-        val num = if (Random().nextBoolean()) (1..9999).random().toString() else ""
-        return "$first$sep$last$num@gmail.com"
+        )
+
+        val f = first[rng.nextInt(first.size)]
+        val l = last[rng.nextInt(last.size)]
+        val sep = listOf("", ".", "_")[rng.nextInt(3)]
+        val num = if (rng.nextBoolean()) (1 + rng.nextInt(9999)).toString() else ""
+        return "$f$sep$l$num@gmail.com"
     }
 
-    fun generatePhoneNumber(npaList: List<String>): String {
-        val npa = if (npaList.isNotEmpty()) npaList.random() else "212"
-        var nxx = (200..999).random()
-        if (nxx == 555) nxx = 556    // 555-xxxx son ficticios
-        val sub = (0..9999).random().toString().padStart(4, '0')
+    fun generatePhoneNumber(npaList: List<String>, seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        val npa = if (npaList.isNotEmpty()) npaList[rng.nextInt(npaList.size)] else "212"
+        var nxx = 200 + rng.nextInt(800)
+        if (nxx == 555) nxx = 556
+        val sub = rng.nextInt(10000).toString().padStart(4, '0')
         return "+1$npa$nxx$sub"
+    }
+
+    // [FIX D3] SSID Realista
+    fun generateRealisticSsid(seed: Long? = null): String {
+        val rng = if (seed != null) Random(seed) else Random()
+        val prefixes = listOf(
+            "NETGEAR", "Linksys", "xfinitywifi", "ATT", "Spectrum",
+            "TP-Link", "ASUS", "Archer", "dlink", "Belkin", "MyHome"
+        )
+        val prefix = prefixes[rng.nextInt(prefixes.size)]
+        val suffixType = rng.nextInt(3)
+        val suffix = when (suffixType) {
+            0 -> "_${1000 + rng.nextInt(9000)}"
+            1 -> "-${generateRandomId(4, seed).uppercase()}"
+            else -> (1 + rng.nextInt(9)).toString()
+        }
+        return "$prefix$suffix"
+    }
+
+    /**
+     * Genera un mapa con TODOS los valores esperados para un perfil dado.
+     * Usado por StatusFragment para verificar consistencia.
+     * Se usa una semilla determinista basada en el nombre del perfil para
+     * que siempre devuelva los mismos valores "ideales" para ese perfil.
+     */
+    fun generateAllForProfile(profileName: String, mccMnc: String = "310260"): Map<String, String> {
+        // Semilla determinista: hash del nombre del perfil + mccmnc
+        // Esto asegura que "Expected" sea constante para una configuración dada.
+        val seed = (profileName.hashCode() + mccMnc.hashCode()).toLong()
+        val fp = MainHook.DEVICE_FINGERPRINTS[profileName]
+        val brand = fp?.brand ?: ""
+
+        // Obtener carrier (si existe) para NPAs
+        val carrier = MainHook.getUsCarriers().find { it.mccMnc == mccMnc }
+        val npas = carrier?.npas ?: emptyList()
+
+        return mapOf(
+            "imei"           to generateValidImei(profileName, seed),
+            "imei2"          to generateValidImei(profileName, seed + 1), // semilla diferente
+            "imsi"           to generateValidImsi(mccMnc, seed),
+            "iccid"          to generateValidIccid(mccMnc, seed),
+            "phone_number"   to generatePhoneNumber(npas, seed),
+            "android_id"     to generateRandomId(16, seed),
+            "ssaid_snapchat" to generateRandomId(16, seed + 2),
+            "gaid"           to generateRandomGaid(seed),
+            "gsf_id"         to generateRandomId(16, seed + 3),
+            "media_drm_id"   to generateRandomId(32, seed),
+            "serial"         to generateRandomSerial(brand, seed),
+            "wifi_mac"       to generateRandomMac(seed),
+            "bluetooth_mac"  to generateRandomMac(seed + 1),
+            "gmail"          to generateRealisticGmail(seed),
+            "wifi_ssid"      to generateRealisticSsid(seed),
+            "wifi_bssid"     to generateRandomMac(seed + 2)
+        )
     }
 }
