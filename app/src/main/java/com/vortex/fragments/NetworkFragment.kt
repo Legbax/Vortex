@@ -71,7 +71,7 @@ class NetworkFragment : Fragment() {
             PrefsManager.saveString(ctx, "carrier_name", carrier.name)
             PrefsManager.saveString(ctx, "sim_country", "us")
 
-            Toast.makeText(ctx, "Carrier Context Set: ${carrier.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, "Carrier Context Set: ${carrier.name}. Now use Randomize.", Toast.LENGTH_SHORT).show()
         }
         rvCarriers.layoutManager = LinearLayoutManager(context)
         rvCarriers.adapter = adapter
