@@ -222,4 +222,63 @@ object SpoofingUtils {
             "wifi_bssid"     to generateRandomMac(seed + 2)
         )
     }
+
+    // [FIX D15] Sensitive paths and commands for evasion
+    private val SENSITIVE_PATHS = listOf(
+        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
+        "/data/local/xbin/su", "/data/local/bin/su", "/data/local/su",
+        "/system/sd/xbin/su", "/system/bin/failsafe/su", "/su/bin/su",
+        "/system/app/Superuser.apk", "/system/app/SuperSU.apk",
+        "/system/app/Magisk.apk", "/data/adb/magisk", "/sbin/.magisk",
+        "/cache/magisk.log", "/dev/magisk",
+        "/data/user_de/0/de.robv.android.xposed.installer"
+    )
+
+    // Only block specific props; allow benign ones like ro.build.version.sdk
+    private val SENSITIVE_PROPS = listOf(
+        "ro.secure", "ro.debuggable", "service.adb.root", "ro.kernel.qemu",
+        "ro.modversion", "ro.custom.build.version"
+    )
+
+    fun isSensitivePath(path: String): Boolean {
+        // Match exact path or subpath (e.g. /sbin/.magisk/mirror)
+        return SENSITIVE_PATHS.any { sensitive ->
+            path == sensitive || path.startsWith("$sensitive/")
+        }
+    }
+
+    fun isSensitiveCommand(command: String): Boolean {
+        val cmdLower = command.lowercase().trim()
+        val tokens = cmdLower.split("\\s+".toRegex())
+        val binary = tokens.firstOrNull() ?: ""
+
+        // 1. Strict binary check (exact match or path ending)
+        val sensitiveBinaries = listOf("su", "magisk", "frida", "zygisk", "riru", "substrate", "busybox")
+        if (sensitiveBinaries.any { bin -> binary == bin || binary.endsWith("/$bin") }) {
+            return true
+        }
+
+        // 2. Context-aware checks for common tools
+        if (binary == "getprop" || binary.endsWith("/getprop")) {
+            return SENSITIVE_PROPS.any { prop -> cmdLower.contains(prop) }
+        }
+
+        if (binary == "mount" || binary.endsWith("/mount")) {
+            return cmdLower.contains("magisk") || cmdLower.contains("core/mirror")
+        }
+
+        if (binary == "which" || binary.endsWith("/which")) {
+            return sensitiveBinaries.any { bin -> cmdLower.contains(bin) }
+        }
+
+        if (binary == "getenforce" || binary.endsWith("/getenforce")) return true
+
+        return false
+    }
+
+    fun isSensitiveCommand(args: Array<String>?): Boolean {
+        if (args == null || args.isEmpty()) return false
+        val cmd = args.joinToString(" ")
+        return isSensitiveCommand(cmd)
+    }
 }

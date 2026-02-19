@@ -140,6 +140,9 @@ class MainHook : IXposedHookLoadPackage {
             hookLocation(lpparam, prefs, ::getStr)
             hookWebView(lpparam, fp)
             hookAccountManager(lpparam)
+            // [FIX D15] Evasion Hooks (File & Runtime)
+            EvasionHooks.hookFile(lpparam)
+            EvasionHooks.hookRuntime(lpparam)
             hookPackageManager(lpparam)
             hookApplicationFlags(lpparam)
             hookFingerprintedPartitions(lpparam, fp) // [FIX D14] Pass fp
