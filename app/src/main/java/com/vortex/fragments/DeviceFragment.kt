@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,11 +16,13 @@ import com.vortex.R
 class DeviceFragment : Fragment() {
 
     private lateinit var rvDevices: RecyclerView
+    private lateinit var btnRandom: Button
     private lateinit var adapter: DeviceAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_device, container, false)
         rvDevices = view.findViewById(R.id.rv_devices)
+        btnRandom = view.findViewById(R.id.btn_random_profile)
 
         adapter = DeviceAdapter(MainHook.DEVICE_FINGERPRINTS) { key ->
             PrefsManager.saveString(requireContext(), "profile", key)
@@ -30,6 +33,17 @@ class DeviceFragment : Fragment() {
 
         val saved = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
         if (saved.isNotEmpty()) adapter.setSelected(saved)
+
+        btnRandom.setOnClickListener {
+            val keys = MainHook.DEVICE_FINGERPRINTS.keys.toList()
+            val randomKey = keys.random()
+            adapter.setSelected(randomKey)
+            PrefsManager.saveString(requireContext(), "profile", randomKey)
+            Toast.makeText(requireContext(), "Random Profile: $randomKey", Toast.LENGTH_SHORT).show()
+            // Scroll to selected
+            val index = keys.indexOf(randomKey)
+            rvDevices.smoothScrollToPosition(index)
+        }
 
         return view
     }
