@@ -3,6 +3,7 @@ package com.vortex.fragments
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -18,8 +19,10 @@ class DeviceAdapter(
     private val keys = profiles.keys.toList()
 
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val tvInitial: TextView = v.findViewById(R.id.tv_brand_initial)
         val tvName: TextView    = v.findViewById(R.id.tv_device_name)
         val tvDetail: TextView  = v.findViewById(R.id.tv_device_details)
+        val ivSelected: ImageView = v.findViewById(R.id.iv_selected)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -27,26 +30,43 @@ class DeviceAdapter(
 
     override fun getItemCount() = keys.size
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        val key = keys[pos]
+    override fun onBindViewHolder(h: VH, position: Int) {
+        val key = keys[position]
         val fp = profiles[key]!!
-        h.tvName.text = key
-        h.tvDetail.text = "${fp.manufacturer} · Android ${fp.release} · ${fp.hardware.uppercase()}"
+
+        h.tvInitial.text = fp.manufacturer.firstOrNull()?.toString()?.uppercase() ?: "?"
+        h.tvName.text = fp.model // Use model as main name, it's more descriptive usually
+        h.tvDetail.text = "${fp.manufacturer} · Android ${fp.release}"
+
+        val isSelected = (key == selectedKey)
+        h.ivSelected.visibility = if (isSelected) View.VISIBLE else View.GONE
+
+        // Highlight background slightly if selected
         h.itemView.setBackgroundColor(
-            if (key == selectedKey)
-                ContextCompat.getColor(h.itemView.context, R.color.vortex_accent_20)
-            else
-                ContextCompat.getColor(h.itemView.context, R.color.vortex_card_background)
+             if (isSelected) ContextCompat.getColor(h.itemView.context, R.color.vortex_accent_20)
+             else ContextCompat.getColor(h.itemView.context, R.color.vortex_card_background)
         )
+
         h.itemView.setOnClickListener {
-            val prev = selectedKey; selectedKey = key
-            notifyItemChanged(keys.indexOf(prev)); notifyItemChanged(pos)
-            onSelected(key)
+            val currentPos = h.bindingAdapterPosition
+            if (currentPos != RecyclerView.NO_POSITION) {
+                val clickedKey = keys[currentPos]
+                val prevKey = selectedKey
+                selectedKey = clickedKey
+
+                // Notify changes to update UI (checkbox and background)
+                notifyItemChanged(keys.indexOf(prevKey))
+                notifyItemChanged(currentPos)
+
+                onSelected(clickedKey)
+            }
         }
     }
 
     fun setSelected(key: String) {
-        val prev = selectedKey; selectedKey = key
-        notifyItemChanged(keys.indexOf(prev)); notifyItemChanged(keys.indexOf(key))
+        val prev = selectedKey
+        selectedKey = key
+        notifyItemChanged(keys.indexOf(prev))
+        notifyItemChanged(keys.indexOf(key))
     }
 }
