@@ -39,7 +39,6 @@ class MainHook : IXposedHookLoadPackage {
         @Volatile private var cachedGmail: String? = null
         @Volatile private var cachedSerial: String? = null
         @Volatile private var cachedMccMnc: String? = null
-        @Volatile private var cachedSsaidSnapchat: String? = null
         @Volatile private var cachedMediaDrmId: String? = null
         @Volatile private var cachedWifiSsid: String? = null
         @Volatile private var cachedWifiBssid: String? = null
@@ -93,8 +92,43 @@ class MainHook : IXposedHookLoadPackage {
                 buildHost = "pangu-build-component-system-177793", buildUser = "builder",
                 buildDateUtc = "1632960000", securityPatch = "2021-09-01",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "POCO X3 Pro" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "POCO", model = "M2102J20SG",
+                device = "vayu", product = "vayu_global",
+                hardware = "qcom", board = "vayu", bootloader = "unknown",
+                fingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.3.0.RJUMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
+                incremental = "V12.5.3.0.RJUMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8250-AC", zygote = "zygote64_32",
+                vendorFingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.3.0.RJUMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "vayu_global-user 11 RKQ1.200826.002 V12.5.3.0.RJUMIXM release-keys",
+                buildFlavor = "vayu_global-user",
+                buildHost = "c3-miui-ota-bd98", buildUser = "builder",
+                buildDateUtc = "1622630400", securityPatch = "2021-05-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Mi 10T" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Xiaomi", model = "M2007J3SY",
+                device = "apollo", product = "apollo_global",
+                hardware = "qcom", board = "apollo", bootloader = "unknown",
+                fingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.1.0.RJDMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
+                incremental = "V12.5.1.0.RJDMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8250", zygote = "zygote64_32",
+                vendorFingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.1.0.RJDMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "apollo_global-user 11 RKQ1.200826.002 V12.5.1.0.RJDMIXM release-keys",
+                buildFlavor = "apollo_global-user",
+                buildHost = "c3-miui-ota-bd05", buildUser = "builder",
+                buildDateUtc = "1622112000", securityPatch = "2021-05-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             )
-            // ... (Other profiles omitted for brevity but should be kept if file is overwritten. I'll include the ones from previous read to be safe)
         )
     }
 
@@ -128,6 +162,11 @@ class MainHook : IXposedHookLoadPackage {
             val profileName = getStr("profile", "Redmi 9")
             val fp = DEVICE_FINGERPRINTS[profileName] ?: DEVICE_FINGERPRINTS["Redmi 9"]!!
 
+            fun getBool(key: String, def: Boolean): Boolean {
+                val v = getStr(key, "")
+                return if (v.isEmpty()) def else v.toBooleanStrictOrNull() ?: def
+            }
+
             synchronized(this) { initializeCache(prefs, ::getStr) }
 
             hookBuildFields(lpparam, fp)
@@ -138,13 +177,20 @@ class MainHook : IXposedHookLoadPackage {
             hookWifiManager(lpparam)
             hookBluetoothAdapter(lpparam)
             hookLocation(lpparam, prefs, ::getStr)
-            hookWebView(lpparam, fp)
             hookAccountManager(lpparam)
-            hookPackageManager(lpparam)
-            hookApplicationFlags(lpparam)
             hookFingerprintedPartitions(lpparam, fp) // [FIX D14] Pass fp
             hookMediaDrm(lpparam)
             hookWifiInfo(lpparam)
+
+            // Conditional Hooks
+            if (getBool("hook_webview", true)) hookWebView(lpparam, fp)
+            if (getBool("hook_packages", true)) hookPackageManager(lpparam)
+            if (getBool("hook_hide_debug", true)) hookApplicationFlags(lpparam)
+
+            if (getBool("hook_hide_root", true)) {
+                 hookFile(lpparam)
+                 hookProcessBuilderAndRuntime(lpparam)
+            }
 
         } catch (e: Throwable) {
             if (BuildConfig.DEBUG) XposedBridge.log("Vortex error: ${e.message}")
@@ -166,7 +212,6 @@ class MainHook : IXposedHookLoadPackage {
         if (cachedWifiMac == null)     cachedWifiMac     = getStr("wifi_mac",      SpoofingUtils.generateRandomMac())
         if (cachedBtMac == null)       cachedBtMac       = getStr("bluetooth_mac", SpoofingUtils.generateRandomMac())
         if (cachedGmail == null)       cachedGmail       = getStr("gmail",         SpoofingUtils.generateRealisticGmail())
-        if (cachedSsaidSnapchat == null) cachedSsaidSnapchat = getStr("ssaid_snapchat", SpoofingUtils.generateRandomId(16))
         if (cachedMediaDrmId == null)    cachedMediaDrmId    = getStr("media_drm_id",   SpoofingUtils.generateRandomId(32))
 
         // [FIX D3] SSID Realista
@@ -391,7 +436,7 @@ class MainHook : IXposedHookLoadPackage {
                         when (param.args[1] as String) {
                             Settings.Secure.ANDROID_ID   -> {
                                 // [FIX D5] SSAID Uniforme (eliminar logica Snapchat especifica para evitar mismatch con GMS)
-                                param.result = cachedSsaidSnapchat ?: cachedAndroidId
+                                param.result = cachedAndroidId
                             }
                             "advertising_id"             -> param.result = cachedGaid
                             "gsf_id", "android_id_gsf"  -> param.result = cachedGsfId
@@ -593,21 +638,8 @@ class MainHook : IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod(cls, "getInstallSourceInfo", String::class.java,
                     object : XC_MethodHook() {
                         override fun afterHookedMethod(param: MethodHookParam) {
-                            val infoClass = XposedHelpers.findClass(
-                                "android.content.pm.InstallSourceInfo", lpparam.classLoader)
-                            try {
-                                val ctor = infoClass.getDeclaredConstructor(
-                                    String::class.java, String::class.java,
-                                    String::class.java, String::class.java
-                                )
-                                ctor.isAccessible = true
-                                param.result = ctor.newInstance(
-                                    "com.android.vending",
-                                    null,
-                                    "com.android.vending",
-                                    "com.android.vending"
-                                )
-                            } catch (_: Exception) {}
+                            // [FIX D10] Constructor no existe en algunas versiones, eliminado para evitar crashes
+                            // Si se requiere en el futuro, usar implementacion robusta por reflexion de campos
                         }
                     })
             } catch (_: NoSuchMethodError) {}
@@ -674,5 +706,34 @@ class MainHook : IXposedHookLoadPackage {
             i += 2
         }
         return data
+    }
+
+    private fun hookFile(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val fileClass = XposedHelpers.findClass("java.io.File", lpparam.classLoader)
+            val rootPaths = setOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su")
+            XposedHelpers.findAndHookMethod(fileClass, "exists", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val file = param.thisObject as java.io.File
+                    if (rootPaths.contains(file.absolutePath)) {
+                        param.result = false
+                    }
+                }
+            })
+        } catch (_: Throwable) {}
+    }
+
+    private fun hookProcessBuilderAndRuntime(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val runtimeClass = XposedHelpers.findClass("java.lang.Runtime", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(runtimeClass, "exec", String::class.java, object : XC_MethodHook() {
+                 override fun beforeHookedMethod(param: MethodHookParam) {
+                     val cmd = param.args[0] as String
+                     if (cmd == "su" || cmd.startsWith("su ")) {
+                         param.throwable = java.io.IOException("Permission denied")
+                     }
+                 }
+            })
+        } catch (_: Throwable) {}
     }
 }

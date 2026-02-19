@@ -1,114 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/vortex_background">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/vortex_background" android:fillViewport="true">
 
-    <!-- Sección: Gestión de Apps -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="APP MANAGEMENT"
-        android:textColor="@color/vortex_text_secondary"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/vortex_card_background"
-        app:cardCornerRadius="12dp"
-        app:strokeWidth="0dp">
+        <!-- HOOK CONFIGURATION -->
+        <TextView android:text="HOOK CONFIGURATION" android:textColor="@color/vortex_text_secondary"
+            android:textStyle="bold" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView style="@style/Vortex.Card" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:padding="16dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+                <LinearLayout android:orientation="horizontal" android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:text="Hide Root (File/Process)" android:textColor="@color/vortex_text_primary" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_hide_root" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:text="Hide Debugging" android:textColor="@color/vortex_text_primary" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_hide_debug" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:text="Hook PackageManager" android:textColor="@color/vortex_text_primary" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_packages" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:text="Hook WebView UA" android:textColor="@color/vortex_text_primary" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_webview" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- APP MANAGEMENT (Existing Code) -->
+        <TextView android:text="APP MANAGEMENT" android:textColor="@color/vortex_text_secondary"
+            android:textStyle="bold" android:layout_marginTop="24dp" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            app:cardBackgroundColor="@color/vortex_card_background"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="0dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Target Applications"
-                android:textColor="@color/vortex_accent"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <CheckBox
-                android:id="@+id/cb_snapchat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Snapchat"
-                android:checked="true"
-                android:textColor="@color/vortex_text_primary"
-                android:buttonTint="@color/vortex_accent"/>
-
-            <CheckBox
-                android:id="@+id/cb_play_store"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Google Play Store"
-                android:textColor="@color/vortex_text_primary"
-                android:buttonTint="@color/vortex_accent"/>
-
-            <CheckBox
-                android:id="@+id/cb_gms"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Google Play Services"
-                android:textColor="@color/vortex_text_primary"
-                android:buttonTint="@color/vortex_accent"/>
-
-            <!-- Botones de Acción -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="16dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <Button
-                    android:id="@+id/btn_force_stop"
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="FORCE STOP"
-                    android:backgroundTint="@color/vortex_accent"
-                    android:textColor="#000000"/>
+                    android:text="Target Applications"
+                    android:textColor="@color/vortex_accent"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-                <Button
-                    android:id="@+id/btn_clear_data"
-                    android:layout_width="0dp"
+                <CheckBox
+                    android:id="@+id/cb_snapchat"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="CLEAR DATA"
-                    android:backgroundTint="#D32F2F"
-                    android:textColor="#FFFFFF"/>
+                    android:text="Snapchat"
+                    android:checked="true"
+                    android:textColor="@color/vortex_text_primary"
+                    android:buttonTint="@color/vortex_accent"/>
+
+                <CheckBox
+                    android:id="@+id/cb_play_store"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Google Play Store"
+                    android:textColor="@color/vortex_text_primary"
+                    android:buttonTint="@color/vortex_accent"/>
+
+                <CheckBox
+                    android:id="@+id/cb_gms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Google Play Services"
+                    android:textColor="@color/vortex_text_primary"
+                    android:buttonTint="@color/vortex_accent"/>
+
+                <!-- Botones de Acción -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp">
+
+                    <Button
+                        android:id="@+id/btn_force_stop"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="FORCE STOP"
+                        android:backgroundTint="@color/vortex_accent"
+                        android:textColor="#000000"/>
+
+                    <Button
+                        android:id="@+id/btn_clear_data"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="CLEAR DATA"
+                        android:backgroundTint="#D32F2F"
+                        android:textColor="#FFFFFF"/>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.card.MaterialCardView>
 
-    <!-- Sección: Sistema -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SYSTEM"
-        android:textColor="@color/vortex_text_secondary"
-        android:textStyle="bold"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="16dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SYSTEM"
+            android:textColor="@color/vortex_text_secondary"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/btn_reboot"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="REBOOT DEVICE"
-        android:backgroundTint="#212121"
-        android:textColor="#FFFFFF"
-        app:icon="@drawable/ic_refresh"
-        app:iconTint="#FFFFFF"/>
+        <Button
+            android:id="@+id/btn_reboot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="REBOOT DEVICE"
+            android:backgroundTint="#212121"
+            android:textColor="#FFFFFF"
+            app:icon="@drawable/ic_refresh"
+            app:iconTint="#FFFFFF"/>
 
-</LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
