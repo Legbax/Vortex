@@ -5,86 +5,70 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.vortex.PrefsManager
 import com.vortex.R
-import kotlin.random.Random
 
 class LocationFragment : Fragment() {
 
-    private lateinit var etLat: TextInputEditText
-    private lateinit var etLon: TextInputEditText
-    private lateinit var etAlt: TextInputEditText
-    private lateinit var etAcc: TextInputEditText
-    private lateinit var cbEnabled: CheckBox
-    private lateinit var cbJitter: CheckBox
-    private lateinit var cbMoving: CheckBox
-    private lateinit var btnSave: Button
-    private lateinit var btnRandomize: Button
+    private lateinit var swMock:    SwitchMaterial
+    private lateinit var etLat:     TextInputEditText
+    private lateinit var etLon:     TextInputEditText
+    private lateinit var etAlt:     TextInputEditText
+    private lateinit var etAcc:     TextInputEditText
+    private lateinit var btnRandom: Button
+    private lateinit var btnSave:   Button
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    private val usCities = listOf(
+        Pair(40.7128, -74.0060),   // New York
+        Pair(34.0522, -118.2437),  // Los Angeles
+        Pair(41.8781, -87.6298),   // Chicago
+        Pair(29.7604, -95.3698),   // Houston
+        Pair(33.4484, -112.0740),  // Phoenix
+        Pair(39.9526, -75.1652),   // Philadelphia
+        Pair(32.7767, -96.7970),   // Dallas
+        Pair(37.3382, -121.8863),  // San Jose
+        Pair(47.6062, -122.3321),  // Seattle
+        Pair(25.7617, -80.1918)    // Miami
+    )
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_location, container, false)
-        bindViews(view)
-        loadData()
-        setupListeners()
-        return view
-    }
+        swMock   = view.findViewById(R.id.sw_mock_location)
+        etLat    = view.findViewById(R.id.et_latitude)
+        etLon    = view.findViewById(R.id.et_longitude)
+        etAlt    = view.findViewById(R.id.et_altitude)
+        etAcc    = view.findViewById(R.id.et_accuracy)
+        btnRandom = view.findViewById(R.id.btn_random_location)
+        btnSave   = view.findViewById(R.id.btn_save_location)
 
-    private fun bindViews(view: View) {
-        etLat = view.findViewById(R.id.et_latitude)
-        etLon = view.findViewById(R.id.et_longitude)
-        etAlt = view.findViewById(R.id.et_altitude)
-        etAcc = view.findViewById(R.id.et_accuracy)
-        cbEnabled = view.findViewById(R.id.cb_mock_location_enabled)
-        cbJitter = view.findViewById(R.id.cb_jitter)
-        cbMoving = view.findViewById(R.id.cb_moving)
-        btnSave = view.findViewById(R.id.btn_save_location)
-        btnRandomize = view.findViewById(R.id.btn_random_location)
-    }
+        val ctx = requireContext()
+        swMock.isChecked = PrefsManager.getBoolean(ctx, "mock_location_enabled", false)
+        etLat.setText(PrefsManager.getString(ctx, "mock_latitude",  "40.7128"))
+        etLon.setText(PrefsManager.getString(ctx, "mock_longitude", "-74.0060"))
+        etAlt.setText(PrefsManager.getString(ctx, "mock_altitude",  "10.0"))
+        etAcc.setText(PrefsManager.getString(ctx, "mock_accuracy",  "5.0"))
 
-    private fun loadData() {
-        val context = requireContext()
-        etLat.setText(PrefsManager.getString(context, "mock_latitude", "40.7128"))
-        etLon.setText(PrefsManager.getString(context, "mock_longitude", "-74.0060"))
-        etAlt.setText(PrefsManager.getString(context, "mock_altitude", "10.0"))
-        etAcc.setText(PrefsManager.getString(context, "mock_accuracy", "5.0"))
-        cbEnabled.isChecked = PrefsManager.getBoolean(context, "mock_location_enabled", false)
-        cbJitter.isChecked = PrefsManager.getBoolean(context, "location_jitter_enabled", true)
-        cbMoving.isChecked = PrefsManager.getBoolean(context, "location_is_moving", false)
-    }
+        btnRandom.setOnClickListener {
+            val city = usCities.random()
+            etLat.setText((city.first  + (Math.random() - 0.5) * 0.05).toString())
+            etLon.setText((city.second + (Math.random() - 0.5) * 0.05).toString())
+            etAlt.setText(((Math.random() * 80) + 5).toString())
+            etAcc.setText(((Math.random() * 15) + 3).toString())
+        }
 
-    private fun setupListeners() {
         btnSave.setOnClickListener {
-            val context = requireContext()
-            PrefsManager.saveString(context, "mock_latitude", etLat.text.toString())
-            PrefsManager.saveString(context, "mock_longitude", etLon.text.toString())
-            PrefsManager.saveString(context, "mock_altitude", etAlt.text.toString())
-            PrefsManager.saveString(context, "mock_accuracy", etAcc.text.toString())
-            PrefsManager.saveBoolean(context, "mock_location_enabled", cbEnabled.isChecked)
-            PrefsManager.saveBoolean(context, "location_jitter_enabled", cbJitter.isChecked)
-            PrefsManager.saveBoolean(context, "location_is_moving", cbMoving.isChecked)
+            PrefsManager.saveBoolean(ctx, "mock_location_enabled", swMock.isChecked)
+            PrefsManager.saveString(ctx, "mock_latitude",  etLat.text.toString())
+            PrefsManager.saveString(ctx, "mock_longitude", etLon.text.toString())
+            PrefsManager.saveString(ctx, "mock_altitude",  etAlt.text.toString())
+            PrefsManager.saveString(ctx, "mock_accuracy",  etAcc.text.toString())
+            Toast.makeText(ctx, "Location saved ✓", Toast.LENGTH_SHORT).show()
         }
 
-        btnRandomize.setOnClickListener {
-            // FIX #33: Use kotlin.random.Random
-            val offsetLat = (Random.nextDouble() - 0.5) * 0.001
-            val offsetLon = (Random.nextDouble() - 0.5) * 0.001
-
-            // Randomize around current or default NY
-            var lat = etLat.text.toString().toDoubleOrNull() ?: 40.7128
-            var lon = etLon.text.toString().toDoubleOrNull() ?: -74.0060
-
-            // Move significantly to a new US location approx
-            lat = 30.0 + Random.nextDouble() * 15.0 // 30-45
-            lon = -120.0 + Random.nextDouble() * 40.0 // -120 to -80
-
-            etLat.setText(String.format("%.6f", lat))
-            etLon.setText(String.format("%.6f", lon))
-        }
+        return view
     }
 }

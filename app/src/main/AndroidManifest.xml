@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -16,7 +13,7 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="Device identity spoofer" />
+            android:value="System utility module" />
         <meta-data
             android:name="xposedminversion"
             android:value="82" />

@@ -1,87 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/vortex_background">
 
-    <LinearLayout
+    <TextView
+        style="@style/Vortex.Text.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nav_location"
+        android:layout_marginBottom="24dp" />
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Vortex.Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/location_mock_settings"/>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_mock_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Vortex.InputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Latitude">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_latitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:textColor="@color/vortex_text_primary"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Vortex.InputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Longitude">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_longitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:textColor="@color/vortex_text_primary"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:hint="Altitude">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_altitude"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:hint="Accuracy">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_accuracy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <Button
+        android:id="@+id/btn_random_location"
+        style="@style/Vortex.Button.Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:text="@string/ids_randomize_all"
+        android:layout_marginTop="8dp"/>
 
-        <CheckBox
-            android:id="@+id/cb_mock_location_enabled"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Enable Mock Location" />
+    <Button
+        android:id="@+id/btn_save_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_save"
+        android:backgroundTint="@color/vortex_accent"
+        android:textColor="#000000"/>
 
-        <CheckBox
-            android:id="@+id/cb_jitter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Enable Jitter" />
-
-        <CheckBox
-            android:id="@+id/cb_moving"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Simulate Movement" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Latitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_latitude"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Longitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_longitude"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Altitude">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_altitude"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Accuracy">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_accuracy"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/btn_random_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Randomize Location" />
-
-        <Button
-            android:id="@+id/btn_save_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Location" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

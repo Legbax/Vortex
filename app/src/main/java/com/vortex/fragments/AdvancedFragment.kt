@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.vortex.R
 import com.vortex.utils.RootUtils
 
@@ -18,9 +18,9 @@ class AdvancedFragment : Fragment() {
     private val PKG_PLAY_STORE = "com.android.vending"
     private val PKG_GMS = "com.google.android.gms"
 
-    private lateinit var cbSnapchat: SwitchMaterial
-    private lateinit var cbPlayStore: SwitchMaterial
-    private lateinit var cbGms: SwitchMaterial
+    private lateinit var cbSnapchat: CheckBox
+    private lateinit var cbPlayStore: CheckBox
+    private lateinit var cbGms: CheckBox
     private lateinit var btnForceStop: Button
     private lateinit var btnClearData: Button
     private lateinit var btnReboot: Button
@@ -53,19 +53,15 @@ class AdvancedFragment : Fragment() {
             }
 
             var successCount = 0
-            // Run in background thread ideally, but for now keeping simple as per request
-            Thread {
-                apps.forEach { pkg ->
-                    if (RootUtils.forceStop(pkg)) successCount++
-                }
-                activity?.runOnUiThread {
-                    if (successCount > 0) {
-                        Toast.makeText(context, "Force Stopped $successCount apps", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed. Is Root granted?", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }.start()
+            apps.forEach { pkg ->
+                if (RootUtils.forceStop(pkg)) successCount++
+            }
+
+            if (successCount > 0) {
+                Toast.makeText(context, "Force Stopped $successCount apps", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Failed. Is Root granted?", Toast.LENGTH_LONG).show()
+            }
         }
 
         btnClearData.setOnClickListener {
@@ -77,21 +73,17 @@ class AdvancedFragment : Fragment() {
 
             AlertDialog.Builder(context)
                 .setTitle("Clear Data?")
-                .setMessage("This will permanently delete all file settings, accounts, and databases for the selected apps.\n\nAre you sure?")
-                .setPositiveButton("WIPE DATA") { _, _ ->
-                    Thread {
-                        var successCount = 0
-                        apps.forEach { pkg ->
-                            if (RootUtils.clearData(pkg)) successCount++
-                        }
-                        activity?.runOnUiThread {
-                            if (successCount > 0) {
-                                Toast.makeText(context, "Data cleared for $successCount apps", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Failed. Is Root granted?", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }.start()
+                .setMessage("This will wipe all data for selected apps. This is irreversible.")
+                .setPositiveButton("WIPE") { _, _ ->
+                    var successCount = 0
+                    apps.forEach { pkg ->
+                        if (RootUtils.clearData(pkg)) successCount++
+                    }
+                    if (successCount > 0) {
+                        Toast.makeText(context, "Data cleared for $successCount apps", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed. Is Root granted?", Toast.LENGTH_LONG).show()
+                    }
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -100,12 +92,8 @@ class AdvancedFragment : Fragment() {
         btnReboot.setOnClickListener {
              AlertDialog.Builder(context)
                 .setTitle("System Reboot")
-                .setMessage("Are you sure you want to restart the device immediately?")
-                .setPositiveButton("REBOOT") { _, _ ->
-                    Thread {
-                        RootUtils.rebootDevice()
-                    }.start()
-                }
+                .setMessage("Are you sure you want to restart the device?")
+                .setPositiveButton("REBOOT") { _, _ -> RootUtils.rebootDevice() }
                 .setNegativeButton("Cancel", null)
                 .show()
         }

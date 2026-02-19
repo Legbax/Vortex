@@ -1,737 +1,781 @@
 package com.vortex
 
 import android.accounts.Account
-import android.content.ContentResolver
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.location.Location
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import java.io.File
 import java.net.NetworkInterface
 import java.util.Random
 import com.vortex.utils.CryptoUtils
-import com.vortex.utils.OriginalBuildValues
-import com.vortex.SpoofingUtils
-import com.vortex.BuildConfig
 
 class MainHook : IXposedHookLoadPackage {
 
     companion object {
-        private const val PREFS_NAME = "spoof_prefs"
+        private const val PREFS_NAME = "vortex_prefs"   // ← sin "lancelot"
 
-        private var cachedImei: String? = null
-        private var cachedImei2: String? = null
-        private var cachedImsi: String? = null
-        private var cachedIccid: String? = null
-        private var cachedPhoneNumber: String? = null
-        private var cachedAndroidId: String? = null
-        private var cachedGsfId: String? = null
-        private var cachedGaid: String? = null
-        private var cachedWifiMac: String? = null
-        private var cachedBtMac: String? = null
-        private var cachedGmail: String? = null
-        private var cachedSerial: String? = null
-        private var cachedSsaidSnapchat: String? = null
-        private var cachedMediaDrmId: String? = null
-        private var cachedWifiSsid: String? = null
-        private var cachedWifiBssid: String? = null
+        // ── Apps objetivo — sólo hookear estas, nunca el sistema entero
+        private val TARGET_APPS = setOf(
+            "com.snapchat.android",
+            "com.instagram.android",
+            "com.facebook.katana",
+            "com.whatsapp",
+            "com.google.android.gms",
+            "com.google.android.gms.unstable",
+            "com.android.vending"
+        )
 
-        private var mockLatitude: Double = 0.0
-        private var mockLongitude: Double = 0.0
-        private var mockAltitude: Double = 0.0
-        private var mockAccuracy: Float = 10.0f
-        private var mockBearing: Float = 0.0f
-        private var mockSpeed: Float = 0.0f
-        private var mockLocationEnabled: Boolean = false
+        // ── Cache @Volatile + synchronized para evitar race condition ──
+        @Volatile private var cachedImei: String? = null
+        @Volatile private var cachedImei2: String? = null
+        @Volatile private var cachedImsi: String? = null
+        @Volatile private var cachedIccid: String? = null
+        @Volatile private var cachedPhoneNumber: String? = null
+        @Volatile private var cachedAndroidId: String? = null
+        @Volatile private var cachedGsfId: String? = null
+        @Volatile private var cachedGaid: String? = null
+        @Volatile private var cachedWifiMac: String? = null
+        @Volatile private var cachedBtMac: String? = null
+        @Volatile private var cachedGmail: String? = null
+        @Volatile private var cachedSerial: String? = null
+        @Volatile private var cachedMccMnc: String? = null
+        @Volatile private var cachedSsaidSnapchat: String? = null
+        @Volatile private var cachedMediaDrmId: String? = null
+        @Volatile private var cachedWifiSsid: String? = null
+        @Volatile private var cachedWifiBssid: String? = null
 
+        // ── Mock location ──
+        @Volatile private var mockLatitude: Double = 0.0
+        @Volatile private var mockLongitude: Double = 0.0
+        @Volatile private var mockAltitude: Double = 0.0
+        @Volatile private var mockAccuracy: Float = 10.0f
+        @Volatile private var mockBearing: Float = 0.0f
+        @Volatile private var mockSpeed: Float = 0.0f
+        @Volatile private var mockLocationEnabled: Boolean = false
+
+        // ── Carriers US con MCC/MNC únicos ──
+        // NOTA: T-Mobile, Metro PCS y Google Fi comparten 310260.
+        // Se diferencia por nombre (SPN). Metro PCS tiene su propio MNC real: 490.
+        // Google Fi usa múltiples redes (T-Mobile+Sprint+US Cellular), se modela como T-Mobile.
         data class UsCarrier(
             val name: String,
-            val mccMnc: String,
-            val npas: List<String>
+            val mccMnc: String,     // lo que devuelve getNetworkOperator()
+            val spn: String,        // Service Provider Name — lo que ve el usuario
+            val npas: List<String>  // NPAs/area codes típicos de ese carrier
         )
 
         private val US_CARRIERS = listOf(
-            UsCarrier("T-Mobile",        "310260", listOf("206","253","360","425","509","564","347","646","917","929","718","212")),
-            UsCarrier("AT&T",            "310410", listOf("214","469","972","817","682","940","404","678","770","470","312","872")),
-            UsCarrier("Verizon",         "310012", listOf("201","551","732","848","908","973","609","856","862","732","908","862")),
-            UsCarrier("Sprint (legacy)", "310120", listOf("312","773","847","224","331","630","708","872","779","815","618","309")),
-            UsCarrier("US Cellular",     "311580", listOf("217","309","618","815","319","563","920","414","262","608","715","906")),
-            UsCarrier("Cricket",         "310150", listOf("832","713","281","346","979","936","210","726","830","956","361","430")),
-            UsCarrier("Metro PCS",       "310030", listOf("305","786","954","754","561","407","321","689","386","352","904","727")),
-            UsCarrier("Boost Mobile",    "311870", listOf("323","213","310","424","818","747","626","562","661","760","442","951")),
-            UsCarrier("Google Fi",       "310260", listOf("202","703","571","240","301","410","443","667","301","202","571","703")),
-            UsCarrier("Tracfone",        "310410", listOf("786","305","954","561","407","321","352","863","941","239","850","904"))
+            UsCarrier("T-Mobile",       "310260", "T-Mobile",       listOf("206","253","360","425","509","347","646","917","929","718","212")),
+            UsCarrier("AT&T",           "310410", "AT&T",           listOf("214","469","972","817","682","940","404","678","770","470","312")),
+            UsCarrier("Verizon",        "310012", "Verizon",        listOf("201","551","732","848","908","973","609","856","862","908")),
+            UsCarrier("Sprint (legacy)","310120", "Sprint",         listOf("312","773","847","224","331","630","708","872","779","815")),
+            UsCarrier("US Cellular",    "311580", "US Cellular",    listOf("217","309","618","815","319","563","920","414","262","608")),
+            UsCarrier("Cricket",        "310150", "Cricket",        listOf("832","713","281","346","979","936","210","726","830","956")),
+            UsCarrier("Metro by T-Mobile","310490","Metro by T-Mobile",listOf("305","786","954","754","561","407","321","689","386","352")),
+            UsCarrier("Boost Mobile",   "311870", "Boost Mobile",   listOf("323","213","310","424","818","747","626","562","661","760")),
+            UsCarrier("Google Fi",      "310260", "Google Fi",      listOf("202","703","571","240","301","410","443","667")),
+            UsCarrier("Tracfone",       "310410", "Tracfone",       listOf("786","305","954","561","407","321","352","863","941","239"))
         )
 
         fun getUsCarriers(): List<UsCarrier> = US_CARRIERS
 
-        // Expanded DEVICE_FINGERPRINTS (40 Android 11 profiles)
+        // ── Device fingerprints ──
+        // IMPORTANTE: Los valores de device/board "lancelot" en Redmi 9
+        // son el CODENAME REAL del hardware. No confundir con el paquete de la app.
         val DEVICE_FINGERPRINTS = mapOf(
-            // --- XIAOMI / POCO ---
             "Redmi 9" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi 9","lancelot","lancelot_global","mt6768","lancelot","unknown",
-                "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.3.0.RJCMIXM",
-                30,"11","mt6768","mali","196610","MT6768","zygote64_32",
-                "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "V12.5.3.0.RJCMIXM","lancelot_global-user","lancelot_global-user",
-                "pangu","builder","1632960000","2021-09-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9",
+                device = "lancelot",                    // ← codename real del chip MT6768
+                product = "lancelot_global",
+                hardware = "mt6768", board = "lancelot", bootloader = "unknown",
+                fingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47",  // ← una sola entrada (corrección A10)
+                incremental = "V12.5.3.0.RJCMIXM",
+                sdkInt = 30, release = "11", boardPlatform = "mt6768",
+                eglDriver = "mali", openGlEs = "196610", hardwareChipname = "MT6768",
+                zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
+                display = "RP1A.200720.011",
+                buildDescription = "lancelot_global-user 11 RP1A.200720.011 V12.5.3.0.RJCMIXM release-keys",
+                buildFlavor = "lancelot_global-user",
+                buildHost = "pangu-build-component-system-177793",
+                buildUser = "builder",
+                buildDateUtc = "1632960000",             // segundos unix (no ms)
+                securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Redmi Note 9" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi Note 9","merlin","merlin_global","mt6769","merlin","unknown",
-                "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.2.0.RJOMIXM",
-                30,"11","mt6769","mali","196610","MT6769","zygote64_32",
-                "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
-                "V12.5.2.0.RJOMIXM","merlin_global-user","merlin_global-user","pangu","builder","1632960000","2021-09-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9",
+                device = "merlin", product = "merlin_global",
+                hardware = "mt6769", board = "merlin", bootloader = "unknown",
+                fingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.2.0.RJOMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6769", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "MT6769", zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys",
+                display = "RP1A.200720.011",
+                buildDescription = "merlin_global-user 11 RP1A.200720.011 V12.5.2.0.RJOMIXM release-keys",
+                buildFlavor = "merlin_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1632960000", securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Redmi 9A" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi 9A","dandelion","dandelion_global","mt6762","dandelion","unknown",
-                "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.4.0.RCDMIXM",
-                30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
-                "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
-                "V12.5.4.0.RCDMIXM","dandelion_global-user","dandelion_global-user","pangu","builder","1633046400","2021-10-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9A",
+                device = "dandelion", product = "dandelion_global",
+                hardware = "mt6762", board = "dandelion", bootloader = "unknown",
+                fingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.4.0.RCDMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608",
+                hardwareChipname = "MT6762", zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/dandelion_global/dandelion:11/RP1A.200720.011/V12.5.4.0.RCDMIXM:user/release-keys",
+                display = "RP1A.200720.011",
+                buildDescription = "dandelion_global-user 11 RP1A.200720.011 V12.5.4.0.RCDMIXM release-keys",
+                buildFlavor = "dandelion_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1633046400", securityPatch = "2021-10-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Redmi 9C" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi 9C","angelica","angelica_global","mt6762","angelica","unknown",
-                "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.1.0.RCRMIXM",
-                30,"11","mt6762","pvrsrvkm","196608","MT6762","zygote64_32",
-                "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
-                "V12.5.1.0.RCRMIXM","angelica_global-user","angelica_global-user","pangu","builder","1632960000","2021-09-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9C",
+                device = "angelica", product = "angelica_global",
+                hardware = "mt6762", board = "angelica", bootloader = "unknown",
+                fingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR12A.R3.MP.V84.P47",
+                incremental = "V12.5.1.0.RCRMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "mt6762", eglDriver = "pvrsrvkm", openGlEs = "196608",
+                hardwareChipname = "MT6762", zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/angelica_global/angelica:11/RP1A.200720.011/V12.5.1.0.RCRMIXM:user/release-keys",
+                display = "RP1A.200720.011",
+                buildDescription = "angelica_global-user 11 RP1A.200720.011 V12.5.1.0.RCRMIXM release-keys",
+                buildFlavor = "angelica_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1632960000", securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Redmi Note 9S" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9S",
+                device = "curtana", product = "curtana_global",
+                hardware = "qcom", board = "curtana", bootloader = "unknown",
+                fingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.1.0.RJWMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7125", zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/curtana_global/curtana:11/RKQ1.200826.002/V12.5.1.0.RJWMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "curtana_global-user 11 RKQ1.200826.002 V12.5.1.0.RJWMIXM release-keys",
+                buildFlavor = "curtana_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1632960000", securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Redmi Note 9 Pro" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi Note 9 Pro",
+                device = "joyeuse", product = "joyeuse_global",
+                hardware = "qcom", board = "joyeuse", bootloader = "unknown",
+                fingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "V12.5.3.0.RJZMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7125", zygote = "zygote64_32",
+                vendorFingerprint = "Redmi/joyeuse_global/joyeuse:11/RKQ1.200826.002/V12.5.3.0.RJZMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "joyeuse_global-user 11 RKQ1.200826.002 V12.5.3.0.RJZMIXM release-keys",
+                buildFlavor = "joyeuse_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1632960000", securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "POCO X3 NFC" to DeviceFingerprint(
-                "Xiaomi","POCO","POCO X3 NFC","surya","surya_global","qcom","surya","unknown",
-                "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                "RKQ1.200826.002","release-keys","user","MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1","V12.5.7.0.RJGMIXM",
-                30,"11","atoll","adreno","196610","SM7150","zygote64_32",
-                "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
-                "V12.5.7.0.RJGMIXM","surya_global-user","surya_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
-            "POCO F3" to DeviceFingerprint(
-                "Xiaomi","POCO","POCO F3","alioth","alioth_global","qcom","alioth","unknown",
-                "POCO/alioth_global/alioth:11/RKQ1.200826.002/V12.5.6.0.RKHMIXM:user/release-keys",
-                "RKQ1.200826.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.6.0.RKHMIXM",
-                30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "POCO/alioth_global/alioth:11/RKQ1.200826.002/V12.5.6.0.RKHMIXM:user/release-keys",
-                "V12.5.6.0.RKHMIXM","alioth_global-user","alioth_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "POCO", model = "POCO X3 NFC",
+                device = "surya", product = "surya_global",
+                hardware = "qcom", board = "surya", bootloader = "unknown",
+                fingerprint = "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
+                incremental = "V12.5.7.0.RJGMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7150", zygote = "zygote64_32",
+                vendorFingerprint = "POCO/surya_global/surya:11/RKQ1.200826.002/V12.5.7.0.RJGMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "surya_global-user 11 RKQ1.200826.002 V12.5.7.0.RJGMIXM release-keys",
+                buildFlavor = "surya_global-user",
+                buildHost = "pangu-build-component-system-177793", buildUser = "builder",
+                buildDateUtc = "1634860800", securityPatch = "2021-10-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "POCO X3 Pro" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "POCO", model = "POCO X3 Pro",
+                device = "vayu", product = "vayu_global",
+                hardware = "qcom", board = "vayu", bootloader = "unknown",
+                fingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
+                incremental = "V12.5.5.0.RJUMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "msmnile", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8150-AC", zygote = "zygote64_32",
+                vendorFingerprint = "POCO/vayu_global/vayu:11/RKQ1.200826.002/V12.5.5.0.RJUMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "vayu_global-user 11 RKQ1.200826.002 V12.5.5.0.RJUMIXM release-keys",
+                buildFlavor = "vayu_global-user",
+                buildHost = "cr3-buildbot-02", buildUser = "builder",
+                buildDateUtc = "1634860800", securityPatch = "2021-10-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "POCO M3" to DeviceFingerprint(
+                manufacturer = "Xiaomi", brand = "POCO", model = "POCO M3",
+                device = "citrus", product = "citrus_global",
+                hardware = "qcom", board = "citrus", bootloader = "unknown",
+                fingerprint = "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
+                incremental = "V12.5.2.0.RJBMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM6115", zygote = "zygote64_32",
+                vendorFingerprint = "POCO/citrus_global/citrus:11/RKQ1.200826.002/V12.5.2.0.RJBMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "citrus_global-user 11 RKQ1.200826.002 V12.5.2.0.RJBMIXM release-keys",
+                buildFlavor = "citrus_global-user",
+                buildHost = "cr3-buildbot-02", buildUser = "builder",
+                buildDateUtc = "1632960000", securityPatch = "2021-09-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Mi 10T" to DeviceFingerprint(
-                "Xiaomi","Xiaomi","Mi 10T","apollo","apollo_global","qcom","apollo","unknown",
-                "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.10.0.RJDMIXM:user/release-keys",
-                "RKQ1.200826.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.10.0.RJDMIXM",
-                30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.10.0.RJDMIXM:user/release-keys",
-                "V12.5.10.0.RJDMIXM","apollo_global-user","apollo_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
-            "Redmi Note 10 Pro" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi Note 10 Pro","sweet","sweet_global","qcom","sweet","unknown",
-                "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.9.0.RKFMIXM:user/release-keys",
-                "RKQ1.200826.002","release-keys","user","MPSS.HI.3.0.c1-00072","V12.5.9.0.RKFMIXM",
-                30,"11","sm6150","adreno","196610","SM7150","zygote64_32",
-                "Redmi/sweet_global/sweet:11/RKQ1.200826.002/V12.5.9.0.RKFMIXM:user/release-keys",
-                "V12.5.9.0.RKFMIXM","sweet_global-user","sweet_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
-            "Mi 11" to DeviceFingerprint(
-                "Xiaomi","Xiaomi","Mi 11","venus","venus_global","qcom","venus","unknown",
-                "Xiaomi/venus_global/venus:11/RKQ1.201112.002/V12.5.7.0.RKBMIXM:user/release-keys",
-                "RKQ1.201112.002","release-keys","user","MPSS.HI.2.0.c4-00165","V12.5.7.0.RKBMIXM",
-                30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
-                "Xiaomi/venus_global/venus:11/RKQ1.201112.002/V12.5.7.0.RKBMIXM:user/release-keys",
-                "V12.5.7.0.RKBMIXM","venus_global-user","venus_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
-            "Redmi 10" to DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi 10","selene","selene_global","mt6768","selene","unknown",
-                "Redmi/selene_global/selene:11/RP1A.200720.011/V12.5.9.0.RKUMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.9.0.RKUMIXM",
-                30,"11","mt6768","mali","196610","MT6768","zygote64_32",
-                "Redmi/selene_global/selene:11/RP1A.200720.011/V12.5.9.0.RKUMIXM:user/release-keys",
-                "V12.5.9.0.RKUMIXM","selene_global-user","selene_global-user","pangu","builder","1634860800","2021-10-01","REL","0"),
-
-            // --- GOOGLE PIXEL (Android 11) ---
-            "Google Pixel 5" to DeviceFingerprint(
-                "Google","google","Pixel 5","redfin","redfin","qcom","redfin","r8-0.3-7219051",
-                "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys",
-                "RQ3A.210805.001.A1","release-keys","user","g725-00164-210812-B-7522969","7512229",
-                30,"11","lito","adreno","196610","SM7250","zygote64_32",
-                "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys",
-                "RQ3A.210805.001.A1","redfin-user","redfin-user","abfarm","android-build","1628100000","2021-08-05","REL","0"),
-            "Google Pixel 4a 5G" to DeviceFingerprint(
-                "Google","google","Pixel 4a (5G)","bramble","bramble","qcom","bramble","b2-0.3-7214727",
-                "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys",
-                "RQ3A.210705.001","release-keys","user","g7250-00195-210614-B-7352378","7380771",
-                30,"11","lito","adreno","196610","SM7250","zygote64_32",
-                "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys",
-                "RQ3A.210705.001","bramble-user","bramble-user","abfarm","android-build","1625616000","2021-07-05","REL","0"),
-            "Google Pixel 4a" to DeviceFingerprint(
-                "Google","google","Pixel 4a","sunfish","sunfish","qcom","sunfish","b2-0.3-7214727",
-                "google/sunfish/sunfish:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","sm7150","adreno","196610","SM7150","zygote64_32",
-                "google/sunfish_vend/sunfish:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","sunfish-user","sunfish-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 4 XL" to DeviceFingerprint(
-                "Google","google","Pixel 4 XL","coral","coral","qcom","coral","b2-0.3-7214727",
-                "google/coral/coral:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","msmnile","adreno","196610","SM8150","zygote64_32",
-                "google/coral_vend/coral:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","coral-user","coral-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 4" to DeviceFingerprint(
-                "Google","google","Pixel 4","flame","flame","qcom","flame","b2-0.3-7214727",
-                "google/flame/flame:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","msmnile","adreno","196610","SM8150","zygote64_32",
-                "google/flame_vend/flame:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","flame-user","flame-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 3a XL" to DeviceFingerprint(
-                "Google","google","Pixel 3a XL","bonito","bonito","qcom","bonito","b2-0.3-7214727",
-                "google/bonito/bonito:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","sdm670","adreno","196610","SDM670","zygote64_32",
-                "google/bonito_vend/bonito:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","bonito-user","bonito-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 3a" to DeviceFingerprint(
-                "Google","google","Pixel 3a","sargo","sargo","qcom","sargo","b2-0.3-7214727",
-                "google/sargo/sargo:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","sdm670","adreno","196610","SDM670","zygote64_32",
-                "google/sargo_vend/sargo:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","sargo-user","sargo-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 3 XL" to DeviceFingerprint(
-                "Google","google","Pixel 3 XL","crosshatch","crosshatch","qcom","crosshatch","b2-0.3-7214727",
-                "google/crosshatch/crosshatch:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","sdm845","adreno","196610","SDM845","zygote64_32",
-                "google/crosshatch_vend/crosshatch:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","crosshatch-user","crosshatch-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 3" to DeviceFingerprint(
-                "Google","google","Pixel 3","blueline","blueline","qcom","blueline","b2-0.3-7214727",
-                "google/blueline/blueline:11/RQ3A.210605.005/7349438:user/release-keys",
-                "RQ3A.210605.005","release-keys","user","g7250-00195-210614-B-7352378","7349438",
-                30,"11","sdm845","adreno","196610","SDM845","zygote64_32",
-                "google/blueline_vend/blueline:11/RQ3A.210605.005/7349438:vendor/release-keys",
-                "RQ3A.210605.005","blueline-user","blueline-user","abfarm","android-build","1622851200","2021-06-05","REL","0"),
-            "Google Pixel 2 XL" to DeviceFingerprint(
-                "Google","google","Pixel 2 XL","taimen","taimen","qcom","taimen","b2-0.3-7214727",
-                "google/taimen/taimen:11/RP1A.201005.004.A1/6934943:user/release-keys",
-                "RP1A.201005.004.A1","release-keys","user","g7250-00195-210614-B-7352378","6934943",
-                30,"11","msm8998","adreno","196610","MSM8998","zygote64_32",
-                "google/taimen_vend/taimen:11/RP1A.201005.004.A1/6934943:vendor/release-keys",
-                "RP1A.201005.004.A1","taimen-user","taimen-user","abfarm","android-build","1601932800","2020-10-05","REL","0"),
-
-            // --- SAMSUNG (Android 11) ---
-            "Samsung Galaxy S21" to DeviceFingerprint(
-                "samsung","samsung","SM-G991B","o1s","o1sxx","exynos2100","o1s","G991BXXU3AUIE",
-                "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G991BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
-                "samsung/o1sxx/o1s:11/RP1A.200720.012/G991BXXU3AUIE:user/release-keys","RP1A.200720.012.G991BXXU3AUIE",
-                "o1sxx-user","o1sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
-            "Samsung Galaxy S21 Ultra" to DeviceFingerprint(
-                "samsung","samsung","SM-G998B","p3s","p3sxx","exynos2100","p3s","G998BXXU3AUIE",
-                "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G998BXXU3AUIE",30,"11","exynos2100","mali","196610","Exynos2100","zygote64_32",
-                "samsung/p3sxx/p3s:11/RP1A.200720.012/G998BXXU3AUIE:user/release-keys","RP1A.200720.012.G998BXXU3AUIE",
-                "p3sxx-user","p3sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
-            "Samsung Galaxy S20 FE" to DeviceFingerprint(
-                "samsung","samsung","SM-G780F","r8q","r8qxx","exynos990","r8q","G780FXXS7CUI1",
-                "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G780FXXS7CUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
-                "samsung/r8qxx/r8q:11/RP1A.200720.012/G780FXXS7CUI1:user/release-keys","RP1A.200720.012.G780FXXS7CUI1",
-                "r8qxx-user","r8qxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
-            "Samsung Galaxy Note 20 Ultra" to DeviceFingerprint(
-                "samsung","samsung","SM-N986B","c2s","c2sxx","exynos990","c2s","N986BXXS4DUI1",
-                "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","N986BXXS4DUI1",30,"11","exynos990","mali","196610","Exynos990","zygote64_32",
-                "samsung/c2sxx/c2s:11/RP1A.200720.012/N986BXXS4DUI1:user/release-keys","RP1A.200720.012.N986BXXS4DUI1",
-                "c2sxx-user","c2sxx-user","21R3NF12","se.infra","1632873600","2021-09-01","REL","0"),
+                manufacturer = "Xiaomi", brand = "Xiaomi", model = "Mi 10T",
+                device = "apollo", product = "apollo_global",
+                hardware = "qcom", board = "apollo", bootloader = "unknown",
+                fingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys",
+                buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.1.c3-00186-SM7150_GEN_PACK-1",
+                incremental = "V12.5.11.0.RJDMIXM", sdkInt = 30, release = "11",
+                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8250", zygote = "zygote64_32",
+                vendorFingerprint = "Xiaomi/apollo_global/apollo:11/RKQ1.200826.002/V12.5.11.0.RJDMIXM:user/release-keys",
+                display = "RKQ1.200826.002",
+                buildDescription = "apollo_global-user 11 RKQ1.200826.002 V12.5.11.0.RJDMIXM release-keys",
+                buildFlavor = "apollo_global-user",
+                buildHost = "cr3-buildbot-02", buildUser = "builder",
+                buildDateUtc = "1634860800", securityPatch = "2021-10-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Samsung Galaxy A52" to DeviceFingerprint(
-                "samsung","samsung","SM-A525F","a52q","a52qxx","qcom","a52q","A525FXXU4CVJB",
-                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
-                "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A525FXXU4CVJB",30,"11","trinket","adreno","196610","SM7125","zygote64_32",
-                "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys","RP1A.200720.012.A525FXXU4CVJB",
-                "a52qxx-user","a52qxx-user","21R3NF12","se.infra","1639497600","2021-12-01","REL","0"),
-            "Samsung Galaxy A72" to DeviceFingerprint(
-                "samsung","samsung","SM-A725F","a72q","a72qxx","qcom","a72q","A725FXXU4AUH2",
-                "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys",
-                "RP1A.200720.012","release-keys","user","MPSS.HI.3.0.c1-00072","A725FXXU4AUH2",30,"11","atoll","adreno","196610","SM7225","zygote64_32",
-                "samsung/a72qxx/a72q:11/RP1A.200720.012/A725FXXU4AUH2:user/release-keys","RP1A.200720.012.A725FXXU4AUH2",
-                "a72qxx-user","a72qxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
-            "Samsung Galaxy S10+" to DeviceFingerprint(
-                "samsung","samsung","SM-G975F","beyond2","beyond2ltexx","exynos9820","beyond2","G975FXXSGHWC1",
-                "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G975FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
-                "samsung/beyond2ltexx/beyond2:11/RP1A.200720.012/G975FXXSGHWC1:user/release-keys","RP1A.200720.012.G975FXXSGHWC1",
-                "beyond2ltexx-user","beyond2ltexx-user","21R3NF12","se.infra","1646236800","2022-03-01","REL","0"),
-            "Samsung Galaxy S10" to DeviceFingerprint(
-                "samsung","samsung","SM-G973F","beyond1","beyond1ltexx","exynos9820","beyond1","G973FXXSGHWC1",
-                "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","G973FXXSGHWC1",30,"11","exynos9820","mali","196610","Exynos9820","zygote64_32",
-                "samsung/beyond1ltexx/beyond1:11/RP1A.200720.012/G973FXXSGHWC1:user/release-keys","RP1A.200720.012.G973FXXSGHWC1",
-                "beyond1ltexx-user","beyond1ltexx-user","21R3NF12","se.infra","1646236800","2022-03-01","REL","0"),
-            "Samsung Galaxy Note 10+" to DeviceFingerprint(
-                "samsung","samsung","SM-N975F","d2s","d2sxx","exynos9825","d2s","N975FXXS7FUH3",
-                "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","N975FXXS7FUH3",30,"11","exynos9825","mali","196610","Exynos9825","zygote64_32",
-                "samsung/d2sxx/d2s:11/RP1A.200720.012/N975FXXS7FUH3:user/release-keys","RP1A.200720.012.N975FXXS7FUH3",
-                "d2sxx-user","d2sxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
-            "Samsung Galaxy M31" to DeviceFingerprint(
-                "samsung","samsung","SM-M315F","m31","m31nsxx","exynos9611","m31","M315FXXU2BUH1",
-                "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys",
-                "RP1A.200720.012","release-keys","user","","M315FXXU2BUH1",30,"11","exynos9611","mali","196610","Exynos9611","zygote64_32",
-                "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU2BUH1:user/release-keys","RP1A.200720.012.M315FXXU2BUH1",
-                "m31nsxx-user","m31nsxx-user","21R3NF12","se.infra","1629849600","2021-08-01","REL","0"),
-
-            // --- ONEPLUS (Android 11) ---
-            "OnePlus 9 Pro" to DeviceFingerprint(
-                "OnePlus","OnePlus","LE2123","OnePlus9Pro","OnePlus9Pro_EEA","qcom","OnePlus9Pro","2109102035",
-                "OnePlus/OnePlus9Pro_EEA/OnePlus9Pro:11/RKQ1.201105.002/2109102035:user/release-keys",
-                "RKQ1.201105.002","release-keys","user","","2109102035",30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
-                "OnePlus/OnePlus9Pro_EEA/OnePlus9Pro:11/RKQ1.201105.002/2109102035:user/release-keys","RKQ1.201105.002",
-                "OnePlus9Pro_EEA-user","OnePlus9Pro_EEA-user","OnePlus","OnePlus","1631278800","2021-09-01","REL","0"),
-            "OnePlus 9" to DeviceFingerprint(
-                "OnePlus","OnePlus","LE2113","OnePlus9","OnePlus9_EEA","qcom","OnePlus9","2109102035",
-                "OnePlus/OnePlus9_EEA/OnePlus9:11/RKQ1.201105.002/2109102035:user/release-keys",
-                "RKQ1.201105.002","release-keys","user","","2109102035",30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
-                "OnePlus/OnePlus9_EEA/OnePlus9:11/RKQ1.201105.002/2109102035:user/release-keys","RKQ1.201105.002",
-                "OnePlus9_EEA-user","OnePlus9_EEA-user","OnePlus","OnePlus","1631278800","2021-09-01","REL","0"),
-            "OnePlus 8T" to DeviceFingerprint(
-                "OnePlus","OnePlus","KB2003","OnePlus8T","OnePlus8T_EEA","qcom","OnePlus8T","2110091915",
-                "OnePlus/OnePlus8T_EEA/OnePlus8T:11/RP1A.201005.001/2110091915:user/release-keys",
-                "RP1A.201005.001","release-keys","user","","2110091915",30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "OnePlus/OnePlus8T_EEA/OnePlus8T:11/RP1A.201005.001/2110091915:user/release-keys","RP1A.201005.001",
-                "OnePlus8T_EEA-user","OnePlus8T_EEA-user","OnePlus","OnePlus","1633784400","2021-10-01","REL","0"),
-            "OnePlus 8 Pro" to DeviceFingerprint(
-                "OnePlus","OnePlus","IN2023","OnePlus8Pro","OnePlus8Pro_EEA","qcom","OnePlus8Pro","2110091915",
-                "OnePlus/OnePlus8Pro_EEA/OnePlus8Pro:11/RP1A.201005.001/2110091915:user/release-keys",
-                "RP1A.201005.001","release-keys","user","","2110091915",30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "OnePlus/OnePlus8Pro_EEA/OnePlus8Pro:11/RP1A.201005.001/2110091915:user/release-keys","RP1A.201005.001",
-                "OnePlus8Pro_EEA-user","OnePlus8Pro_EEA-user","OnePlus","OnePlus","1633784400","2021-10-01","REL","0"),
+                manufacturer = "samsung", brand = "samsung", model = "SM-A525F",
+                device = "a52q", product = "a52qxx",
+                hardware = "qcom", board = "a52q", bootloader = "A525FXXU4CVJB",
+                fingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "A525FXXU4CVJB", sdkInt = 30, release = "11",
+                boardPlatform = "trinket", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7125", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/a52qxx/a52q:11/RP1A.200720.012/A525FXXU4CVJB:user/release-keys",
+                display = "RP1A.200720.012.A525FXXU4CVJB",
+                buildDescription = "a52qxx-user 11 RP1A.200720.012 A525FXXU4CVJB release-keys",
+                buildFlavor = "a52qxx-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO: "dpi" → "se.infra"
+                buildDateUtc = "1639497600", securityPatch = "2021-12-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Samsung Galaxy A32" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-A325F",
+                device = "a32", product = "a32xxx",
+                hardware = "mt6853", board = "a32", bootloader = "A325FXXU2BUG1",
+                fingerprint = "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR14A.R3.MP.V62.P4",
+                incremental = "A325FXXU2BUG1", sdkInt = 30, release = "11",
+                boardPlatform = "mt6853", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "MT6853", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/a32xxx/a32:11/RP1A.200720.012/A325FXXU2BUG1:user/release-keys",
+                display = "RP1A.200720.012.A325FXXU2BUG1",
+                buildDescription = "a32xxx-user 11 RP1A.200720.012 A325FXXU2BUG1 release-keys",
+                buildFlavor = "a32xxx-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO
+                buildDateUtc = "1625097600", securityPatch = "2021-07-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Samsung Galaxy A51" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-A515F",
+                device = "a51", product = "a51xxx",
+                hardware = "exynos9610", board = "a51", bootloader = "A515FXXU4CUG1",
+                fingerprint = "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "",
+                incremental = "A515FXXU4CUG1", sdkInt = 30, release = "11",
+                boardPlatform = "exynos9610", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "Exynos9611", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/a51xxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
+                display = "RP1A.200720.012.A515FXXU4CUG1",
+                buildDescription = "a51xxx-user 11 RP1A.200720.012 A515FXXU4CUG1 release-keys",
+                buildFlavor = "a51xxx-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO
+                buildDateUtc = "1625097600", securityPatch = "2021-07-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Samsung Galaxy M12" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-M127F",
+                device = "m12", product = "m12xid",
+                hardware = "exynos850", board = "m12", bootloader = "M127FXXU3BUK1",
+                fingerprint = "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "",
+                incremental = "M127FXXU3BUK1", sdkInt = 30, release = "11",
+                boardPlatform = "exynos850", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "S5E3830", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/m12xid/m12:11/RP1A.200720.012/M127FXXU3BUK1:user/release-keys",
+                display = "RP1A.200720.012.M127FXXU3BUK1",
+                buildDescription = "m12xid-user 11 RP1A.200720.012 M127FXXU3BUK1 release-keys",
+                buildFlavor = "m12xid-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO
+                buildDateUtc = "1636934400", securityPatch = "2021-11-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Samsung Galaxy S20+" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-G985F",
+                device = "y2s", product = "y2sxx",
+                hardware = "exynos990", board = "universal990", bootloader = "G985FXXSGHWA3",
+                fingerprint = "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "",
+                incremental = "G985FXXSGHWA3", sdkInt = 30, release = "11",
+                boardPlatform = "exynos990", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "Exynos990", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys",
+                display = "RP1A.200720.012.G985FXXSGHWA3",
+                buildDescription = "y2sxx-user 11 RP1A.200720.012 G985FXXSGHWA3 release-keys",
+                buildFlavor = "y2sxx-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO
+                // buildDateUtc de Dic 2021 pero securityPatch 2022-01 es coherente para HWA3
+                buildDateUtc = "1639497600", securityPatch = "2022-01-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Samsung Galaxy S10e" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-G970F",
+                device = "beyond0", product = "beyond0ltexx",
+                hardware = "exynos9820", board = "universal9820", bootloader = "G970FXXSGHWC1",
+                fingerprint = "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "",
+                incremental = "G970FXXSGHWC1", sdkInt = 30, release = "11",
+                boardPlatform = "exynos9820", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "Exynos9820", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/beyond0ltexx/beyond0:11/RP1A.200720.012/G970FXXSGHWC1:user/release-keys",
+                display = "RP1A.200720.012.G970FXXSGHWC1",
+                buildDescription = "beyond0ltexx-user 11 RP1A.200720.012 G970FXXSGHWC1 release-keys",
+                buildFlavor = "beyond0ltexx-user",
+                buildHost = "21R3NF12", buildUser = "se.infra",   // ← CORREGIDO
+                buildDateUtc = "1646236800", securityPatch = "2022-03-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Google Pixel 4a" to DeviceFingerprint(
+                manufacturer = "Google", brand = "google", model = "Pixel 4a",
+                device = "sunfish", product = "sunfish",
+                hardware = "qcom", board = "sunfish", bootloader = "s5-0.5-9637172",
+                fingerprint = "google/sunfish/sunfish:11/RQ3A.210705.001/7380771:user/release-keys",
+                buildId = "RQ3A.210705.001", tags = "release-keys", type = "user",
+                radioVersion = "g7150-00023-210610-B-7310372",
+                incremental = "7380771", sdkInt = 30, release = "11",
+                boardPlatform = "atoll", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7150", zygote = "zygote64_32",
+                vendorFingerprint = "google/sunfish_vend/sunfish:11/RQ3A.210705.001/7380771:vendor/release-keys",
+                display = "RQ3A.210705.001",
+                buildDescription = "sunfish-user 11 RQ3A.210705.001 7380771 release-keys",
+                buildFlavor = "sunfish-user",
+                buildHost = "abfarm-release-rbe-64.hot.corp.google.com",
+                buildUser = "android-build",
+                buildDateUtc = "1625616000", securityPatch = "2021-07-05",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Google Pixel 5" to DeviceFingerprint(
+                manufacturer = "Google", brand = "google", model = "Pixel 5",
+                device = "redfin", product = "redfin",
+                hardware = "qcom", board = "redfin", bootloader = "r8-0.3-7219051",
+                fingerprint = "google/redfin/redfin:11/RQ3A.210805.001.A1/7512229:user/release-keys",
+                buildId = "RQ3A.210805.001.A1", tags = "release-keys", type = "user",
+                radioVersion = "g725-00164-210812-B-7522969",
+                incremental = "7512229", sdkInt = 30, release = "11",
+                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7250", zygote = "zygote64_32",
+                vendorFingerprint = "google/redfin_vend/redfin:11/RQ3A.210805.001.A1/7512229:vendor/release-keys",
+                display = "RQ3A.210805.001.A1",
+                buildDescription = "redfin-user 11 RQ3A.210805.001.A1 7512229 release-keys",
+                buildFlavor = "redfin-user",
+                buildHost = "abfarm-release-rbe-64.hot.corp.google.com",
+                buildUser = "android-build",
+                buildDateUtc = "1628100000", securityPatch = "2021-08-05",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Google Pixel 4a 5G" to DeviceFingerprint(
+                manufacturer = "Google", brand = "google", model = "Pixel 4a (5G)",
+                device = "bramble", product = "bramble",
+                hardware = "qcom", board = "bramble", bootloader = "b2-0.3-7214727",
+                fingerprint = "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys",
+                buildId = "RQ3A.210705.001", tags = "release-keys", type = "user",
+                radioVersion = "g7250-00195-210614-B-7352378",
+                incremental = "7380771", sdkInt = 30, release = "11",
+                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7250", zygote = "zygote64_32",
+                vendorFingerprint = "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys",
+                display = "RQ3A.210705.001",
+                buildDescription = "bramble-user 11 RQ3A.210705.001 7380771 release-keys",
+                buildFlavor = "bramble-user",
+                buildHost = "abfarm-release-rbe-64.hot.corp.google.com",
+                buildUser = "android-build",
+                buildDateUtc = "1625616000", securityPatch = "2021-07-05",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "OnePlus Nord" to DeviceFingerprint(
-                "OnePlus","OnePlus","AC2003","Nord","Nord_EEA","qcom","Nord","2108231920",
-                "OnePlus/Nord_EEA/Nord:11/RP1A.201005.001/2108231920:user/release-keys",
-                "RP1A.201005.001","release-keys","user","","2108231920",30,"11","lito","adreno","196610","SM7250","zygote64_32",
-                "OnePlus/Nord_EEA/Nord:11/RP1A.201005.001/2108231920:user/release-keys","RP1A.201005.001",
-                "Nord_EEA-user","Nord_EEA-user","OnePlus","OnePlus","1629723600","2021-08-01","REL","0"),
-
-            // --- OTHERS (Android 11) ---
-            "Xperia 5 II" to DeviceFingerprint(
-                "Sony","Sony","XQ-AS52","XQ-AS52","XQ-AS52_EEA","qcom","XQ-AS52","unknown",
-                "Sony/XQ-AS52_EEA/XQ-AS52:11/58.1.A.5.441/058001A005044102927236206:user/release-keys",
-                "58.1.A.5.441","release-keys","user","","058001A005044102927236206",30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "Sony/XQ-AS52_EEA/XQ-AS52:11/58.1.A.5.441/058001A005044102927236206:user/release-keys","58.1.A.5.441",
-                "XQ-AS52_EEA-user","XQ-AS52_EEA-user","Sony","Sony","1632747600","2021-09-01","REL","0"),
-            "Vivo Y53s" to DeviceFingerprint(
-                "vivo","vivo","V2058","V2058","V2058","mt6769","V2058","unknown",
-                "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V98","compiler08272021",
-                30,"11","mt6769","mali","196610","MT6769","zygote64_32",
-                "vivo/V2058/V2058:11/RP1A.200720.011/compiler08272021:user/release-keys",
-                "RP1A.200720.011","V2058-user","V2058-user","compiler","build","1630022400","2021-08-01","REL","0"),
+                manufacturer = "OnePlus", brand = "OnePlus", model = "OnePlus Nord",
+                device = "avicii", product = "OnePlus Nord",
+                hardware = "qcom", board = "avicii", bootloader = "avicii_11_A.11",
+                fingerprint = "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys",
+                buildId = "RKQ1.201022.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.0.c1-00072-SM7250_GEN_PACK-1",
+                incremental = "2107141742", sdkInt = 30, release = "11",
+                boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM7250", zygote = "zygote64_32",
+                vendorFingerprint = "OnePlus/OnePlus Nord/avicii:11/RKQ1.201022.002/2107141742:user/release-keys",
+                display = "RKQ1.201022.002.2107141742",
+                buildDescription = "OnePlus Nord-user 11 RKQ1.201022.002 2107141742 release-keys",
+                buildFlavor = "OnePlus Nord-user",
+                buildHost = "buildserver12", buildUser = "jenkins",
+                buildDateUtc = "1626307200", securityPatch = "2021-07-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "OnePlus 8T" to DeviceFingerprint(
+                manufacturer = "OnePlus", brand = "OnePlus", model = "KB2005",
+                device = "kebab", product = "OnePlus8T",
+                hardware = "qcom", board = "kebab", bootloader = "kebab_21_A.14",
+                fingerprint = "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys",
+                buildId = "RKQ1.201022.002", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
+                incremental = "2106051219", sdkInt = 30, release = "11",
+                boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8250", zygote = "zygote64_32",
+                vendorFingerprint = "OnePlus/OnePlus8T/kebab:11/RKQ1.201022.002/2106051219:user/release-keys",
+                display = "RKQ1.201022.002.2106051219",
+                buildDescription = "OnePlus8T-user 11 RKQ1.201022.002 2106051219 release-keys",
+                buildFlavor = "OnePlus8T-user",
+                buildHost = "buildserver12", buildUser = "jenkins",
+                buildDateUtc = "1622937600", securityPatch = "2021-06-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Moto G30" to DeviceFingerprint(
+                manufacturer = "motorola", brand = "motorola", model = "moto g30",
+                device = "caprip", product = "caprip",
+                hardware = "qcom", board = "caprip", bootloader = "unknown",
+                fingerprint = "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys",
+                buildId = "RRHS31.Q3-47-32", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
+                incremental = "a57fec", sdkInt = 30, release = "11",
+                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM6115", zygote = "zygote64_32",
+                vendorFingerprint = "motorola/caprip/caprip:11/RRHS31.Q3-47-32/a57fec:user/release-keys",
+                display = "RRHS31.Q3-47-32",
+                buildDescription = "caprip-user 11 RRHS31.Q3-47-32 a57fec release-keys",
+                buildFlavor = "caprip-user",
+                buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm",
+                buildDateUtc = "1630022400", securityPatch = "2021-08-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+            "Moto G Power 2021" to DeviceFingerprint(
+                manufacturer = "motorola", brand = "motorola", model = "moto g power (2021)",
+                device = "borneo", product = "borneo",
+                hardware = "qcom", board = "borneo", bootloader = "unknown",
+                fingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
+                buildId = "RRQ31.Q3-47-22", tags = "release-keys", type = "user",
+                radioVersion = "MPSS.HI.2.8.1.c3-00026-SM6115_GEN_PACK-1",
+                incremental = "2b4fae", sdkInt = 30, release = "11",
+                boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM6115", zygote = "zygote64_32",
+                vendorFingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
+                display = "RRQ31.Q3-47-22",
+                buildDescription = "borneo-user 11 RRQ31.Q3-47-22 2b4fae release-keys",
+                buildFlavor = "borneo-user",
+                buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm",
+                buildDateUtc = "1619827200", securityPatch = "2021-05-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Realme 7 5G" to DeviceFingerprint(
-                "realme","realme","RMX2111","RMX2111","RMX2111","mt6853","RMX2111","unknown",
-                "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR14A.R3.MP.V62","1626245367375",
-                30,"11","mt6853","mali","196610","MT6853","zygote64_32",
-                "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","RMX2111-user","RMX2111-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
-            "Oppo Reno5" to DeviceFingerprint(
-                "OPPO","OPPO","CPH2159","OP4E75L1","CPH2159","qcom","OP4E75L1","unknown",
-                "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MPSS.HI.2.0.c4-00165","1622635284",
-                30,"11","atoll","adreno","196610","SM7225","zygote64_32",
-                "OPPO/CPH2159/OP4E75L1:11/RP1A.200720.011/1622635284:user/release-keys",
-                "RP1A.200720.011","CPH2159-user","CPH2159-user","ubuntu","jenkins","1622635284","2021-06-01","REL","0"),
-            "Vivo X60" to DeviceFingerprint(
-                "vivo","vivo","V2046","V2046","V2046","qcom","V2046","unknown",
-                "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
-                "RP1A.200720.012","release-keys","user","MPSS.HI.2.0.c4-00165","compiler05211516",
-                30,"11","kona","adreno","196610","SM8250","zygote64_32",
-                "vivo/V2046/V2046:11/RP1A.200720.012/compiler05211516:user/release-keys",
-                "RP1A.200720.012","V2046-user","V2046-user","compiler","build","1621584000","2021-05-01","REL","0"),
-            "Vivo X70 Pro" to DeviceFingerprint(
-                "vivo","vivo","V2105","V2105","V2105","mt6893","V2105","unknown",
-                "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
-                "RP1A.200720.012","release-keys","user","MOLY.LR12A.R3.MP.V98","compiler10212015",
-                30,"11","mt6893","mali","196610","MT6893","zygote64_32",
-                "vivo/V2105/V2105:11/RP1A.200720.012/compiler10212015:user/release-keys",
-                "RP1A.200720.012","V2105-user","V2105-user","compiler","build","1634860800","2021-10-01","REL","0"),
-            "Realme 8 Pro" to DeviceFingerprint(
-                "realme","realme","RMX3081","RMX3081","RMX3081","qcom","RMX3081","unknown",
-                "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MPSS.HI.2.0.c4-00165","1626245367375",
-                30,"11","atoll","adreno","196610","SM7125","zygote64_32",
-                "realme/RMX3081/RMX3081:11/RP1A.200720.011/1626245367375:user/release-keys",
-                "RP1A.200720.011","RMX3081-user","RMX3081-user","ubuntu-123","jenkins","1626245367","2021-07-01","REL","0"),
+                manufacturer = "realme", brand = "realme", model = "RMX2111",
+                device = "RMX2111", product = "RMX2111",
+                hardware = "mt6853", board = "RMX2111", bootloader = "unknown",
+                fingerprint = "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367:user/release-keys",
+                buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
+                radioVersion = "MOLY.LR14A.R3.MP.V62",
+                incremental = "1626245367", sdkInt = 30, release = "11",
+                boardPlatform = "mt6853", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "MT6853", zygote = "zygote64_32",
+                vendorFingerprint = "realme/RMX2111/RMX2111:11/RP1A.200720.011/1626245367:user/release-keys",
+                display = "RP1A.200720.011",
+                buildDescription = "RMX2111-user 11 RP1A.200720.011 1626245367 release-keys",
+                buildFlavor = "RMX2111-user",
+                buildHost = "ubuntu-123", buildUser = "jenkins",
+                buildDateUtc = "1626245367",      // ← CORREGIDO: era "1626245367375" (ms), ahora segundos
+                securityPatch = "2021-07-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
             "Asus Zenfone 8" to DeviceFingerprint(
-                "asus","asus","ASUS_I006D","ASUS_I006D","WW_I006D","qcom","sake","unknown",
-                "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
-                "RKQ1.201112.002","release-keys","user","M3.13.24.51-Sake_0000100","30.11.51.115",
-                30,"11","lahaina","adreno","196610","SM8350","zygote64_32",
-                "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
-                "RKQ1.201112.002.30.11.51.115","WW_I006D-user","WW_I006D-user","android-build","jenkins","1629859200","2021-08-01","REL","0")
+                manufacturer = "asus", brand = "asus", model = "ASUS_I006D",
+                device = "ASUS_I006D", product = "WW_I006D",
+                hardware = "qcom", board = "sake", bootloader = "unknown",
+                fingerprint = "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
+                buildId = "RKQ1.201112.002", tags = "release-keys", type = "user",
+                radioVersion = "M3.13.24.51-Sake_0000100",
+                incremental = "30.11.51.115", sdkInt = 30, release = "11",
+                boardPlatform = "lahaina", eglDriver = "adreno", openGlEs = "196610",
+                hardwareChipname = "SM8350", zygote = "zygote64_32",
+                vendorFingerprint = "asus/WW_I006D/ASUS_I006D:11/RKQ1.201112.002/30.11.51.115:user/release-keys",
+                display = "RKQ1.201112.002.30.11.51.115",
+                buildDescription = "WW_I006D-user 11 RKQ1.201112.002 30.11.51.115 release-keys",
+                buildFlavor = "WW_I006D-user",
+                buildHost = "android-build", buildUser = "jenkins",
+                buildDateUtc = "1629859200", securityPatch = "2021-08-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            )
         )
     }
 
     data class DeviceFingerprint(
-        val manufacturer: String, val brand: String, val model: String, val device: String,
-        val product: String, val hardware: String, val board: String, val bootloader: String,
-        val fingerprint: String, val buildId: String, val tags: String, val type: String,
-        val radioVersion: String, val incremental: String, val sdkInt: Int, val release: String,
-        val boardPlatform: String, val eglDriver: String, val openGlEs: String,
-        val hardwareChipname: String, val zygote: String, val vendorFingerprint: String,
-        val display: String, val buildDescription: String, val buildFlavor: String,
-        val buildHost: String, val buildUser: String, val buildDateUtc: String,
-        val securityPatch: String, val buildVersionCodename: String,
-        val buildVersionPreviewSdk: String
+        val manufacturer: String, val brand: String, val model: String,
+        val device: String, val product: String, val hardware: String,
+        val board: String, val bootloader: String, val fingerprint: String,
+        val buildId: String, val tags: String, val type: String,
+        val radioVersion: String, val incremental: String, val sdkInt: Int,
+        val release: String, val boardPlatform: String, val eglDriver: String,
+        val openGlEs: String, val hardwareChipname: String, val zygote: String,
+        val vendorFingerprint: String, val display: String,
+        val buildDescription: String, val buildFlavor: String,
+        val buildHost: String, val buildUser: String,
+        val buildDateUtc: String, val securityPatch: String,
+        val buildVersionCodename: String, val buildVersionPreviewSdk: String
     )
 
-    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName == "com.vortex") {
-            hookModuleStatus(lpparam)
-            return
-        }
+    // ─────────────────────────────────────────────────────────────
+    //  HANDLE LOAD PACKAGE
+    // ─────────────────────────────────────────────────────────────
 
-        if (lpparam.packageName == "android" ||
-            lpparam.packageName.startsWith("com.android.") ||
-            lpparam.packageName.startsWith("com.miui.") ||
-            lpparam.packageName.startsWith("com.xiaomi.")) {
-            return
-        }
+    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+        // [FIX L2] Solo hookear apps objetivo, nunca el sistema completo
+        if (lpparam.packageName !in TARGET_APPS) return
 
         try {
-            val originalTime = OriginalBuildValues.ORIGINAL_BUILD_TIME
-
-            val prefs = XSharedPreferences("com.vortex", PREFS_NAME)
+            val prefs = XSharedPreferences("com.vortex", PREFS_NAME)   // ← paquete correcto
             prefs.reload()
 
-            fun getEncryptedString(key: String, def: String): String {
+            fun getStr(key: String, def: String): String {
                 val raw = prefs.getString(key, null)
                 return CryptoUtils.decrypt(raw) ?: def
             }
+            // [FIX U3] También descifrar booleanos
+            fun getBool(key: String, def: Boolean): Boolean {
+                val v = getStr(key, "")
+                return if (v.isEmpty()) def else v.toBooleanStrictOrNull() ?: def
+            }
 
-            val profileName = getEncryptedString("profile", "Redmi 9")
-            val fingerprint = getDeviceFingerprint(profileName)
+            val profileName = getStr("profile", "Redmi 9")
+            val fp = DEVICE_FINGERPRINTS[profileName] ?: DEVICE_FINGERPRINTS["Redmi 9"]!!
 
-            initializeCache(prefs, ::getEncryptedString, fingerprint.model)
+            synchronized(this) { initializeCache(prefs, ::getStr) }
 
-            hookBuildFields(lpparam, fingerprint)
-            hookSystemProperties(lpparam, fingerprint)
+            hookBuildFields(lpparam, fp)
+            hookSystemProperties(lpparam, fp)
             hookTelephonyManager(lpparam)
-            hookUnifiedSettingsSecure(lpparam)
+            hookSettingsSecure(lpparam)
             hookNetworkInterfaces(lpparam)
-            hookBluetooth(lpparam)
-            hookWifiInfo(lpparam)
-            hookMediaDrm(lpparam)
-            hookLocation(lpparam, prefs, ::getEncryptedString)
-            hookWebView(lpparam, fingerprint)
+            hookWifiManager(lpparam)               // [NEW A14]
+            hookBluetoothAdapter(lpparam)          // [NEW A15]
+            hookLocation(lpparam, prefs, ::getStr)
+
+            // Always hook webview and packages (removed conditional checks as per "Always On")
+            hookWebView(lpparam, fp)
             hookAccountManager(lpparam)
-
             hookPackageManager(lpparam)
-            hookApplicationFlags(lpparam)
-            hookFile()
-            hookProcessBuilderAndRuntime()
+            hookApplicationFlags(lpparam)          // [FIX A6] versión correcta
+            hookFingerprintedPartitions(lpparam, fp)  // [NEW A13]
+
+            // Vortex Injections
+            hookMediaDrm(lpparam)
+            hookWifiInfo(lpparam)
 
         } catch (e: Throwable) {
-            try {
-                if (BuildConfig.DEBUG) XposedBridge.log("Vortex Error: ${e.message}")
-            } catch (ex: Throwable) {}
+            if (BuildConfig.DEBUG) XposedBridge.log("Vortex error: ${e.message}")
         }
     }
 
-    private fun hookModuleStatus(lpparam: XC_LoadPackage.LoadPackageParam) {
-        try {
-            XposedHelpers.findAndHookMethod(
-                "com.vortex.StatusFragment",
-                lpparam.classLoader,
-                "isModuleActive",
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        param.result = true
-                    }
-                }
-            )
-        } catch (e: Throwable) {}
-    }
+    // ─────────────────────────────────────────────────────────────
+    //  INIT CACHE  (llamar dentro de synchronized)
+    // ─────────────────────────────────────────────────────────────
 
-    private fun hookFile() {
-        try {
-            val hook = object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    if (param.result == false) return
-                    val file = param.thisObject as File
-                    val path = file.absolutePath
-                    if (path.length < 5) return
+    private fun initializeCache(prefs: XSharedPreferences, getStr: (String, String) -> String) {
+        val profileName = getStr("profile", "Redmi 9")
+        val mccMnc = getStr("mcc_mnc", "310260")
 
-                    if (SpoofingUtils.isSensitivePath(path)) {
-                        param.result = false
-                    }
-                }
-            }
-            XposedHelpers.findAndHookMethod(File::class.java, "exists",      hook)
-            XposedHelpers.findAndHookMethod(File::class.java, "canRead",     hook)
-            XposedHelpers.findAndHookMethod(File::class.java, "canExecute",  hook)
-            XposedHelpers.findAndHookMethod(File::class.java, "isFile",      hook)
-            XposedHelpers.findAndHookMethod(File::class.java, "isDirectory", hook)
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("File hook error: ${e.message}")
-        }
-    }
+        if (cachedMccMnc == null) cachedMccMnc = mccMnc
 
-    private fun createDummyProcess(): Process = object : Process() {
-        override fun getOutputStream() = object : java.io.OutputStream() {
-            override fun write(b: Int) = Unit
-        }
-        override fun getInputStream()  = java.io.ByteArrayInputStream(ByteArray(0))
-        override fun getErrorStream()  = java.io.ByteArrayInputStream(ByteArray(0))
-        override fun waitFor()         = 1
-        override fun exitValue()       = 1
-        override fun destroy()         = Unit
-    }
+        if (cachedImei == null)        cachedImei        = getStr("imei",          SpoofingUtils.generateValidImei(profileName))
+        if (cachedImei2 == null)       cachedImei2       = getStr("imei2",         SpoofingUtils.generateValidImei(profileName))
+        if (cachedAndroidId == null)   cachedAndroidId   = getStr("android_id",    SpoofingUtils.generateRandomId(16))
+        if (cachedGsfId == null)       cachedGsfId       = getStr("gsf_id",        SpoofingUtils.generateRandomId(16))
+        if (cachedGaid == null)        cachedGaid        = getStr("gaid",          SpoofingUtils.generateRandomGaid())    // [FIX A2] UUID v4
 
-    private fun hookProcessBuilderAndRuntime() {
-        try {
-            val runtimeHook = object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val cmd = when (val arg = param.args[0]) {
-                        is String     -> arg
-                        is Array<*>   -> arg.joinToString(" ")
-                        else          -> return
-                    }
-                    if (SpoofingUtils.isSensitiveCommand(cmd.split("\\s+".toRegex()))) {
-                        param.result = createDummyProcess()
-                        if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked Runtime.exec: $cmd")
-                    }
-                }
-            }
+        val brand = DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
+        if (cachedSerial == null)      cachedSerial      = getStr("serial",        SpoofingUtils.generateRandomSerial(brand))
+        if (cachedWifiMac == null)     cachedWifiMac     = getStr("wifi_mac",      SpoofingUtils.generateRandomMac())
+        if (cachedBtMac == null)       cachedBtMac       = getStr("bluetooth_mac", SpoofingUtils.generateRandomMac())
+        if (cachedGmail == null)       cachedGmail       = getStr("gmail",         SpoofingUtils.generateRealisticGmail())  // [FIX A11]
 
-            XposedHelpers.findAndHookMethod(Runtime::class.java, "exec", String::class.java, runtimeHook)
-            try { XposedHelpers.findAndHookMethod(Runtime::class.java, "exec", Array<String>::class.java, runtimeHook) } catch (e: Throwable) {}
-            try { XposedHelpers.findAndHookMethod(Runtime::class.java, "exec", String::class.java, Array<String>::class.java, runtimeHook) } catch (e: Throwable) {}
-            try { XposedHelpers.findAndHookMethod(Runtime::class.java, "exec", String::class.java, Array<String>::class.java, File::class.java, runtimeHook) } catch (e: Throwable) {}
-            try { XposedHelpers.findAndHookMethod(Runtime::class.java, "exec", Array<String>::class.java, Array<String>::class.java, File::class.java, runtimeHook) } catch (e: Throwable) {}
+        // Vortex Extra IDs
+        if (cachedSsaidSnapchat == null) cachedSsaidSnapchat = getStr("ssaid_snapchat", SpoofingUtils.generateRandomId(16))
+        if (cachedMediaDrmId == null)    cachedMediaDrmId    = getStr("media_drm_id",   SpoofingUtils.generateRandomId(32))
+        if (cachedWifiSsid == null)      cachedWifiSsid      = getStr("wifi_ssid",      "Vortex-5G")
+        if (cachedWifiBssid == null)     cachedWifiBssid     = getStr("wifi_bssid",     SpoofingUtils.generateRandomMac())
 
-            XposedHelpers.findAndHookMethod(
-                ProcessBuilder::class.java, "start",
-                object : XC_MethodHook() {
-                    override fun beforeHookedMethod(param: MethodHookParam) {
-                        val commandList = (param.thisObject as ProcessBuilder).command()
-                        if (SpoofingUtils.isSensitiveCommand(commandList)) {
-                            param.result = createDummyProcess()
-                            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Blocked ProcessBuilder: $commandList")
-                        }
-                    }
-                }
-            )
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("ProcessBuilder/Runtime hook error: ${e.message}")
-        }
-    }
+        // [FIX A1] IMSI = MCC+MNC(6) + MSIN(9) = 15 dígitos exactos
+        if (cachedImsi == null)        cachedImsi        = getStr("imsi",          SpoofingUtils.generateValidImsi(mccMnc))
+        if (cachedIccid == null)       cachedIccid       = getStr("iccid",         SpoofingUtils.generateValidIccid(mccMnc))
 
-    private fun initializeCache(
-        prefs: XSharedPreferences,
-        getString: (String, String) -> String,
-        modelName: String
-    ) {
-        if (cachedAndroidId == null) cachedAndroidId = getString("android_id", SpoofingUtils.generateRandomId(16))
-
-        val seed = (cachedAndroidId ?: "default").hashCode().toLong()
-        val seededRandom = Random(seed)
-
-        val rawMccMnc = prefs.getString("mcc_mnc", null)
-        val mccMnc: String = if (rawMccMnc != null) {
-            CryptoUtils.decrypt(rawMccMnc) ?: rawMccMnc
-        } else {
-            US_CARRIERS[Math.abs(seededRandom.nextInt()) % US_CARRIERS.size].mccMnc
-        }
-
-        if (cachedImei  == null) cachedImei  = getString("imei",  SpoofingUtils.generateValidImei(modelName))
-        if (cachedImei2 == null) cachedImei2 = getString("imei2", SpoofingUtils.generateValidImei(modelName))
-
-        if (cachedImsi == null) cachedImsi = getString("imsi", SpoofingUtils.generateValidImsi(mccMnc))
-
-        if (cachedIccid       == null) cachedIccid       = getString("iccid",          SpoofingUtils.generateValidIccid(mccMnc))
-        if (cachedGsfId       == null) cachedGsfId       = getString("gsf_id",        SpoofingUtils.generateRandomId(16))
-        if (cachedGaid        == null) cachedGaid        = getString("gaid",           SpoofingUtils.generateRandomGaid())
-        if (cachedWifiMac     == null) cachedWifiMac     = getString("wifi_mac",       SpoofingUtils.generateRandomMac())
-        if (cachedBtMac       == null) cachedBtMac       = getString("bluetooth_mac",  SpoofingUtils.generateRandomMac())
-        if (cachedGmail       == null) cachedGmail       = getString("gmail",          SpoofingUtils.generateRealisticGmail())
-        if (cachedSerial      == null) cachedSerial      = getString("serial",         SpoofingUtils.generateRandomSerial())
-
-        if (cachedSsaidSnapchat == null) cachedSsaidSnapchat = getString("ssaid_snapchat", SpoofingUtils.generateRandomId(16))
-        if (cachedMediaDrmId    == null) cachedMediaDrmId    = getString("media_drm_id",   SpoofingUtils.generateRandomId(32))
-        if (cachedWifiSsid      == null) cachedWifiSsid      = getString("wifi_ssid",      "Vortex-5G")
-        if (cachedWifiBssid     == null) cachedWifiBssid     = getString("wifi_bssid",     SpoofingUtils.generateRandomMac())
-
+        // Número de teléfono usando NPAs del carrier correcto
         if (cachedPhoneNumber == null) {
-            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
-            cachedPhoneNumber = SpoofingUtils.generatePhoneNumber(carrier.npas)
-        }
-    }
-
-    private fun extractMccMnc(imsi: String): String {
-        if (imsi.length < 5) return "310260"
-        val mccInt = imsi.take(3).toIntOrNull() ?: return imsi.take(6)
-        val mncLength = when (mccInt) {
-            in 310..316 -> 3
-            302         -> 3
-            else        -> 2
-        }
-        return imsi.take(3 + mncLength)
-    }
-
-    private fun getDeviceFingerprint(profileName: String): DeviceFingerprint {
-        val cleanName = profileName.replace(Regex(" - Android \\d+"), "").trim()
-        val fp = DEVICE_FINGERPRINTS.entries.find { it.key == cleanName }?.value
-        if (fp == null && BuildConfig.DEBUG) {
-            XposedBridge.log("Vortex: Perfil desconocido '$profileName', fallback Redmi 9")
-        }
-        return fp
-            ?: DEVICE_FINGERPRINTS.values.firstOrNull()
-            ?: DeviceFingerprint(
-                "Xiaomi","Redmi","Redmi 9","lancelot","lancelot_global","mt6768","lancelot","unknown",
-                "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "RP1A.200720.011","release-keys","user","MOLY.LR12A.R3.MP.V84.P47","V12.5.3.0.RJCMIXM",
-                30,"11","mt6768","mali","196610","MT6768","zygote64_32",
-                "Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys",
-                "V12.5.3.0.RJCMIXM","lancelot_global-user","lancelot_global-user",
-                "pangu","builder","1632960000","2021-09-01","REL","0")
-    }
-
-    private fun hookBuildFields(lpparam: XC_LoadPackage.LoadPackageParam, fingerprint: DeviceFingerprint) {
-        try {
-            val buildClass = Build::class.java
-            XposedHelpers.setStaticObjectField(buildClass, "MANUFACTURER", fingerprint.manufacturer)
-            XposedHelpers.setStaticObjectField(buildClass, "BRAND",        fingerprint.brand)
-            XposedHelpers.setStaticObjectField(buildClass, "MODEL",        fingerprint.model)
-            XposedHelpers.setStaticObjectField(buildClass, "DEVICE",       fingerprint.device)
-            XposedHelpers.setStaticObjectField(buildClass, "PRODUCT",      fingerprint.product)
-            XposedHelpers.setStaticObjectField(buildClass, "HARDWARE",     fingerprint.hardware)
-            XposedHelpers.setStaticObjectField(buildClass, "BOARD",        fingerprint.board)
-            XposedHelpers.setStaticObjectField(buildClass, "BOOTLOADER",   fingerprint.bootloader)
-            XposedHelpers.setStaticObjectField(buildClass, "FINGERPRINT",  fingerprint.fingerprint)
-            XposedHelpers.setStaticObjectField(buildClass, "ID",           fingerprint.buildId)
-            XposedHelpers.setStaticObjectField(buildClass, "TAGS",         fingerprint.tags)
-            XposedHelpers.setStaticObjectField(buildClass, "TYPE",         fingerprint.type)
-            XposedHelpers.setStaticObjectField(buildClass, "DISPLAY",      fingerprint.display)
-            XposedHelpers.setStaticObjectField(buildClass, "HOST",         fingerprint.buildHost)
-            XposedHelpers.setStaticObjectField(buildClass, "USER",         fingerprint.buildUser)
-            XposedHelpers.setStaticLongField(  buildClass, "TIME",         fingerprint.buildDateUtc.toLong() * 1000)
-
-            if (lpparam.appInfo != null && lpparam.appInfo.targetSdkVersion < 29) {
-                XposedHelpers.setStaticObjectField(buildClass, "SERIAL", cachedSerial)
+            val savedPhone = getStr("phone_number", "")
+            cachedPhoneNumber = if (savedPhone.isNotEmpty()) savedPhone else {
+                val carrier = US_CARRIERS.find { it.mccMnc == mccMnc && it.name == getStr("carrier_name","") }
+                    ?: US_CARRIERS.find { it.mccMnc == mccMnc }   // [FIX A3] fallback por nombre
+                SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList())
             }
+        }
+    }
 
-            val versionClass = Build.VERSION::class.java
-            XposedHelpers.setStaticIntField(   versionClass, "SDK_INT",       fingerprint.sdkInt)
-            XposedHelpers.setStaticObjectField(versionClass, "RELEASE",       fingerprint.release)
-            XposedHelpers.setStaticObjectField(versionClass, "INCREMENTAL",   fingerprint.incremental)
-            XposedHelpers.setStaticObjectField(versionClass, "SECURITY_PATCH",fingerprint.securityPatch)
-            XposedHelpers.setStaticObjectField(versionClass, "CODENAME",      fingerprint.buildVersionCodename)
-            XposedHelpers.setStaticIntField(   versionClass, "PREVIEW_SDK_INT",fingerprint.buildVersionPreviewSdk.toInt())
+    // ─────────────────────────────────────────────────────────────
+    //  BUILD FIELDS
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookBuildFields(lpparam: XC_LoadPackage.LoadPackageParam, fp: DeviceFingerprint) {
+        try {
+            val b = Build::class.java
+            XposedHelpers.setStaticObjectField(b, "MANUFACTURER", fp.manufacturer)
+            XposedHelpers.setStaticObjectField(b, "BRAND",        fp.brand)
+            XposedHelpers.setStaticObjectField(b, "MODEL",        fp.model)
+            XposedHelpers.setStaticObjectField(b, "DEVICE",       fp.device)
+            XposedHelpers.setStaticObjectField(b, "PRODUCT",      fp.product)
+            XposedHelpers.setStaticObjectField(b, "HARDWARE",     fp.hardware)
+            XposedHelpers.setStaticObjectField(b, "BOARD",        fp.board)
+            XposedHelpers.setStaticObjectField(b, "BOOTLOADER",   fp.bootloader)
+            XposedHelpers.setStaticObjectField(b, "FINGERPRINT",  fp.fingerprint)
+            XposedHelpers.setStaticObjectField(b, "ID",           fp.buildId)
+            XposedHelpers.setStaticObjectField(b, "TAGS",         fp.tags)
+            XposedHelpers.setStaticObjectField(b, "TYPE",         fp.type)
+            XposedHelpers.setStaticObjectField(b, "DISPLAY",      fp.display)
+            XposedHelpers.setStaticObjectField(b, "HOST",         fp.buildHost)
+            XposedHelpers.setStaticObjectField(b, "USER",         fp.buildUser)   // [FIX A8]
+            XposedHelpers.setStaticObjectField(b, "SERIAL",       cachedSerial)
+            // [FIX A9] buildDateUtc ya son segundos unix, multiplicar por 1000 da ms correcto
+            XposedHelpers.setStaticLongField(b, "TIME", fp.buildDateUtc.toLong() * 1000L)
+
+            val v = Build.VERSION::class.java
+            XposedHelpers.setStaticIntField(v,    "SDK_INT",        fp.sdkInt)
+            XposedHelpers.setStaticObjectField(v, "RELEASE",        fp.release)
+            XposedHelpers.setStaticObjectField(v, "INCREMENTAL",    fp.incremental)
+            XposedHelpers.setStaticObjectField(v, "SECURITY_PATCH", fp.securityPatch)
+            XposedHelpers.setStaticObjectField(v, "CODENAME",       fp.buildVersionCodename)
+            XposedHelpers.setStaticIntField(v,    "PREVIEW_SDK_INT",fp.buildVersionPreviewSdk.toInt())
 
             try {
                 XposedHelpers.findAndHookMethod(Build::class.java, "getSerial",
                     object : XC_MethodHook() {
-                        override fun afterHookedMethod(param: MethodHookParam) { param.result = cachedSerial }
-                    }
-                )
-            } catch (e: NoSuchMethodError) {}
-
-            // FIX #21: Hook Build.getFingerprintedPartitions (Android 11+)
-            try {
-                XposedHelpers.findAndHookMethod(Build::class.java, "getFingerprintedPartitions",
-                    object : XC_MethodHook() {
-                        override fun afterHookedMethod(param: MethodHookParam) {
-                            val partitions = param.result as? List<*> ?: return
-                            val newPartitions = ArrayList<Any>()
-                            for (p in partitions) {
-                                // Clone partition object if possible or just modify field?
-                                // Partition is hidden class. Easier to set fields?
-                                // We cannot easily clone hidden classes without reflection instantiation.
-                                // Instead, we iterate and set "mFingerprint" field on existing objects.
-                                try {
-                                    XposedHelpers.setObjectField(p, "mFingerprint", fingerprint.fingerprint)
-                                } catch (e: Throwable) {}
-                                newPartitions.add(p!!)
-                            }
-                            param.result = newPartitions
-                        }
-                    }
-                )
-            } catch (e: Throwable) {}
-
-        } catch (e: Throwable) {}
+                        override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedSerial }
+                    })
+            } catch (_: NoSuchMethodError) {}
+        } catch (_: Throwable) {}
     }
 
-    private fun hookSystemProperties(lpparam: XC_LoadPackage.LoadPackageParam, fingerprint: DeviceFingerprint) {
+    // ─────────────────────────────────────────────────────────────
+    //  SYSTEM PROPERTIES
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookSystemProperties(lpparam: XC_LoadPackage.LoadPackageParam, fp: DeviceFingerprint) {
         try {
             val sysPropClass = XposedHelpers.findClass("android.os.SystemProperties", lpparam.classLoader)
             val hook = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val key = param.args[0] as String
                     val res = when (key) {
-                        "ro.product.manufacturer"              -> fingerprint.manufacturer
-                        "ro.product.brand"                     -> fingerprint.brand
-                        "ro.product.model"                     -> fingerprint.model
-                        "ro.product.device"                    -> fingerprint.device
-                        "ro.product.name"                      -> fingerprint.product
-                        "ro.hardware"                          -> fingerprint.hardware
-                        "ro.product.board"                     -> fingerprint.board
-                        "ro.bootloader"                        -> fingerprint.bootloader
-                        "ro.build.fingerprint"                 -> fingerprint.fingerprint
-                        "ro.build.id"                          -> fingerprint.buildId
-                        "ro.build.tags"                        -> fingerprint.tags
-                        "ro.build.type"                        -> fingerprint.type
-                        "gsm.version.baseband"                 -> fingerprint.radioVersion
-                        "ro.serialno"                          -> cachedSerial
-                        "ro.build.version.release"             -> fingerprint.release
-                        "ro.build.version.sdk"                 -> fingerprint.sdkInt.toString()
-                        "ro.debuggable"                        -> "0"
-                        "ro.secure"                            -> "1"
-                        "ro.build.display.id"                  -> fingerprint.display
-                        "ro.build.description"                 -> fingerprint.buildDescription
-                        "ro.build.characteristics"             -> "default"
-                        "ro.build.flavor"                      -> fingerprint.buildFlavor
-                        "ro.vendor.build.fingerprint"          -> fingerprint.vendorFingerprint
-                        "ro.board.platform"                    -> fingerprint.boardPlatform
-                        "ro.hardware.egl"                      -> fingerprint.eglDriver
-                        "ro.opengles.version"                  -> fingerprint.openGlEs
-                        "ro.hardware.chipname"                 -> fingerprint.hardwareChipname
-                        "ro.zygote"                            -> fingerprint.zygote
-                        "ro.build.host"                        -> fingerprint.buildHost
-                        "ro.build.user"                        -> fingerprint.buildUser
-                        "ro.build.date.utc"                    -> fingerprint.buildDateUtc
-                        "ro.build.version.security_patch"      -> fingerprint.securityPatch
-                        "ro.build.version.codename"            -> fingerprint.buildVersionCodename
-                        "ro.build.version.preview_sdk"         -> fingerprint.buildVersionPreviewSdk
-                        "ro.product.system.manufacturer"       -> fingerprint.manufacturer
-                        "ro.product.system.brand"              -> fingerprint.brand
-                        "ro.product.system.model"              -> fingerprint.model
-                        "ro.product.system.device"             -> fingerprint.device
-                        "ro.product.system.name"               -> fingerprint.product
-                        "ro.product.vendor.manufacturer"       -> fingerprint.manufacturer
-                        "ro.product.vendor.brand"              -> fingerprint.brand
-                        "ro.product.vendor.model"              -> fingerprint.model
-                        "ro.product.vendor.device"             -> fingerprint.device
-                        "ro.product.vendor.name"               -> fingerprint.product
-                        "ro.product.odm.manufacturer"          -> fingerprint.manufacturer
-                        "ro.product.odm.brand"                 -> fingerprint.brand
-                        "ro.product.odm.model"                 -> fingerprint.model
-                        "ro.product.odm.device"                -> fingerprint.device
-                        "ro.product.odm.name"                  -> fingerprint.product
-                        "ro.product.product.manufacturer"      -> fingerprint.manufacturer
-                        "ro.product.product.brand"             -> fingerprint.brand
-                        "ro.product.product.model"             -> fingerprint.model
-                        "ro.product.product.device"            -> fingerprint.device
-                        "ro.product.product.name"              -> fingerprint.product
-                        "ro.build.version.all_codenames"       -> fingerprint.buildVersionCodename
-                        "ro.build.version.min_supported_target_sdk" -> "23"
-                        "ro.kernel.qemu"                       -> "0"
-                        "persist.sys.usb.config"               -> "none"
-                        "service.adb.root"                     -> "0"
-                        "ro.boot.serialno"                     -> cachedSerial
-                        "ro.boot.hardware"                     -> fingerprint.hardware
-                        "ro.boot.bootloader"                   -> fingerprint.bootloader
-                        "ro.boot.verifiedbootstate"            -> "green"
-                        "ro.boot.flash.locked"                 -> "1"
-                        "ro.boot.vbmeta.device_state"          -> "locked"
+                        "ro.product.manufacturer"         -> fp.manufacturer
+                        "ro.product.brand"                -> fp.brand
+                        "ro.product.model"                -> fp.model
+                        "ro.product.device"               -> fp.device
+                        "ro.product.name"                 -> fp.product
+                        "ro.hardware"                     -> fp.hardware
+                        "ro.product.board"                -> fp.board
+                        "ro.bootloader"                   -> fp.bootloader
+                        "ro.build.fingerprint"            -> fp.fingerprint
+                        "ro.build.id"                     -> fp.buildId
+                        "ro.build.tags"                   -> fp.tags
+                        "ro.build.type"                   -> fp.type
+                        "gsm.version.baseband"            -> fp.radioVersion
+                        "ro.serialno"                     -> cachedSerial
+                        "ro.build.version.release"        -> fp.release
+                        "ro.build.version.sdk"            -> fp.sdkInt.toString()
+                        "ro.build.display.id"             -> fp.display
+                        "ro.build.description"            -> fp.buildDescription
+                        "ro.build.flavor"                 -> fp.buildFlavor
+                        "ro.vendor.build.fingerprint"     -> fp.vendorFingerprint
+                        "ro.board.platform"               -> fp.boardPlatform
+                        "ro.hardware.egl"                 -> fp.eglDriver
+                        "ro.opengles.version"             -> fp.openGlEs
+                        "ro.hardware.chipname"            -> fp.hardwareChipname
+                        "ro.zygote"                       -> fp.zygote
+                        "ro.build.host"                   -> fp.buildHost
+                        "ro.build.user"                   -> fp.buildUser     // [FIX A8]
+                        "ro.build.date.utc"               -> fp.buildDateUtc
+                        "ro.build.version.security_patch" -> fp.securityPatch
+                        "ro.build.version.codename"       -> fp.buildVersionCodename
+                        "ro.build.version.preview_sdk"    -> fp.buildVersionPreviewSdk
+                        "ro.build.characteristics"        -> "default"
+                        // particiones system/vendor/odm/product
+                        "ro.product.system.manufacturer"  -> fp.manufacturer
+                        "ro.product.system.brand"         -> fp.brand
+                        "ro.product.system.model"         -> fp.model
+                        "ro.product.system.device"        -> fp.device
+                        "ro.product.system.name"          -> fp.product
+                        "ro.product.vendor.manufacturer"  -> fp.manufacturer
+                        "ro.product.vendor.brand"         -> fp.brand
+                        "ro.product.vendor.model"         -> fp.model
+                        "ro.product.vendor.device"        -> fp.device
+                        "ro.product.vendor.name"          -> fp.product
+                        "ro.product.odm.manufacturer"     -> fp.manufacturer
+                        "ro.product.odm.brand"            -> fp.brand
+                        "ro.product.odm.model"            -> fp.model
+                        "ro.product.odm.device"           -> fp.device
+                        "ro.product.odm.name"             -> fp.product
+                        "ro.product.product.manufacturer" -> fp.manufacturer
+                        "ro.product.product.brand"        -> fp.brand
+                        "ro.product.product.model"        -> fp.model
+                        "ro.product.product.device"       -> fp.device
+                        "ro.product.product.name"         -> fp.product
+                        // boot/security
+                        "ro.debuggable"                   -> "0"
+                        "ro.secure"                       -> "1"
+                        "ro.kernel.qemu"                  -> "0"
+                        "service.adb.root"                -> "0"
+                        "ro.boot.serialno"                -> cachedSerial
+                        "ro.boot.hardware"                -> fp.hardware
+                        "ro.boot.bootloader"              -> fp.bootloader
+                        "ro.boot.verifiedbootstate"       -> "green"
+                        "ro.boot.flash.locked"            -> "1"
+                        "ro.boot.vbmeta.device_state"     -> "locked"
+                        "persist.sys.usb.config"          -> "none"
                         else -> null
                     }
                     if (res != null) param.result = res
@@ -739,301 +783,146 @@ class MainHook : IXposedHookLoadPackage {
             }
             XposedHelpers.findAndHookMethod(sysPropClass, "get", String::class.java, hook)
             XposedHelpers.findAndHookMethod(sysPropClass, "get", String::class.java, String::class.java, hook)
-        } catch (e: Throwable) {}
+        } catch (_: Throwable) {}
     }
+
+    // ─────────────────────────────────────────────────────────────
+    //  TELEPHONY MANAGER
+    // ─────────────────────────────────────────────────────────────
 
     private fun hookTelephonyManager(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
-            val tmClass = XposedHelpers.findClass("android.telephony.TelephonyManager", lpparam.classLoader)
+            val tm = XposedHelpers.findClass("android.telephony.TelephonyManager", lpparam.classLoader)
+            val mccMnc = cachedMccMnc ?: "310260"
+            // [FIX A3] buscar por nombre guardado + MCC/MNC
+            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS[0]
 
-            XposedHelpers.findAndHookMethod(tmClass, "getDeviceId", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedImei } })
-            try { XposedHelpers.findAndHookMethod(tmClass, "getDeviceId", Int::class.javaPrimitiveType, object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2 } }) } catch (e: NoSuchMethodError) {}
-            try {
-                XposedHelpers.findAndHookMethod(tmClass, "getImei", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedImei } })
-                XposedHelpers.findAndHookMethod(tmClass, "getImei", Int::class.javaPrimitiveType, object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2 } })
-            } catch (e: NoSuchMethodError) {}
+            fun after(result: Any?) = object : XC_MethodHook() {
+                override fun afterHookedMethod(p: MethodHookParam) { p.result = result }
+            }
 
-            XposedHelpers.findAndHookMethod(tmClass, "getSubscriberId",  object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedImsi } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimSerialNumber", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedIccid } })
-            XposedHelpers.findAndHookMethod(tmClass, "getLine1Number",   object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedPhoneNumber } })
-
-            val mccMnc  = if (cachedImsi != null) extractMccMnc(cachedImsi!!) else "310260"
-            val carrier = US_CARRIERS.find { it.mccMnc == mccMnc } ?: US_CARRIERS.first()
-
-            XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperator",     object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mccMnc } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimOperator",         object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mccMnc } })
-            XposedHelpers.findAndHookMethod(tmClass, "getNetworkOperatorName", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = carrier.name } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimOperatorName",     object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = carrier.name } })
-            XposedHelpers.findAndHookMethod(tmClass, "getNetworkCountryIso",   object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = "us" } })
-            XposedHelpers.findAndHookMethod(tmClass, "getSimCountryIso",       object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = "us" } })
+            XposedHelpers.findAndHookMethod(tm, "getDeviceId",   after(cachedImei))
+            XposedHelpers.findAndHookMethod(tm, "getSubscriberId", after(cachedImsi))
+            XposedHelpers.findAndHookMethod(tm, "getSimSerialNumber", after(cachedIccid))
+            XposedHelpers.findAndHookMethod(tm, "getLine1Number", after(cachedPhoneNumber))
+            XposedHelpers.findAndHookMethod(tm, "getNetworkOperator",     after(mccMnc))
+            XposedHelpers.findAndHookMethod(tm, "getSimOperator",         after(mccMnc))
+            XposedHelpers.findAndHookMethod(tm, "getNetworkOperatorName", after(carrier.name))
+            XposedHelpers.findAndHookMethod(tm, "getSimOperatorName",     after(carrier.name))
+            XposedHelpers.findAndHookMethod(tm, "getNetworkCountryIso",   after("us"))
+            XposedHelpers.findAndHookMethod(tm, "getSimCountryIso",       after("us"))
 
             try {
-                XposedHelpers.findAndHookMethod(tmClass, "getMeid", object : XC_MethodHook() {
-                    override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedImei }
-                })
-                XposedHelpers.findAndHookMethod(tmClass, "getMeid", Int::class.javaPrimitiveType, object : XC_MethodHook() {
+                XposedHelpers.findAndHookMethod(tm, "getDeviceId", Int::class.javaPrimitiveType,
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(p: MethodHookParam) {
+                            p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2
+                        }
+                    })
+                XposedHelpers.findAndHookMethod(tm, "getImei", after(cachedImei))
+                XposedHelpers.findAndHookMethod(tm, "getImei", Int::class.javaPrimitiveType,
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(p: MethodHookParam) {
+                            p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2
+                        }
+                    })
+
+                // MEID Hooks (Vortex addition)
+                XposedHelpers.findAndHookMethod(tm, "getMeid", after(cachedImei))
+                XposedHelpers.findAndHookMethod(tm, "getMeid", Int::class.javaPrimitiveType, object : XC_MethodHook() {
                     override fun afterHookedMethod(p: MethodHookParam) {
                         p.result = if ((p.args[0] as Int) == 0) cachedImei else cachedImei2
                     }
                 })
-            } catch (e: NoSuchMethodError) {}
-
-        } catch (e: Throwable) {}
+            } catch (_: NoSuchMethodError) {}
+        } catch (_: Throwable) {}
     }
 
-    private fun hookUnifiedSettingsSecure(lpparam: XC_LoadPackage.LoadPackageParam) {
+    // ─────────────────────────────────────────────────────────────
+    //  SETTINGS SECURE
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookSettingsSecure(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val cls = XposedHelpers.findClass("android.provider.Settings\$Secure", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(cls, "getString",
-                ContentResolver::class.java, String::class.java,
+                android.content.ContentResolver::class.java, String::class.java,
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         when (param.args[1] as String) {
-                            Settings.Secure.ANDROID_ID  -> {
+                            Settings.Secure.ANDROID_ID   -> {
                                 if (lpparam.packageName == "com.snapchat.android" && cachedSsaidSnapchat != null) {
                                     param.result = cachedSsaidSnapchat
                                 } else {
                                     param.result = cachedAndroidId
                                 }
                             }
-                            "advertising_id"            -> param.result = cachedGaid
-                            "gsf_id", "android_id_gsf" -> param.result = cachedGsfId
+                            "advertising_id"             -> param.result = cachedGaid
+                            "gsf_id", "android_id_gsf"  -> param.result = cachedGsfId
                         }
                     }
-                }
-            )
-        } catch (e: Throwable) {}
+                })
+        } catch (_: Throwable) {}
     }
+
+    // ─────────────────────────────────────────────────────────────
+    //  NETWORK INTERFACES (WiFi + Bluetooth via NetworkInterface)
+    // ─────────────────────────────────────────────────────────────
 
     private fun hookNetworkInterfaces(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
-            val niClass = XposedHelpers.findClass("java.net.NetworkInterface", lpparam.classLoader)
-            XposedHelpers.findAndHookMethod(niClass, "getHardwareAddress", object : XC_MethodHook() {
+            val cls = XposedHelpers.findClass("java.net.NetworkInterface", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(cls, "getHardwareAddress", object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     try {
-                        val ni   = param.thisObject as NetworkInterface
+                        val ni = param.thisObject as java.net.NetworkInterface
                         val name = ni.name ?: return
                         when {
-                            name.startsWith("wlan") || name.startsWith("wifi") || name.startsWith("swlan") ->
-                                param.result = macStringToBytes(cachedWifiMac ?: SpoofingUtils.generateRandomMac())
+                            name.startsWith("wlan") ->
+                                param.result = macToBytes(cachedWifiMac ?: SpoofingUtils.generateRandomMac())
                             name.startsWith("bt") || name.startsWith("bluetooth") ->
-                                param.result = macStringToBytes(cachedBtMac ?: SpoofingUtils.generateRandomMac())
-                            name.startsWith("p2p") || name.startsWith("eth") ->
-                                param.result = macStringToBytes(SpoofingUtils.generateRandomMac())
+                                param.result = macToBytes(cachedBtMac ?: SpoofingUtils.generateRandomMac())
                         }
-                    } catch (e: Exception) {
-                        if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Error spoofing network interface: ${e.message}")
-                    }
+                    } catch (_: Exception) {}
                 }
             })
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("Vortex: Error hooking NetworkInterface: ${e.message}")
-        }
+        } catch (_: Throwable) {}
     }
 
-    private fun hookLocation(
-        lpparam: XC_LoadPackage.LoadPackageParam,
-        prefs: XSharedPreferences,
-        getString: (String, String) -> String
-    ) {
+    // [FIX A14] WiFi MAC vía WifiManager.getConnectionInfo()
+    private fun hookWifiManager(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
-            mockLocationEnabled = prefs.getBoolean("mock_location_enabled", false)
-            mockLatitude  = (getString("mock_latitude",  "0.0")).toDoubleOrNull() ?: 0.0
-            mockLongitude = (getString("mock_longitude", "0.0")).toDoubleOrNull() ?: 0.0
-            mockAltitude  = (getString("mock_altitude",  "0.0")).toDoubleOrNull() ?: 0.0
-            mockAccuracy  = (getString("mock_accuracy",  "10.0")).toFloatOrNull() ?: 10.0f
-
-            if (!mockLocationEnabled) return
-
-            val random      = Random()
-            val applyJitter = prefs.getBoolean("location_jitter_enabled", true)
-            val isMoving    = prefs.getBoolean("location_is_moving", false)
-
-            if (applyJitter) {
-                mockAccuracy   = (mockAccuracy + (random.nextGaussian() * 2.0)).toFloat().coerceAtLeast(1.0f)
-                mockAltitude  += random.nextGaussian() * 0.5
-                mockLatitude  += random.nextGaussian() * 0.00001
-                mockLongitude += random.nextGaussian() * 0.00001
-            }
-
-            mockBearing = if (isMoving) random.nextFloat() * 360.0f else 0.0f
-            mockSpeed   = if (isMoving) random.nextFloat() * 5.0f   else 0.0f
-
-            val locationClass = XposedHelpers.findClass("android.location.Location", lpparam.classLoader)
-
-            XposedHelpers.findAndHookMethod(locationClass, "getLatitude",  object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockLatitude  } })
-            XposedHelpers.findAndHookMethod(locationClass, "getLongitude", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockLongitude } })
-            XposedHelpers.findAndHookMethod(locationClass, "getAltitude",  object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockAltitude  } })
-            XposedHelpers.findAndHookMethod(locationClass, "hasAltitude",  object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = true } })
-            XposedHelpers.findAndHookMethod(locationClass, "getAccuracy",  object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockAccuracy  } })
-            XposedHelpers.findAndHookMethod(locationClass, "getBearing",   object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockBearing   } })
-            XposedHelpers.findAndHookMethod(locationClass, "hasBearing",   object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = true } })
-            XposedHelpers.findAndHookMethod(locationClass, "getSpeed",     object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = mockSpeed     } })
-            XposedHelpers.findAndHookMethod(locationClass, "hasSpeed",     object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = true } })
-
-            try {
-                XposedHelpers.findAndHookMethod(locationClass, "isFromMockProvider",
-                    object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = false } })
-            } catch (e: NoSuchMethodError) {}
-
-            val lmClass = XposedHelpers.findClass("android.location.LocationManager", lpparam.classLoader)
-            XposedHelpers.findAndHookMethod(lmClass, "getLastKnownLocation", String::class.java,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val loc = Location(param.args[0] as String).apply {
-                            latitude              = mockLatitude
-                            longitude             = mockLongitude
-                            altitude              = mockAltitude
-                            accuracy              = mockAccuracy
-                            bearing               = mockBearing
-                            speed                 = mockSpeed
-                            time                  = System.currentTimeMillis()
-                            elapsedRealtimeNanos  = SystemClock.elapsedRealtimeNanos()
-                        }
-                        try {
-                            Location::class.java.getDeclaredMethod(
-                                "setIsFromMockProvider", Boolean::class.javaPrimitiveType
-                            ).apply { isAccessible = true }.invoke(loc, false)
-                        } catch (e: Exception) {}
-                        param.result = loc
-                    }
-                }
-            )
-        } catch (e: Throwable) {}
-    }
-
-    private fun hookWebView(lpparam: XC_LoadPackage.LoadPackageParam, fingerprint: DeviceFingerprint) {
-        try {
-            val wsClass = XposedHelpers.findClass("android.webkit.WebSettings", lpparam.classLoader)
-            XposedHelpers.findAndHookMethod(wsClass, "getUserAgentString", object : XC_MethodHook() {
+            val wifiInfoClass = XposedHelpers.findClass("android.net.wifi.WifiInfo", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(wifiInfoClass, "getMacAddress", object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
-                    val original = param.result as? String ?: return
-                    var ua = original.replace(
-                        Regex(";\\s+[^;]+?\\s+Build/"),
-                        "; ${fingerprint.model} Build/"
-                    )
-                    ua = ua.replace(Regex("Android\\s+[\\d.]+"), "Android ${fingerprint.release}")
-                    param.result = ua
+                    param.result = cachedWifiMac ?: SpoofingUtils.generateRandomMac()
                 }
             })
-        } catch (e: Throwable) {}
+        } catch (_: Throwable) {}
     }
 
-    private fun hookAccountManager(lpparam: XC_LoadPackage.LoadPackageParam) {
-        try {
-            val amClass = XposedHelpers.findClass("android.accounts.AccountManager", lpparam.classLoader)
-
-            XposedHelpers.findAndHookMethod(amClass, "getAccounts", object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    val gmail = cachedGmail ?: return
-                    val accounts = param.result as Array<Account>
-                    val result = accounts.filter { it.type != "com.google" }.toMutableList()
-                    result.add(Account(gmail, "com.google"))
-                    param.result = result.toTypedArray()
-                }
-            })
-
-            XposedHelpers.findAndHookMethod(amClass, "getAccountsByType", String::class.java,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        if ((param.args[0] as String) != "com.google") return
-                        val gmail = cachedGmail
-                        param.result = if (gmail != null) arrayOf(Account(gmail, "com.google"))
-                                       else emptyArray()
-                    }
-                }
-            )
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("AccountManager hook error: ${e.message}")
-        }
-    }
-
-    private fun hookPackageManager(lpparam: XC_LoadPackage.LoadPackageParam) {
-        try {
-            XposedHelpers.findAndHookMethod(
-                "android.app.ApplicationPackageManager", lpparam.classLoader,
-                "getInstallerPackageName", String::class.java,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        param.result = "com.android.vending"
-                    }
-                }
-            )
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("PackageManager legacy hook error: ${e.message}")
-        }
-
-        try {
-            val isiClass = XposedHelpers.findClass("android.content.pm.InstallSourceInfo", lpparam.classLoader)
-            XposedHelpers.findAndHookMethod(isiClass, "getInstallingPackageName",
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(p: MethodHookParam) { p.result = "com.android.vending" }
-                }
-            )
-            try {
-                XposedHelpers.findAndHookMethod(isiClass, "getInitiatingPackageName",
-                    object : XC_MethodHook() {
-                        override fun afterHookedMethod(p: MethodHookParam) { p.result = "com.android.vending" }
-                    }
-                )
-            } catch (e: Throwable) {}
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("PackageManager getInstallSourceInfo hook error: ${e.message}")
-        }
-    }
-
-    private fun hookApplicationFlags(lpparam: XC_LoadPackage.LoadPackageParam) {
-        try {
-            val appInfoHook = object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    val ai = param.result as? ApplicationInfo ?: return
-                    ai.flags = ai.flags and 0x100.inv() and 0x2.inv()
-                }
-            }
-
-            XposedHelpers.findAndHookMethod(
-                "android.app.ApplicationPackageManager", lpparam.classLoader,
-                "getApplicationInfo", String::class.java, Int::class.javaPrimitiveType,
-                appInfoHook
-            )
-
-            XposedHelpers.findAndHookMethod(
-                "android.app.ApplicationPackageManager", lpparam.classLoader,
-                "getPackageInfo", String::class.java, Int::class.javaPrimitiveType,
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val pi = param.result as? PackageInfo ?: return
-                        pi.applicationInfo?.let { ai ->
-                            ai.flags = ai.flags and 0x100.inv() and 0x2.inv()
-                        }
-                    }
-                }
-            )
-        } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) XposedBridge.log("ApplicationFlags hook error: ${e.message}")
-        }
-    }
-
+    // Vortex: WifiInfo SSID/BSSID
     private fun hookWifiInfo(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val wifiInfoClass = XposedHelpers.findClass("android.net.wifi.WifiInfo", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(wifiInfoClass, "getSSID", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = "\"$cachedWifiSsid\"" } })
             XposedHelpers.findAndHookMethod(wifiInfoClass, "getBSSID", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedWifiBssid } })
-            XposedHelpers.findAndHookMethod(wifiInfoClass, "getMacAddress", object : XC_MethodHook() { override fun afterHookedMethod(p: MethodHookParam) { p.result = cachedWifiMac } })
         } catch (e: Throwable) {}
     }
 
-    private fun hookBluetooth(lpparam: XC_LoadPackage.LoadPackageParam) {
+    // [FIX A15] Bluetooth MAC vía BluetoothAdapter.getAddress()
+    private fun hookBluetoothAdapter(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val btClass = XposedHelpers.findClass("android.bluetooth.BluetoothAdapter", lpparam.classLoader)
             XposedHelpers.findAndHookMethod(btClass, "getAddress", object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
-                    param.result = cachedBtMac
+                    param.result = cachedBtMac ?: SpoofingUtils.generateRandomMac()
                 }
             })
-        } catch (e: Throwable) {}
+        } catch (_: Throwable) {}
     }
 
+    // Vortex: MediaDrm
     private fun hookMediaDrm(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val drmClass = XposedHelpers.findClass("android.media.MediaDrm", lpparam.classLoader)
@@ -1060,12 +949,216 @@ class MainHook : IXposedHookLoadPackage {
         } catch (e: Throwable) {}
     }
 
-    private fun macStringToBytes(mac: String): ByteArray {
+    // ─────────────────────────────────────────────────────────────
+    //  LOCATION
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookLocation(lpparam: XC_LoadPackage.LoadPackageParam,
+                             prefs: XSharedPreferences,
+                             getStr: (String, String) -> String) {
+        try {
+            // [FIX A12] Guard PRIMERO, luego calcular jitter
+            mockLocationEnabled = prefs.getBoolean("mock_location_enabled", false)
+            if (!mockLocationEnabled) return   // ← salir antes de modificar variables
+
+            mockLatitude  = getStr("mock_latitude",  "40.7128").toDoubleOrNull() ?: 40.7128
+            mockLongitude = getStr("mock_longitude", "-74.0060").toDoubleOrNull() ?: -74.0060
+            mockAltitude  = getStr("mock_altitude",  "10.0").toDoubleOrNull()  ?: 10.0
+            mockAccuracy  = getStr("mock_accuracy",  "5.0").toFloatOrNull()    ?: 5.0f
+
+            val rng = Random()
+            mockBearing  = rng.nextFloat() * 360f
+            mockSpeed    = rng.nextFloat() * 3f   // 0–3 m/s caminando
+            // Jitter gaussiano pequeño — solo cuando mock está activo
+            val jitterDeg = 0.00001
+            mockLatitude  += rng.nextGaussian() * jitterDeg
+            mockLongitude += rng.nextGaussian() * jitterDeg
+            mockAltitude  += rng.nextGaussian() * 0.5
+            mockAccuracy   = (mockAccuracy + (rng.nextGaussian() * 1.5)).toFloat().coerceAtLeast(1f)
+
+            val locClass = XposedHelpers.findClass("android.location.Location", lpparam.classLoader)
+            fun after(fn: () -> Any?) = object : XC_MethodHook() {
+                override fun afterHookedMethod(p: MethodHookParam) { p.result = fn() }
+            }
+
+            XposedHelpers.findAndHookMethod(locClass, "getLatitude",  after { mockLatitude })
+            XposedHelpers.findAndHookMethod(locClass, "getLongitude", after { mockLongitude })
+            XposedHelpers.findAndHookMethod(locClass, "getAltitude",  after { mockAltitude })
+            XposedHelpers.findAndHookMethod(locClass, "hasAltitude",  after { true })
+            XposedHelpers.findAndHookMethod(locClass, "getAccuracy",  after { mockAccuracy })
+            XposedHelpers.findAndHookMethod(locClass, "getBearing",   after { mockBearing })
+            XposedHelpers.findAndHookMethod(locClass, "hasBearing",   after { true })
+            XposedHelpers.findAndHookMethod(locClass, "getSpeed",     after { mockSpeed })
+            XposedHelpers.findAndHookMethod(locClass, "hasSpeed",     after { true })
+            try {
+                XposedHelpers.findAndHookMethod(locClass, "isFromMockProvider", after { false })
+            } catch (_: NoSuchMethodError) {}
+
+            val lmClass = XposedHelpers.findClass("android.location.LocationManager", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(lmClass, "getLastKnownLocation", String::class.java,
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val loc = Location(param.args[0] as String)
+                        loc.latitude  = mockLatitude
+                        loc.longitude = mockLongitude
+                        loc.altitude  = mockAltitude
+                        loc.accuracy  = mockAccuracy
+                        loc.bearing   = mockBearing
+                        loc.speed     = mockSpeed
+                        loc.time      = System.currentTimeMillis()
+                        loc.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                        try {
+                            val m = Location::class.java.getDeclaredMethod("setIsFromMockProvider", Boolean::class.javaPrimitiveType)
+                            m.isAccessible = true; m.invoke(loc, false)
+                        } catch (_: Exception) {}
+                        param.result = loc
+                    }
+                })
+        } catch (_: Throwable) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  WEBVIEW
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookWebView(lpparam: XC_LoadPackage.LoadPackageParam, fp: DeviceFingerprint) {
+        try {
+            val cls = XposedHelpers.findClass("android.webkit.WebSettings", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(cls, "getUserAgentString", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val ua = param.result as? String ?: return
+                    // Reemplazar modelo Y versión Android en el UA
+                    val patched = ua
+                        .replace(Regex(";\\s+[^;]+?\\s+Build/[^)]+"), "; ${fp.model} Build/${fp.buildId}")
+                        .replace(Regex("Android [0-9.]+"), "Android ${fp.release}")
+                    param.result = patched
+                }
+            })
+        } catch (_: Throwable) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  ACCOUNT MANAGER
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookAccountManager(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val cls = XposedHelpers.findClass("android.accounts.AccountManager", lpparam.classLoader)
+            val fakeGoogle = if (cachedGmail != null) arrayOf(Account(cachedGmail, "com.google")) else emptyArray()
+
+            XposedHelpers.findAndHookMethod(cls, "getAccounts", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val orig = param.result as Array<Account>
+                    val filtered = orig.filter { it.type != "com.google" }.toMutableList()
+                    filtered.addAll(fakeGoogle)
+                    param.result = filtered.toTypedArray()
+                }
+            })
+            XposedHelpers.findAndHookMethod(cls, "getAccountsByType", String::class.java, object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    if (param.args[0] == "com.google") param.result = fakeGoogle
+                }
+            })
+        } catch (_: Throwable) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  PACKAGE MANAGER  [FIX A7] también hookear getInstallSourceInfo (API 30)
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookPackageManager(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val cls = XposedHelpers.findClass("android.app.ApplicationPackageManager", lpparam.classLoader)
+
+            // API antigua
+            XposedHelpers.findAndHookMethod(cls, "getInstallerPackageName", String::class.java,
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(p: MethodHookParam) {
+                        p.result = "com.android.vending"
+                    }
+                })
+
+            // [FIX A7] API 30: getInstallSourceInfo()
+            try {
+                XposedHelpers.findAndHookMethod(cls, "getInstallSourceInfo", String::class.java,
+                    object : XC_MethodHook() {
+                        override fun afterHookedMethod(param: MethodHookParam) {
+                            // Crear un InstallSourceInfo simulando instalación desde Play Store
+                            val infoClass = XposedHelpers.findClass(
+                                "android.content.pm.InstallSourceInfo", lpparam.classLoader)
+                            try {
+                                val ctor = infoClass.getDeclaredConstructor(
+                                    String::class.java, String::class.java,
+                                    String::class.java, String::class.java
+                                )
+                                ctor.isAccessible = true
+                                param.result = ctor.newInstance(
+                                    "com.android.vending",  // initiatingPackageName
+                                    null,                   // initiatingPackageSigningInfo
+                                    "com.android.vending",  // originatingPackageName
+                                    "com.android.vending"   // installingPackageName
+                                )
+                            } catch (_: Exception) {
+                                // Constructor diferente según versión del sistema
+                                // Si falla, el campo installerPackageName ya está hookeado arriba
+                            }
+                        }
+                    })
+            } catch (_: NoSuchMethodError) {}
+
+        } catch (_: Throwable) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  APPLICATION FLAGS  [FIX A6] hook correcto: campo, no método
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookApplicationFlags(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val cls = XposedHelpers.findClass("android.app.ApplicationPackageManager", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(cls, "getApplicationInfo",
+                String::class.java, Int::class.javaPrimitiveType,
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        val appInfo = param.result as? android.content.pm.ApplicationInfo ?: return
+                        // Limpiar FLAG_DEBUGGABLE (0x2) y FLAG_TEST_ONLY (0x100)
+                        appInfo.flags = appInfo.flags and
+                            android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE.inv() and
+                            0x100.inv()
+                    }
+                })
+        } catch (_: Throwable) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  FINGERPRINTED PARTITIONS  [FIX A13] API 30
+    // ─────────────────────────────────────────────────────────────
+
+    private fun hookFingerprintedPartitions(lpparam: XC_LoadPackage.LoadPackageParam, fp: DeviceFingerprint) {
+        try {
+            XposedHelpers.findAndHookMethod(Build::class.java, "getFingerprintedPartitions",
+                object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        // Devolver lista vacía hace que el método retorne sin revelar
+                        // los fingerprints reales de las particiones del dispositivo físico
+                        param.result = emptyList<Any>()
+                    }
+                })
+        } catch (_: Throwable) {
+            // API no disponible en esta versión, ignorar
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  HELPERS
+    // ─────────────────────────────────────────────────────────────
+
+    private fun macToBytes(mac: String): ByteArray {
         return try {
             val parts = mac.split(":")
-            if (parts.size != 6) throw IllegalArgumentException()
+            if (parts.size != 6) throw IllegalArgumentException("Bad MAC")
             ByteArray(6) { i -> parts[i].toInt(16).toByte() }
-        } catch (e: Exception) { byteArrayOf(0x02, 0x00, 0x00, 0x00, 0x00, 0x00) }
+        } catch (_: Exception) { byteArrayOf(0x02, 0x00, 0x00, 0x00, 0x00, 0x01) }
     }
 
     private fun hexStringToByteArray(s: String): ByteArray {
