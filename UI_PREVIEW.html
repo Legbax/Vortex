@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex UI Preview - Redmi 9 Lancelot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vortex: {
+                            bg: '#080A0F',
+                            surface: '#12151A',
+                            accent: '#00D4FF',
+                            text: '#FFFFFF',
+                            secondary: '#8F9BB3',
+                            danger: '#FF5252'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        /* Custom Scrollbar for hidden look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen font-sans selection:bg-vortex-accent selection:text-vortex-bg">
+
+    <!-- Redmi 9 Lancelot Chassis Simulation (360x800 logical px ~ 720x1600 physical) -->
+    <div x-data="app()" class="relative w-[360px] h-[800px] bg-black rounded-[3rem] shadow-2xl overflow-hidden border-[8px] border-gray-800 ring-4 ring-gray-900">
+
+        <!-- Notch Area -->
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-7 bg-black rounded-b-xl z-50"></div>
+
+        <!-- Screen Content -->
+        <div class="w-full h-full bg-vortex-bg flex flex-col text-vortex-text relative">
+
+            <!-- Status Bar -->
+            <div class="h-8 w-full flex justify-between items-center px-6 pt-2 select-none z-40 bg-vortex-bg/90 backdrop-blur-sm">
+                <span class="text-xs font-medium tracking-wide">12:00</span>
+                <div class="flex items-center gap-1">
+                    <span class="material-symbols-rounded text-[16px]">signal_cellular_4_bar</span>
+                    <span class="material-symbols-rounded text-[16px]">wifi</span>
+                    <span class="material-symbols-rounded text-[16px]">battery_full</span>
+                </div>
+            </div>
+
+            <!-- Main Content Area (Scrollable) -->
+            <div class="flex-1 overflow-y-auto no-scrollbar pb-24 pt-4 px-4">
+
+                <!-- Advanced Tab Content -->
+                <div x-show="activeTab === 'advanced'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
+
+                    <!-- Header -->
+                    <h1 class="text-2xl font-bold mb-6 tracking-tight">Advanced Controls</h1>
+
+                    <!-- App Management Card -->
+                    <div class="bg-vortex-surface rounded-2xl p-4 mb-6 shadow-lg border border-white/5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-rounded text-vortex-accent">apps</span>
+                            <h2 class="text-sm font-bold text-vortex-secondary uppercase tracking-wider">Target Applications</h2>
+                        </div>
+
+                        <!-- App List -->
+                        <div class="space-y-4">
+                            <!-- Snapchat -->
+                            <div class="flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center shadow-sm">
+                                        <span class="material-symbols-rounded text-white text-xl">chat_bubble</span> <!-- Placeholder Icon -->
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm group-hover:text-vortex-accent transition-colors">Snapchat</p>
+                                        <p class="text-xs text-vortex-secondary">com.snapchat.android</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="apps.snapchat" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vortex-accent/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vortex-accent"></div>
+                                </label>
+                            </div>
+
+                            <!-- Play Store -->
+                            <div class="flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                                        <span class="material-symbols-rounded text-white text-xl">shop</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm group-hover:text-vortex-accent transition-colors">Play Store</p>
+                                        <p class="text-xs text-vortex-secondary">com.android.vending</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="apps.playStore" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vortex-accent/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vortex-accent"></div>
+                                </label>
+                            </div>
+
+                            <!-- Play Services -->
+                            <div class="flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                                        <span class="material-symbols-rounded text-white text-xl">settings_system_daydream</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-sm group-hover:text-vortex-accent transition-colors">Play Services</p>
+                                        <p class="text-xs text-vortex-secondary">com.google.android.gms</p>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="apps.gms" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vortex-accent/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vortex-accent"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-6 flex gap-3">
+                            <button @click="forceStop()" class="flex-1 bg-vortex-surface border border-vortex-accent/30 hover:bg-vortex-accent/10 active:scale-95 transition-all text-vortex-accent font-medium py-3 rounded-xl flex items-center justify-center gap-2">
+                                <span class="material-symbols-rounded text-lg">stop_circle</span>
+                                Force Stop
+                            </button>
+                            <button @click="confirmClearData()" class="flex-1 bg-vortex-danger/10 border border-vortex-danger/30 hover:bg-vortex-danger/20 active:scale-95 transition-all text-vortex-danger font-medium py-3 rounded-xl flex items-center justify-center gap-2">
+                                <span class="material-symbols-rounded text-lg">delete_forever</span>
+                                Clear Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- System Section -->
+                    <div class="bg-vortex-surface rounded-2xl p-4 shadow-lg border border-white/5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-rounded text-vortex-accent">dns</span>
+                            <h2 class="text-sm font-bold text-vortex-secondary uppercase tracking-wider">System Controls</h2>
+                        </div>
+                         <button @click="confirmReboot()" class="w-full bg-gray-800 hover:bg-gray-700 active:scale-95 transition-all text-white font-medium py-4 rounded-xl flex items-center justify-center gap-3 shadow-md">
+                            <span class="material-symbols-rounded">restart_alt</span>
+                            Reboot Device
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Placeholder for other tabs -->
+                <div x-show="activeTab !== 'advanced'" class="flex flex-col items-center justify-center h-full text-vortex-secondary opacity-50">
+                    <span class="material-symbols-rounded text-6xl mb-4" x-text="getTabIcon(activeTab)"></span>
+                    <p class="text-sm uppercase tracking-widest">Work in Progress</p>
+                </div>
+
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="h-[72px] bg-vortex-surface border-t border-white/5 flex justify-between items-center px-2 pb-2">
+                <template x-for="tab in tabs">
+                    <button @click="activeTab = tab.id" :class="{'text-vortex-accent': activeTab === tab.id, 'text-vortex-secondary': activeTab !== tab.id}" class="flex flex-col items-center justify-center w-full h-full gap-1 active:scale-90 transition-transform relative">
+                        <!-- Active Indicator -->
+                        <div x-show="activeTab === tab.id" class="absolute -top-[1px] w-8 h-[2px] bg-vortex-accent rounded-b-full shadow-[0_0_10px_rgba(0,212,255,0.5)]"></div>
+
+                        <span class="material-symbols-rounded text-2xl" x-text="tab.icon"></span>
+                        <span class="text-[10px] font-medium tracking-wide" x-text="tab.label"></span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- Android Navigation Bar Indicator -->
+            <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-600 rounded-full opacity-50"></div>
+
+        </div>
+
+        <!-- Confirm Modal -->
+        <div x-show="modal.open" class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" x-transition.opacity>
+            <div class="bg-vortex-surface w-[85%] rounded-2xl p-6 border border-white/10 shadow-2xl transform transition-all" @click.away="modal.open = false">
+                <div class="w-12 h-12 rounded-full bg-vortex-danger/20 flex items-center justify-center mb-4 mx-auto" x-show="modal.type === 'danger'">
+                    <span class="material-symbols-rounded text-vortex-danger text-2xl">warning</span>
+                </div>
+                 <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mb-4 mx-auto" x-show="modal.type === 'system'">
+                    <span class="material-symbols-rounded text-white text-2xl">power_settings_new</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-center mb-2" x-text="modal.title"></h3>
+                <p class="text-center text-vortex-secondary text-sm mb-6" x-text="modal.message"></p>
+
+                <div class="flex gap-3">
+                    <button @click="modal.open = false" class="flex-1 py-3 rounded-xl bg-transparent border border-gray-600 text-gray-300 font-medium active:bg-gray-800 transition-colors">Cancel</button>
+                    <button @click="executeAction()" class="flex-1 py-3 rounded-xl font-medium text-black active:opacity-80 transition-opacity shadow-lg" :class="modal.type === 'danger' ? 'bg-vortex-danger' : 'bg-white'">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div x-show="toast.show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800/90 backdrop-blur text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 border border-white/5 z-50 w-max max-w-[90%]">
+             <span class="material-symbols-rounded text-vortex-accent">check_circle</span>
+             <span x-text="toast.message" class="text-sm font-medium"></span>
+        </div>
+
+    </div>
+
+    <script>
+        function app() {
+            return {
+                activeTab: 'advanced',
+                tabs: [
+                    { id: 'status', label: 'Status', icon: 'dashboard' },
+                    { id: 'device', label: 'Device', icon: 'smartphone' },
+                    { id: 'network', label: 'Network', icon: 'signal_cellular_alt' },
+                    { id: 'ids', label: 'IDs', icon: 'fingerprint' },
+                    { id: 'location', label: 'Location', icon: 'location_on' },
+                    { id: 'advanced', label: 'Advanced', icon: 'settings_suggest' }
+                ],
+                apps: {
+                    snapchat: true,
+                    playStore: false,
+                    gms: false
+                },
+                modal: {
+                    open: false,
+                    title: '',
+                    message: '',
+                    type: 'danger', // 'danger' or 'system'
+                    action: null
+                },
+                toast: {
+                    show: false,
+                    message: ''
+                },
+                getTabIcon(id) {
+                    return this.tabs.find(t => t.id === id)?.icon || 'help';
+                },
+                forceStop() {
+                    const selected = Object.keys(this.apps).filter(k => this.apps[k]);
+                    if (selected.length === 0) {
+                        this.showToast('Select at least one app');
+                        return;
+                    }
+                    // Simulate loading/action
+                    this.showToast(`Force stopped ${selected.length} apps`);
+                },
+                confirmClearData() {
+                    const selected = Object.keys(this.apps).filter(k => this.apps[k]);
+                    if (selected.length === 0) {
+                        this.showToast('Select at least one app');
+                        return;
+                    }
+                    this.modal.title = 'Clear Data?';
+                    this.modal.message = 'This will permanently delete all file settings, accounts, and databases for the selected apps.';
+                    this.modal.type = 'danger';
+                    this.modal.action = () => {
+                        this.showToast(`Data cleared for ${selected.length} apps`);
+                    };
+                    this.modal.open = true;
+                },
+                confirmReboot() {
+                    this.modal.title = 'System Reboot';
+                    this.modal.message = 'Are you sure you want to restart the device immediately?';
+                    this.modal.type = 'system';
+                    this.modal.action = () => {
+                        this.showToast('Rebooting system...');
+                    };
+                    this.modal.open = true;
+                },
+                executeAction() {
+                    if (this.modal.action) this.modal.action();
+                    this.modal.open = false;
+                },
+                showToast(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => this.toast.show = false, 3000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
