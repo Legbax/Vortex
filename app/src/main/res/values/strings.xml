@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Vortex</string>
     <string name="xposed_description">System utility module</string>
+    <string name="developer_subtitle">Developed by Legba</string>
 
     <!-- Navigation -->
     <string name="nav_status_header">System Status</string>
