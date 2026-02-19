@@ -14,7 +14,17 @@ import com.vortex.utils.CryptoUtils
 class MainHook : IXposedHookLoadPackage {
 
     companion object {
+        private const val TAG = "Vortex"
         private const val PREFS_NAME = "vortex_prefs"
+
+        fun log(message: String) {
+            XposedBridge.log("[$TAG] $message")
+        }
+
+        fun logError(message: String, throwable: Throwable? = null) {
+            XposedBridge.log("[$TAG][ERROR] $message")
+            throwable?.let { XposedBridge.log(it) }
+        }
 
         private val TARGET_APPS = setOf(
             "com.snapchat.android",
@@ -192,6 +202,9 @@ class MainHook : IXposedHookLoadPackage {
                  hookProcessBuilderAndRuntime(lpparam)
             }
 
+            hookSSLPinning(lpparam)
+            hookSensors(lpparam)
+
         } catch (e: Throwable) {
             if (BuildConfig.DEBUG) XposedBridge.log("Vortex error: ${e.message}")
         }
@@ -348,8 +361,6 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.product.product.device"       -> fp.device
                         "ro.product.product.name"         -> fp.product
 
-                        "ro.debuggable"                   -> "0"
-                        "ro.secure"                       -> "1"
                         "ro.kernel.qemu"                  -> "0"
                         "service.adb.root"                -> "0"
                         "ro.boot.serialno"                -> cachedSerial
@@ -357,6 +368,13 @@ class MainHook : IXposedHookLoadPackage {
                         "ro.boot.bootloader"              -> fp.bootloader
                         // [FIX D11] Eliminar conflictos con TrickyStore
                         "persist.sys.usb.config"          -> "none"
+
+                        // Props de seguridad y bootloader (seguras)
+                        "ro.boot.flash.locked"       -> "1"
+                        "sys.oem_unlock_allowed"     -> "0"
+                        "ro.secure"                  -> "1"
+                        "ro.debuggable"              -> "0"
+
                         else -> null
                     }
                     if (res != null) param.result = res
@@ -735,5 +753,67 @@ class MainHook : IXposedHookLoadPackage {
                  }
             })
         } catch (_: Throwable) {}
+    }
+
+    private fun hookSSLPinning(lpparam: XC_LoadPackage.LoadPackageParam) {
+        if (lpparam.packageName != "com.snapchat.android") return
+
+        try {
+            // 1. OkHttp CertificatePinner
+            val pinnerClass = XposedHelpers.findClass("okhttp3.CertificatePinner", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(pinnerClass, "check", String::class.java, List::class.java, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) { param.result = null } // Bypass
+            })
+
+            // 2. Java X509TrustManager
+            val trustManagerClass = XposedHelpers.findClass("javax.net.ssl.X509TrustManager", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(trustManagerClass, "checkServerTrusted", Array<java.security.cert.X509Certificate>::class.java, String::class.java, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) { param.result = null } // Bypass
+            })
+
+            // 3. SSLContext Init (Deep Bypass)
+            val sslContextClass = XposedHelpers.findClass("javax.net.ssl.SSLContext", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(sslContextClass, "init", Array<javax.net.ssl.KeyManager>::class.java, Array<javax.net.ssl.TrustManager>::class.java, java.security.SecureRandom::class.java, object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    // Inyectar TrustManager permisivo
+                    val trustingManager = object : javax.net.ssl.X509TrustManager {
+                        override fun checkClientTrusted(chain: Array<java.security.cert.X509Certificate>?, authType: String?) {}
+                        override fun checkServerTrusted(chain: Array<java.security.cert.X509Certificate>?, authType: String?) {}
+                        override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = emptyArray()
+                    }
+                    param.args[1] = arrayOf(trustingManager)
+                }
+            })
+            MainHook.log("SSL Pinning neutralizado para Snapchat.")
+        } catch (e: Throwable) { MainHook.logError("Error en SSL Pinning Hook", e) }
+    }
+
+    private fun hookSensors(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val sensorClass = android.hardware.Sensor::class.java
+            // Hook getters directamente para modificar la "lectura" de las specs del sensor
+            val spoofSpecs = object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val sensor = param.thisObject as android.hardware.Sensor
+                    val type = sensor.type
+                    // Lógica de perfiles (Simplificada para ejemplo)
+                    if (type == android.hardware.Sensor.TYPE_ACCELEROMETER) {
+                        when (param.method.name) {
+                            "getMaximumRange" -> param.result = 19.6f // Xiaomi standard
+                            "getPower" -> param.result = 0.25f
+                            "getResolution" -> param.result = 0.01f
+                            "getVendor" -> param.result = "Vortex Virtual Sensor" // O el vendor del perfil
+                        }
+                    }
+                }
+            }
+
+            // Aplicar a métodos clave
+            XposedHelpers.findAndHookMethod(sensorClass, "getMaximumRange", spoofSpecs)
+            XposedHelpers.findAndHookMethod(sensorClass, "getPower", spoofSpecs)
+            XposedHelpers.findAndHookMethod(sensorClass, "getResolution", spoofSpecs)
+            XposedHelpers.findAndHookMethod(sensorClass, "getVendor", spoofSpecs)
+
+        } catch (e: Throwable) { MainHook.logError("Error hooking Sensors", e) }
     }
 }
