@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App Meta -->
     <string name="app_name">Vortex</string>
     <string name="xposed_description">Spoofer anti-detección (Redmi 9) - Hooks avanzados para evadir fingerprinting</string>
 
