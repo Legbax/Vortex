@@ -59,7 +59,8 @@ object SpoofingUtils {
 
     // Sensitive commands to block
     private val SENSITIVE_COMMANDS = setOf(
-        "su", "which su", "mount", "getprop ro.secure"
+        "su", "which su", "mount", "getprop ro.secure",
+        "getprop ro.debuggable", "getprop ro.build.tags", "getenforce"
     )
 
     fun isSensitivePath(path: String): Boolean {
@@ -71,7 +72,11 @@ object SpoofingUtils {
             if (path.startsWith("/data/adb/modules")) return true
             if (path.contains("magisk", true) ||
                 path.contains("xposed", true) ||
-                path.contains("lsposed", true)) {
+                path.contains("lsposed", true) ||
+                path.contains("frida", true)   ||
+                path.contains("zygisk", true)  ||
+                path.contains("riru", true)    ||
+                path.contains("substrate", true)) {
                 return true
             }
         }
@@ -88,7 +93,12 @@ object SpoofingUtils {
         if (fullCmd.contains("magisk") ||
             fullCmd.contains("xposed") ||
             fullCmd.contains("lsposed") ||
-            fullCmd.contains("busybox")) {
+            fullCmd.contains("busybox") ||
+            fullCmd.contains("frida-server") ||
+            fullCmd.contains("zygisk") ||
+            fullCmd.contains("riru") ||
+            fullCmd.contains("substrate") ||
+            fullCmd.contains("getenforce")) {
             return true
         }
 
