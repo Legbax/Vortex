@@ -30,6 +30,17 @@ class CommandEvasionTest {
     }
 
     @Test
+    fun testExtendedKeywords() {
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("frida-server")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("ls", "/data/local/tmp/frida")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("ps", "-A", "|", "grep", "zygisk")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("ls", "/data/adb/riru")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.debuggable")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getprop", "ro.build.tags")))
+        assertTrue(SpoofingUtils.isSensitiveCommand(listOf("getenforce")))
+    }
+
+    @Test
     fun testSafeCommands() {
         assertFalse(SpoofingUtils.isSensitiveCommand(listOf("ls", "-la")))
         assertFalse(SpoofingUtils.isSensitiveCommand(listOf("cat", "/proc/cpuinfo")))
