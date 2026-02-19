@@ -1,4 +1,4 @@
-# Vortex - Device Spoofer
+# <img src="assets/logo.png" width="100" align="right" /> Vortex - Device Spoofer
 
 **Advanced Android 11 Device Spoofing Module**
 
