@@ -26,26 +26,36 @@ class CarrierAdapter(
 
     override fun getItemCount() = carriers.size
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        val c = carriers[pos]
+    override fun onBindViewHolder(h: VH, position: Int) {
+        // Use bindingAdapterPosition when clicking, but for initial binding use position
+        val c = carriers[position]
         h.tvName.text = c.name
-        h.tvMcc.text  = "MCC/MNC: ${c.mccMnc} · ${c.spn}"
+        h.tvMcc.text  = "${c.mccMnc} · ${c.spn}" // Cleaned up format for new horizontal layout
+
+        val isSelected = (position == selectedIdx)
         h.itemView.setBackgroundColor(
-            if (pos == selectedIdx)
+            if (isSelected)
                 ContextCompat.getColor(h.itemView.context, R.color.vortex_accent_20)
             else
                 ContextCompat.getColor(h.itemView.context, R.color.vortex_card_background)
         )
+
         h.itemView.setOnClickListener {
-            val prev = selectedIdx; selectedIdx = pos
-            notifyItemChanged(prev); notifyItemChanged(pos)
-            onSelected(c)
+            val currentPos = h.bindingAdapterPosition
+            if (currentPos != RecyclerView.NO_POSITION) {
+                val prev = selectedIdx
+                selectedIdx = currentPos
+                notifyItemChanged(prev)
+                notifyItemChanged(selectedIdx)
+                onSelected(carriers[currentPos])
+            }
         }
     }
 
     fun setSelected(mccMnc: String) {
         val prev = selectedIdx
         selectedIdx = carriers.indexOfFirst { it.mccMnc == mccMnc }
-        notifyItemChanged(prev); notifyItemChanged(selectedIdx)
+        notifyItemChanged(prev)
+        notifyItemChanged(selectedIdx)
     }
 }
