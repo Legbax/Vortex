@@ -1,102 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@color/vortex_background" android:fillViewport="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/vortex_background">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="16dp">
+    <!-- Sección: Gestión de Apps -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="APP MANAGEMENT"
+        android:textColor="@color/vortex_text_secondary"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
 
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/advanced_hooks_title" style="@style/Vortex.Text.Title"
-            android:layout_marginBottom="16dp" />
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/vortex_card_background"
+        app:cardCornerRadius="12dp"
+        app:strokeWidth="0dp">
 
-        <!-- Hide Root -->
-        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
-            android:layout_height="wrap_content" style="@style/Vortex.Card">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="@string/advanced_hide_root"
-                        style="@style/Vortex.Text.Title" android:textSize="16sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="@string/advanced_hide_root_desc"
-                        style="@style/Vortex.Text.Subtitle" android:textSize="12sp" />
-                </LinearLayout>
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_hide_root"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Target Applications"
+                android:textColor="@color/vortex_accent"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <CheckBox
+                android:id="@+id/cb_snapchat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Snapchat"
+                android:checked="true"
+                android:textColor="@color/vortex_text_primary"
+                android:buttonTint="@color/vortex_accent"/>
+
+            <CheckBox
+                android:id="@+id/cb_play_store"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Google Play Store"
+                android:textColor="@color/vortex_text_primary"
+                android:buttonTint="@color/vortex_accent"/>
+
+            <CheckBox
+                android:id="@+id/cb_gms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Google Play Services"
+                android:textColor="@color/vortex_text_primary"
+                android:buttonTint="@color/vortex_accent"/>
+
+            <!-- Botones de Acción -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <Button
+                    android:id="@+id/btn_force_stop"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="FORCE STOP"
+                    android:backgroundTint="@color/vortex_accent"
+                    android:textColor="#000000"/>
+
+                <Button
+                    android:id="@+id/btn_clear_data"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="CLEAR DATA"
+                    android:backgroundTint="#D32F2F"
+                    android:textColor="#FFFFFF"/>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <!-- Hide Debug -->
-        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
-            android:layout_height="wrap_content" style="@style/Vortex.Card">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="@string/advanced_hide_debug"
-                        style="@style/Vortex.Text.Title" android:textSize="16sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="@string/advanced_hide_debug_desc"
-                        style="@style/Vortex.Text.Subtitle" android:textSize="12sp" />
-                </LinearLayout>
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_hide_debug"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+    <!-- Sección: Sistema -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SYSTEM"
+        android:textColor="@color/vortex_text_secondary"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="16dp" />
 
-        <!-- Package Manager -->
-        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
-            android:layout_height="wrap_content" style="@style/Vortex.Card">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Package Manager Hook"
-                        style="@style/Vortex.Text.Title" android:textSize="16sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Spoofs installer source to Play Store"
-                        style="@style/Vortex.Text.Subtitle" android:textSize="12sp" />
-                </LinearLayout>
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_packages"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+    <Button
+        android:id="@+id/btn_reboot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="REBOOT DEVICE"
+        android:backgroundTint="#212121"
+        android:textColor="#FFFFFF"
+        app:icon="@drawable/ic_refresh"
+        app:iconTint="#FFFFFF"/>
 
-        <!-- WebView -->
-        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent"
-            android:layout_height="wrap_content" style="@style/Vortex.Card">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="WebView User-Agent Hook"
-                        style="@style/Vortex.Text.Title" android:textSize="16sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Override browser User-Agent string"
-                        style="@style/Vortex.Text.Subtitle" android:textSize="12sp" />
-                </LinearLayout>
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switch_webview"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_save_advanced"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="@string/action_save" android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.Button" />
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</LinearLayout>
