@@ -2,12 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_item_ripple">
 
     <TextView
         android:id="@+id/tv_device_name"
-        android:layout_width="wrap_content"
+        style="@style/Vortex.Text.Title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Device Name"
         android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_device_details"
+        style="@style/Vortex.Text.Subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Details"
+        android:layout_marginTop="4dp"
+        android:textSize="12sp" />
 
 </LinearLayout>

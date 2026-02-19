@@ -1,287 +1,162 @@
 package com.vortex
 
-import com.vortex.utils.ValidationUtils
-import java.util.UUID
 import java.util.Random
 
 object SpoofingUtils {
 
-    // === TAC MAP POR MODELO (Versión A - Recomendada) ===
-    private val TAC_MAP: Map<String, List<String>> = mapOf(
-        // Google Pixel
-        "Pixel 5" to listOf("35674910", "35824005", "35935107"),
-        "Pixel 4a" to listOf("35674910", "35824005"),
-        "Pixel 4" to listOf("35674910", "35824006"),
-        "Pixel 3a" to listOf("35328510", "35328511"),
-        "Pixel 3" to listOf("35328510"),
-
-        // Samsung Galaxy
-        "Galaxy S20" to listOf("35271311", "35361311", "35449209"),
-        "Galaxy A52" to listOf("35563409", "35563410"),
-        "Galaxy A72" to listOf("35563409", "35563410"),
-        "Galaxy Note 20" to listOf("35271311", "35361311"),
-        "Galaxy Z Flip" to listOf("35449209"),
-        "Galaxy S10" to listOf("35271311"),
-
-        // Xiaomi / Redmi / Poco (Vortex focus)
-        "Redmi Note 9 Pro" to listOf("86413405", "86413404", "86413403"),
-        "Redmi Note 10" to listOf("86413405", "86413404"),
-        "Mi 10" to listOf("86413405", "86712345"),
-        "Mi 11" to listOf("86413405", "86712346"),
-        "Mi 10T" to listOf("86413405"),
-        "Poco X3 NFC" to listOf("86413405", "86413404"),
-
-        // OnePlus
-        "OnePlus 8" to listOf("35824005", "35912345"),
-        "OnePlus 8T" to listOf("35824005", "35912345"),
-        "OnePlus Nord" to listOf("35824005"),
-        "OnePlus 9" to listOf("35824005", "35912346"),
-        "OnePlus 7 Pro" to listOf("35824005"),
-        "OnePlus Nord N10" to listOf("35824005"),
-
-        // Sony Xperia
-        "Xperia 5 II" to listOf("35123456", "35234567"),
-        "Xperia 10 II" to listOf("35123456"),
-        "Xperia 1 II" to listOf("35123456"),
-        "Xperia 5" to listOf("35123456"),
-        "Xperia 10 III" to listOf("35123456"),
-        "Xperia XZ2" to listOf("35123456")
+    // TACs mapeados POR FABRICANTE para correlacionar con el perfil activo.
+    // Fuente: GSMA IMEI DB pública. Cada entrada: TAC → (modelo aproximado)
+    private val TACS_BY_BRAND = mapOf(
+        "Xiaomi"   to listOf("86413404", "86413405", "35271311", "35361311", "86814904"),
+        "POCO"     to listOf("86814904", "86814905", "35847611", "35847612"),
+        "Redmi"    to listOf("86413404", "86413405", "35271311", "35271312"),
+        "samsung"  to listOf("35449209", "35449210", "35355610", "35735110", "35735111"),
+        "Google"   to listOf("35674910", "35674911", "35308010", "35308011"),
+        "OnePlus"  to listOf("86882504", "86882505", "35438210", "35438211"),
+        "motorola" to listOf("35617710", "35617711", "35327510", "35327511"),
+        "Nokia"    to listOf("35720210", "35720211", "35489310"),
+        "realme"   to listOf("86828804", "86828805", "35388910"),
+        "vivo"     to listOf("86979604", "86979605", "35503210"),
+        "OPPO"     to listOf("86885004", "86885005", "35604210"),
+        "asus"     to listOf("35851710", "35851711", "35325010"),
+        "default"  to listOf("35271311", "35449209", "35674910")
     )
 
-    // Optimized paths to hide (Set for O(1) access)
-    private val SENSITIVE_PATHS = setOf(
-        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/vendor/bin/su",
-        "/data/local/su", "/data/local/xbin/su", "/data/local/bin/su",
-        "/system/sd/xbin/su", "/system/bin/failsafe/su",
-        "/su/bin/su", "/system/xbin/daemonsu",
-        "/system/app/Superuser.apk", "/system/app/SuperSU.apk"
-    )
-
-    // Sensitive commands to block
-    private val SENSITIVE_COMMANDS = setOf(
-        "su", "which su", "mount", "getprop ro.secure",
-        "getprop ro.debuggable", "getprop ro.build.tags", "getenforce"
-    )
-
-    fun isSensitivePath(path: String): Boolean {
-        if (path.isEmpty() || path[0] != '/') return false
-        if (path.contains("com.vortex")) return false
-        if (SENSITIVE_PATHS.contains(path)) return true
-
-        if (path.length > 6) {
-            if (path.startsWith("/data/adb/modules")) return true
-            if (path.contains("magisk", true) ||
-                path.contains("xposed", true) ||
-                path.contains("lsposed", true) ||
-                path.contains("frida", true)   ||
-                path.contains("zygisk", true)  ||
-                path.contains("riru", true)    ||
-                path.contains("substrate", true)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    fun isSensitiveCommand(command: List<String>): Boolean {
-        if (command.isEmpty()) return false
-        val fullCmd = command.joinToString(" ").lowercase()
-
-        if (SENSITIVE_COMMANDS.contains(fullCmd)) return true
-        if (fullCmd.startsWith("su ")) return true
-
-        if (fullCmd.contains("magisk") ||
-            fullCmd.contains("xposed") ||
-            fullCmd.contains("lsposed") ||
-            fullCmd.contains("busybox") ||
-            fullCmd.contains("frida-server") ||
-            fullCmd.contains("zygisk") ||
-            fullCmd.contains("riru") ||
-            fullCmd.contains("substrate") ||
-            fullCmd.contains("getenforce")) {
-            return true
-        }
-
-        if (fullCmd.contains("which su") ||
-            fullCmd.contains("ls /sbin") ||
-            fullCmd.contains("ls /data/adb")) {
-            return true
-        }
-
-        for (part in command) {
-            if (part.startsWith("/") && isSensitivePath(part)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /** Genera IMEI coherente con el modelo seleccionado */
-    fun generateValidImei(modelName: String): String {
-        val tacList = TAC_MAP.entries.firstOrNull {
-            modelName.contains(it.key, ignoreCase = true)
-        }?.value ?: listOf("86413405") // fallback seguro para Lancelot
-
+    /**
+     * Genera un IMEI válido correlacionado con la marca del perfil activo.
+     * Si no se pasa perfil, usa la lista genérica.
+     */
+    fun generateValidImei(profileName: String = ""): String {
+        // Buscar la marca del perfil en DEVICE_FINGERPRINTS
+        val brand = MainHook.DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
+        val tacList = TACS_BY_BRAND[brand] ?: TACS_BY_BRAND["default"]!!
         val tac = tacList.random()
-        val serial = (0..999999).random().toString().padStart(6, '0')
+        val serial = (1..6).map { (0..9).random() }.joinToString("")
         val base = tac + serial
-        val check = ValidationUtils.luhnChecksum(base)
-        return base + check
+        return base + luhnChecksum(base)
     }
 
-    fun generateValidImei(): String {
-        // Fallback overload for compatibility if needed, using default
-        return generateValidImei("Redmi 9")
-    }
-
+    /**
+     * Genera un ICCID válido para el MCC/MNC dado.
+     * Formato estándar: 89 + MCC(3) + MNC(2-3) + account(9-10) + check
+     */
     fun generateValidIccid(mccMnc: String): String {
-        val mnc = if (mccMnc.length >= 6) mccMnc.substring(3) else "260"
+        // mccMnc típicamente 6 dígitos para US (MCC=310, MNC=3 dígitos)
         val issuer = (10..99).random().toString()
-        val prefixPart = "891$mnc$issuer"
-
-        val accountLen = 18 - prefixPart.length
-        val account = (1..accountLen).map { (0..9).random() }.joinToString("")
-        val base = prefixPart + account
-        val check = ValidationUtils.luhnChecksum(base)
-        return base + check
+        val prefix = "89$mccMnc$issuer"             // "89" + 6 + 2 = 10 chars
+        val needed = 18 - prefix.length              // necesitamos llegar a 19 sin check
+        val account = (1..needed.coerceAtLeast(1)).map { (0..9).random() }.joinToString("")
+        val base = prefix + account
+        return base + luhnChecksum(base)             // total: 19-20 dígitos
     }
 
+    /**
+     * Genera un IMSI válido de exactamente 15 dígitos.
+     * IMSI = MCC(3) + MNC(3) + MSIN(9) = 15 dígitos totales
+     */
     fun generateValidImsi(mccMnc: String): String {
-        val needed = 15 - mccMnc.length
+        // mccMnc debe tener 6 dígitos para US (MCC 310 + MNC 3 dígitos)
+        val msin = (1..9).map { (0..9).random() }.joinToString("")   // siempre 9 dígitos
+        return mccMnc + msin                                          // 6 + 9 = 15 ✓
+    }
 
-        // Primeros 2-3 dígitos del MSIN suelen ser rangos del operador (HLR)
-        val operatorRange = when (mccMnc) {
-            "310260" -> (60..69).random()  // T-Mobile HLR ranges
-            "310410" -> (40..49).random()  // AT&T
-            "310012" -> (10..19).random()  // Verizon
-            else -> (10..99).random()
+    fun isLuhnValid(number: String): Boolean {
+        if (number.isEmpty() || !number.all { it.isDigit() }) return false
+        var sum = 0; val len = number.length; val p = len % 2
+        for (i in 0 until len) {
+            var d = number[i].digitToInt()
+            if (i % 2 == p) { d *= 2; if (d > 9) d -= 9 }
+            sum += d
         }
+        return sum % 10 == 0
+    }
 
-        // El MSIN total suele ser de 9 o 10 dígitos. MCC(3) + MNC(2/3) + MSIN = 15
-        // Si needed es 9 (MNC 3 digitos), operatorRange (2) + 7 random
-        val randomPartLen = needed - operatorRange.toString().length
-        val randomPart = (1..randomPartLen).map { (0..9).random() }.joinToString("")
-
-        return mccMnc + operatorRange.toString() + randomPart
+    private fun luhnChecksum(number: String): Int {
+        var sum = 0
+        for (i in number.indices.reversed()) {
+            var d = number[i].digitToInt()
+            if ((number.length - i + 1) % 2 == 0) { d *= 2; if (d > 9) d -= 9 }
+            sum += d
+        }
+        return (10 - (sum % 10)) % 10
     }
 
     fun generateRandomId(len: Int) = (1..len).map { "0123456789abcdef".random() }.joinToString("")
 
+    /**
+     * GAID como UUID v4 correcto:
+     * xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+     * donde y ∈ {8,9,a,b}
+     */
     fun generateRandomGaid(): String {
-        // Fix: UUID v4 format
         val p1 = generateRandomId(8)
         val p2 = generateRandomId(4)
-        val p3 = "4" + generateRandomId(3)  // version 4
-        val p4 = listOf("8","9","a","b").random() + generateRandomId(3)  // variant
+        val p3 = "4" + generateRandomId(3)                    // versión 4 ✓
+        val p4 = listOf("8","9","a","b").random() + generateRandomId(3)  // variante ✓
         val p5 = generateRandomId(12)
         return "$p1-$p2-$p3-$p4-$p5"
     }
 
-    fun generateRandomSerial(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return (1..12).map { chars.random() }.joinToString("")
+    /**
+     * Serial: formato realista por marca.
+     * Xiaomi/Redmi: alfanumérico 8-12 chars
+     * Samsung: RX + año + mes + letras + dígitos
+     */
+    fun generateRandomSerial(brand: String = ""): String {
+        return when (brand.lowercase()) {
+            "samsung" -> {
+                val year = listOf("21","22").random()
+                val month = (1..12).random().toString().padStart(2,'0')
+                val suffix = (1..6).map { "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789".random() }.joinToString("")
+                "R${year}${month}${suffix}"
+            }
+            "google" -> {
+                // Pixel: 14 chars alfanuméricos
+                (1..14).map { "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".random() }.joinToString("")
+            }
+            else -> {
+                // Xiaomi/genérico: 8-12 chars
+                val len = (8..12).random()
+                (1..len).map { "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".random() }.joinToString("")
+            }
+        }
     }
 
     fun generateRandomMac(): String {
         val bytes = ByteArray(6)
         Random().nextBytes(bytes)
-        bytes[0] = (bytes[0].toInt() and 0xFC or 0x02).toByte()
+        // Bit 0 del primer octeto = 0 (unicast), bit 1 = 1 (locally administered)
+        bytes[0] = (bytes[0].toInt() and 0xFE or 0x02).toByte()
         return bytes.joinToString(":") { "%02X".format(it) }
     }
 
-    fun generatePhoneNumber(npaList: List<String>): String {
-        val npa = if (npaList.isNotEmpty()) npaList.random() else "202"
-
-        var nxx = (200..999).random()
-        // Bloquear rangos problemáticos (555, 9XX reservados, X11)
-        while (nxx == 555 ||
-               nxx in 950..999 ||
-               (nxx / 100 == 9 && nxx % 10 == 1)) {
-            nxx = (200..999).random()
-        }
-
-        val subscriber = (0..9999).random().toString().padStart(4, '0')
-        return "+1$npa$nxx$subscriber"
+    /**
+     * Gmail realista con nombres anglo-americanos coherentes con US carrier.
+     * Se eliminan los nombres españoles/apellidos italianos del original.
+     */
+    fun generateRealisticGmail(): String {
+        val first = listOf(
+            "james","john","robert","michael","william","david","joseph","charles",
+            "thomas","daniel","matthew","anthony","mark","donald","steven","paul",
+            "andrew","joshua","kenneth","kevin","brian","george","timothy","ronald",
+            "edward","jason","jeffrey","ryan","jacob","gary","nicholas","eric"
+        ).random()
+        val last = listOf(
+            "smith","johnson","williams","brown","jones","garcia","miller","davis",
+            "wilson","taylor","anderson","thomas","jackson","white","harris","martin",
+            "thompson","young","robinson","lewis","walker","allen","hall","wright",
+            "scott","green","adams","baker","nelson","carter","mitchell","perez"
+        ).random()
+        val sep = listOf("", ".", "_").random()
+        val num = if (Random().nextBoolean()) (1..9999).random().toString() else ""
+        return "$first$sep$last$num@gmail.com"
     }
 
-    fun generateRealisticGmail(): String {
-        val firstNames = listOf(
-            "sofia","sof","camila","cami","valentina","val","isabella","bella","lucia","luci",
-            "daniela","dani","valeria","vale","gabriela","gaby","mariana","mari","catalina","cata",
-            "ximena","xim","victoria","vicky","natalia","nati","alejandra","ale","fernanda","fer",
-            "paulina","pauli","renata","re","emilia","emi","mia","sara","sarita","laura","laur",
-            "ana","anita","maria","mary","carmen","carme","rosa","rosy","luna","lunita","aurora","rory",
-            "sophia","olivia","emma","ava","charlotte","amelia","harper","evelyn","abigail","ella",
-            "scarlett","grace","chloe","lily","nora","hazel","zoey","riley","layla","violet",
-            "nova","ivy","stella","maya","penelope","everly","willow","eleanor","hannah","addison",
-            "aubrey","brooklyn","claire","savannah","skylar","genesis","madison","isla","aaliyah",
-            "jasmine","jas","ruby","alexa","lexi","brianna","bri","kaylee","kayla","megan","meg",
-            "sydney","syd","rachel","rach","nicole","nikki","vanessa","nessa","andrea","drea",
-            "veronica","vero","monica","mon","patricia","patty","elena","eli","silvia","sil",
-            "beatriz","bea","carolina","caro","adriana","adri","paola","pao","tamara","tami"
-        )
-
-        val lastNames = listOf(
-            "garcia","garci","rodriguez","rodri","lopez","lope","martinez","marti","hernandez","hernan",
-            "gonzalez","gonza","smith","smit","johnson","johns","williams","will","brown","brow",
-            "jones","jone","miller","mill","davis","davi","wilson","wils","moore","moor","taylor","tay",
-            "anderson","thomas","jackson","white","harris","martin","thompson","garcia","martinez",
-            "robinson","clark","rodriguez","lewis","lee","walker","hall","allen","young","hernandez",
-            "king","wright","lopez","scott","green","adams","baker","gonzalez","nelson","carter",
-            "mitchell","perez","roberts","turner","phillips","campbell","parker","evans","edwards",
-            "collins","stewart","sanchez","morris","rogers","reed","cook","morgan","bell","murphy",
-            "bailey","rivera","cooper","richardson","cox","howard","ward","torres","peterson","gray",
-            "ramirez","james","watson","brooks","kelly","sanders","price","bennett","wood","barnes",
-            "ross","henderson","coleman","jenkins","perry","powell","long","patterson","hughes",
-            "flores","washington","butler","simmons","foster","gonzales","bryant","alexander","russell",
-            "griffin","diaz","hayes","myers","ford","hamilton","graham","sullivan","wallace","woods",
-            "cole","west","jordan","owens","reynolds","fisher","ellis","harrison","gibson","mcdonald",
-            "cruz","marshall","ortiz","gomez","murray","freeman","wells","webb","simpson","stevens",
-            "tucker","porter","hunter","hicks","crawford","henry","boyd","mason","moreno","kennedy",
-            "warren","dixon","ramos","reyes","burns","gordon","shaw","holmes","rice","robertson",
-            "hunt","black","daniels","palmer","mills","nichols","grant","knight","ferguson","rose",
-            "stone","hawkins","dunn","perkins","hudson","spencer","gardner","stephens","payne","pierce",
-            "berry","matthews","arnold","wagner","watkins","olson","carroll","duncan","snyder","hart",
-            "cunningham","bradley","lane","andrews","ruiz","harper","fox","riley","armstrong","carpenter",
-            "weaver","greene","lawrence","elliott","chavez","sims","austin","peters","kelley","franklin",
-            "lawson","fields","gutierrez","ryan","schmidt","carr","vasquez","castillo","wheeler","chapman",
-            "oliver","montgomery","richards","williamson","johnston","banks","meyer","bishop","mccoy",
-            "howell","alvarez","morrison","hansen","fernandez","garza","harvey","little","burton","stanley",
-            "nguyen","george","jacobs","reid","kim","fuller","lynch","dean","gilbert","garrett","romero",
-            "welch","larson","frazier","burke","hanson","day","mendoza","moreno","bowman","medina","fowler",
-            "brewer","hoffman","carlson","silva","pearson","holland","douglas","fleming","jensen","vargas",
-            "byrd","davidson","hopkins","may","terry","herrera","wade","soto","walters","curtis","neal",
-            "caldwell","lowe","jennings","barnett","graves","jimenez","horton","shelton","barrett","obrien",
-            "castro","sutton","gregory","mckinney","lucas","miles","craig","rodriquez","chambers","holt",
-            "lambert","fletcher","watts","bates","hale","rhodes","pena","beck","newman","haynes","mcdaniel",
-            "mendez","bush","vaughn","phelps","mccormick","baldwin","kerr","murray","cordova","gibbs"
-        )
-
-        val first = firstNames.random()
-        val last = lastNames.random()
-        val separator = listOf("", ".", "_").random()
-
-        var email = "${first}${separator}${last}"
-
-        // Garantizamos mínimo 9 caracteres
-        if (email.length < 9) {
-            val needed = 9 - email.length
-            val extra = (0..(Math.pow(10.0, needed.toDouble()) - 1).toInt())
-                .random()
-                .toString()
-                .padStart(needed, '0')
-            email += extra
-        }
-
-        // 55% probabilidad de agregar números extras
-        if ((0..99).random() < 55) {
-            val extraLen = (1..4).random()
-            val number = (0..(Math.pow(10.0, extraLen.toDouble()) - 1).toInt())
-                .random()
-                .toString()
-            email += number
-        }
-
-        return "$email@gmail.com"
+    fun generatePhoneNumber(npaList: List<String>): String {
+        val npa = if (npaList.isNotEmpty()) npaList.random() else "212"
+        var nxx = (200..999).random()
+        if (nxx == 555) nxx = 556    // 555-xxxx son ficticios
+        val sub = (0..9999).random().toString().padStart(4, '0')
+        return "+1$npa$nxx$sub"
     }
 }

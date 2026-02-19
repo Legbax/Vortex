@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.vortex.MainHook
 import com.vortex.PrefsManager
-import com.vortex.adapters.DeviceAdapter
 import com.vortex.R
 
 class DeviceFragment : Fragment() {
@@ -18,34 +17,20 @@ class DeviceFragment : Fragment() {
     private lateinit var rvDevices: RecyclerView
     private lateinit var adapter: DeviceAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_device, container, false)
-        rvDevices = view.findViewById(R.id.recycler_devices)
-        setupRecyclerView()
-        return view
-    }
+        rvDevices = view.findViewById(R.id.rv_devices)
 
-    private fun setupRecyclerView() {
-        val currentProfile = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
-        // Get keys from MainHook.DEVICE_FINGERPRINTS
-        val devices = MainHook.DEVICE_FINGERPRINTS.keys.toList()
-
-        adapter = DeviceAdapter(devices) { selectedDevice ->
-            PrefsManager.saveString(requireContext(), "profile", selectedDevice)
-            Toast.makeText(requireContext(), "Selected: $selectedDevice", Toast.LENGTH_SHORT).show()
+        adapter = DeviceAdapter(MainHook.DEVICE_FINGERPRINTS) { key ->
+            PrefsManager.saveString(requireContext(), "profile", key)
+            Toast.makeText(requireContext(), "Profile saved: $key", Toast.LENGTH_SHORT).show()
         }
-
-        rvDevices.layoutManager = LinearLayoutManager(requireContext())
+        rvDevices.layoutManager = LinearLayoutManager(context)
         rvDevices.adapter = adapter
 
-        val index = devices.indexOfFirst { it == currentProfile }
-        if (index != -1) {
-            adapter.selectedPosition = index
-            adapter.notifyItemChanged(index)
-            rvDevices.scrollToPosition(index)
-        }
+        val saved = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
+        if (saved.isNotEmpty()) adapter.setSelected(saved)
+
+        return view
     }
 }

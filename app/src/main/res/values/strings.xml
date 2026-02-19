@@ -1,8 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Vortex</string>
-    <string name="xposed_description">Spoofer anti-detección (Redmi 9) - Hooks avanzados para evadir fingerprinting</string>
+    <string name="xposed_description">System utility module</string>
 
-    <!-- Theme -->
-    <string name="theme_name">Vortex Theme</string>
+    <!-- Navigation -->
+    <string name="nav_status">Status</string>
+    <string name="nav_device">Device</string>
+    <string name="nav_network">Network</string>
+    <string name="nav_ids">IDs</string>
+    <string name="nav_location">Location</string>
+    <string name="nav_advanced">Advanced</string>
+
+    <!-- Status -->
+    <string name="status_evasion_score">Score</string>
+    <string name="status_master_switch">Master Switch</string>
+    <string name="status_system_integrity">System Integrity</string>
+    <string name="status_device_profile">Device Profile</string>
+    <string name="status_protected">Protected</string>
+    <string name="status_not_spoofed">Not active</string>
+
+    <!-- Device -->
+    <string name="device_apply_profile">Apply Profile</string>
+
+    <!-- Network -->
+    <string name="network_carrier_config">Carrier Configuration</string>
+    <string name="network_operator_name">Operator Name</string>
+    <string name="network_mcc">MCC</string>
+    <string name="network_mnc">MNC</string>
+    <string name="network_sim_serial">SIM Serial (ICCID)</string>
+    <string name="network_phone_number">Phone Number</string>
+    <string name="network_wifi_mac">WiFi MAC</string>
+
+    <!-- IDs -->
+    <string name="ids_identifiers">Device Identifiers</string>
+    <string name="ids_imei">IMEI (Slot 1)</string>
+    <string name="ids_android_id">Android ID (SSAID)</string>
+    <string name="ids_gsf">Google Service Framework (GSF)</string>
+    <string name="ids_serial">Serial Number</string>
+    <string name="ids_bluetooth_mac">Bluetooth MAC</string>
+    <string name="ids_validate_valid">Valid</string>
+    <string name="ids_validate_invalid">Invalid</string>
+    <string name="ids_randomize_all">Randomize All</string>
+
+    <!-- Location -->
+    <string name="location_mock_settings">Mock Location Settings</string>
+
+    <!-- Advanced -->
+    <string name="advanced_hooks_title">Advanced Hooks</string>
+    <string name="advanced_hide_root">Hide Root</string>
+    <string name="advanced_hide_root_desc">Intercepts su binary checks.</string>
+    <string name="advanced_hide_debug">Hide Debugging Flags</string>
+    <string name="advanced_hide_debug_desc">Clears FLAG_DEBUGGABLE.</string>
+
+    <!-- Actions -->
+    <string name="action_save">Save</string>
+    <string name="action_reset">Reset</string>
+    <string name="msg_saved">Saved successfully</string>
+    <string name="msg_reboot_required">Restart target apps to apply</string>
 </resources>
