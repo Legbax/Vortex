@@ -1,48 +1,63 @@
 package com.vortex.fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.switchmaterial.SwitchMaterial
+import com.vortex.PrefsManager
 import com.vortex.R
 
 class StatusFragment : Fragment() {
 
-    // FIX #8: Este método devuelve false por defecto.
-    // MainHook.hookModuleStatus() lo hookea para devolver true cuando
-    // el módulo está activo. Si devuelve false, el módulo no está cargado.
-    fun isModuleActive(): Boolean = false
+    private lateinit var progressEvasion: CircularProgressIndicator
+    private lateinit var textScore: TextView
+    private lateinit var switchMaster: SwitchMaterial
+    private lateinit var textProfile: TextView
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_status, container, false)
-
-        val active = isModuleActive()
-
-        view.findViewById<ImageView>(R.id.iv_status_icon).apply {
-            setImageResource(if (active) R.drawable.ic_check_circle else R.drawable.ic_error_circle)
-            setColorFilter(if (active) Color.parseColor("#4CAF50") else Color.parseColor("#F44336"))
-        }
-
-        view.findViewById<TextView>(R.id.tv_status_title).apply {
-            text = if (active) "Módulo Activo" else "Módulo Inactivo"
-            setTextColor(if (active) Color.parseColor("#4CAF50") else Color.parseColor("#F44336"))
-        }
-
-        view.findViewById<TextView>(R.id.tv_status_description).text = if (active) {
-            "El módulo Vortex está cargado correctamente por Xposed/LSPosed."
-        } else {
-            "El módulo no está activo. Asegúrate de haberlo habilitado en LSPosed " +
-            "y de haber reiniciado el dispositivo."
-        }
-
+        bindViews(view)
+        loadData()
+        setupListeners()
         return view
+    }
+
+    private fun bindViews(view: View) {
+        progressEvasion = view.findViewById(R.id.progress_evasion)
+        textScore = view.findViewById(R.id.text_score)
+        switchMaster = view.findViewById(R.id.switch_master)
+        textProfile = view.findViewById(R.id.text_current_profile)
+    }
+
+    private fun loadData() {
+        val context = requireContext()
+        val profile = PrefsManager.getString(context, "profile", "Redmi 9")
+        val masterEnabled = PrefsManager.getBoolean(context, "master_switch", true)
+
+        textProfile.text = profile
+        switchMaster.isChecked = masterEnabled
+
+        // Mock Score Logic
+        val score = if (masterEnabled) 85 else 0
+        updateScore(score)
+    }
+
+    private fun setupListeners() {
+        switchMaster.setOnCheckedChangeListener { _, isChecked ->
+            PrefsManager.saveBoolean(requireContext(), "master_switch", isChecked)
+            updateScore(if (isChecked) 85 else 0)
+        }
+    }
+
+    private fun updateScore(score: Int) {
+        progressEvasion.setProgressCompat(score, true)
+        textScore.text = score.toString()
     }
 }

@@ -1,35 +1,50 @@
+import os
 from playwright.sync_api import sync_playwright
 
 def main():
+    cwd = os.getcwd()
+    preview_path = f"file://{cwd}/UI_PREVIEW.html"
+    print(f"Opening: {preview_path}")
+
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
+        page.goto(preview_path)
 
-        # Open the local file (absolute path)
-        page.goto("file:///app/UI_PREVIEW.html")
-
-        # Wait for Alpine to initialize
+        # Wait for Alpine
         page.wait_for_timeout(1000)
 
-        # Take screenshot of Dashboard (Status Tab)
-        page.screenshot(path="/home/jules/verification/preview_status.png", full_page=True)
-        print("Status tab screenshot taken.")
+        # Status Tab
+        page.screenshot(path="verification_status.png")
+        print("Captured verification_status.png")
 
-        # Click "Device" tab (using role to be specific)
-        page.get_by_role("button", name="device").click()
+        # Device Tab (simulate click)
+        # The tabs are buttons with text inside spans.
+        # Let's target by text content "device" inside the bottom nav
+        # But wait, the text is inside a span with x-text="item".
+        # Let's use a selector based on the tab variable or text.
+
+        # Click the button that sets tab = 'device'
+        # In UI_PREVIEW.html: <button @click="tab = item" ...> ... <span ... x-text="item">device</span> ... </button>
+        # We can just use text="device" (case insensitive usually in playwright locators if configured, or exact).
+        # But the text is uppercase in the span via CSS? No, "text-[10px] uppercase". The DOM text is "device".
+
+        page.get_by_text("device", exact=True).click()
         page.wait_for_timeout(500)
+        page.screenshot(path="verification_device.png")
+        print("Captured verification_device.png")
 
-        # Take screenshot of Device Tab
-        page.screenshot(path="/home/jules/verification/preview_device.png", full_page=True)
-        print("Device tab screenshot taken.")
-
-        # Click "IDs" tab
-        page.get_by_role("button", name="ids").click()
+        # IDs Tab
+        page.get_by_text("ids", exact=True).click()
         page.wait_for_timeout(500)
+        page.screenshot(path="verification_ids.png")
+        print("Captured verification_ids.png")
 
-        # Take screenshot of IDs Tab
-        page.screenshot(path="/home/jules/verification/preview_ids.png", full_page=True)
-        print("IDs tab screenshot taken.")
+        # Advanced Tab
+        page.get_by_text("advanced", exact=True).click()
+        page.wait_for_timeout(500)
+        page.screenshot(path="verification_advanced.png")
+        print("Captured verification_advanced.png")
 
         browser.close()
 

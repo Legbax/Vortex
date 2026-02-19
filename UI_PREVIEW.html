@@ -12,18 +12,20 @@
         body { font-family: 'Roboto', sans-serif; background-color: #000; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Redmi 9 Waterdrop Notch */
         .notch {
-            width: 150px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
             background: #000;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
+            border-radius: 50%;
             position: absolute;
-            top: 0;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 50;
+            box-shadow: 0 5px 10px #000;
         }
+        [x-cloak] { display: none !important; }
     </style>
     <script>
         tailwind.config = {
@@ -40,6 +42,20 @@
                             error: '#CF6679',
                             success: '#00E676'
                         }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
                     }
                 }
             }
@@ -53,6 +69,12 @@
           evasionScore: 85,
           currentProfile: 'Google Pixel 5',
           deviceSearch: '',
+          showConfirm: false,
+          confirmAction: null,
+          confirmTitle: '',
+          confirmMessage: '',
+          tooltip: { visible: false, text: '', x: 0, y: 0 },
+          selectedApps: { snap: false, gplay: false, gservices: false },
           profiles: [
               { name: 'Redmi 9', detail: 'Xiaomi | Android 11', fp: 'Redmi/lancelot_global/lancelot:11/RP1A.200720.011/V12.5.3.0.RJCMIXM:user/release-keys' },
               { name: 'Redmi Note 9', detail: 'Xiaomi | Android 11', fp: 'Redmi/merlin_global/merlin:11/RP1A.200720.011/V12.5.2.0.RJOMIXM:user/release-keys' },
@@ -60,11 +82,7 @@
               { name: 'Samsung Galaxy S20+', detail: 'Samsung | Android 11', fp: 'samsung/y2sxx/y2s:11/RP1A.200720.012/G985FXXSGHWA3:user/release-keys' }
           ],
           hooks: {
-              root: true,
-              debug: true,
-              files: true,
-              process: true,
-              packages: true
+              // Hooks removed as per new requirement
           },
           network: {
               operator: 'T-Mobile',
@@ -92,20 +110,77 @@
               speed: 0.0,
               bearing: 0.0,
               jitter: true,
-              moving: false
+              moving: false,
+              mapX: 0,
+              mapY: 0
           },
           randomizeAnim: false,
-          triggerRandom() {
+
+          showTooltip(e, text) {
+             this.tooltip.visible = true;
+             this.tooltip.text = text;
+             this.tooltip.x = e.clientX;
+             this.tooltip.y = e.clientY - 40;
+          },
+          hideTooltip() {
+             this.tooltip.visible = false;
+          },
+
+          askConfirm(title, message, action) {
+              this.confirmTitle = title;
+              this.confirmMessage = message;
+              this.confirmAction = action;
+              this.showConfirm = true;
+          },
+
+          executeConfirm() {
+              if (this.confirmAction) this.confirmAction();
+              this.showConfirm = false;
+          },
+
+          randomizeAll() {
               this.randomizeAnim = true;
               setTimeout(() => this.randomizeAnim = false, 1000);
               this.evasionScore = Math.floor(Math.random() * 20) + 80;
+              // Simulate ID changes
+              this.ids.imei = Math.floor(Math.random() * 1000000000000000).toString();
           }
       }">
 
-    <!-- Redmi 9 Frame Simulation (Approx 720x1600 scaled) -->
-    <div class="relative w-[360px] h-[800px] bg-black rounded-[40px] border-4 border-gray-800 shadow-2xl overflow-hidden ring-4 ring-gray-900/50">
+    <!-- Tooltip -->
+    <div x-show="tooltip.visible" x-cloak
+         class="fixed z-[100] bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg border border-gray-700 pointer-events-none transition-opacity"
+         :style="`top: ${tooltip.y}px; left: ${tooltip.x}px; transform: translateX(-50%)`">
+        <span x-text="tooltip.text"></span>
+    </div>
 
-        <!-- Notch -->
+    <!-- Confirmation Modal -->
+    <div x-show="showConfirm" x-cloak
+         class="fixed inset-0 z-[60] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm transition-opacity"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+         <div class="bg-vortex-card w-full max-w-xs rounded-2xl border border-vortex-divider p-6 shadow-2xl transform transition-all"
+              @click.away="showConfirm = false"
+              x-transition:enter="transition ease-out duration-300"
+              x-transition:enter-start="opacity-0 scale-90"
+              x-transition:enter-end="opacity-100 scale-100">
+             <h3 class="text-lg font-bold text-white mb-2" x-text="confirmTitle"></h3>
+             <p class="text-sm text-vortex-textSec mb-6" x-text="confirmMessage"></p>
+             <div class="flex justify-end gap-3">
+                 <button @click="showConfirm = false" class="px-4 py-2 rounded-lg text-sm font-medium text-vortex-textSec hover:text-white transition-colors">Cancel</button>
+                 <button @click="executeConfirm()" class="px-4 py-2 rounded-lg text-sm font-bold bg-vortex-accent text-vortex-bg hover:bg-opacity-90 transition-colors">Confirm</button>
+             </div>
+         </div>
+    </div>
+
+    <!-- Redmi 9 Frame Simulation (Approx 720x1600 scaled) -->
+    <div class="relative w-[360px] h-[800px] bg-black rounded-[40px] border-4 border-gray-800 shadow-2xl overflow-hidden ring-4 ring-gray-900/50 select-none">
+
+        <!-- Waterdrop Notch -->
         <div class="notch"></div>
 
         <!-- Status Bar -->
@@ -122,10 +197,10 @@
         <div class="w-full h-full bg-vortex-bg text-vortex-text flex flex-col pt-8 pb-[70px]">
 
             <!-- Content Area (Scrollable) -->
-            <div class="flex-1 overflow-y-auto no-scrollbar relative">
+            <div class="flex-1 overflow-y-auto no-scrollbar relative scroll-smooth">
 
                 <!-- STATUS TAB -->
-                <div x-show="tab === 'status'" class="p-4 space-y-6 animate-fade-in">
+                <div x-show="tab === 'status'" x-transition:enter="animate-fade-in" class="p-4 space-y-6">
                     <!-- Header -->
                     <div class="text-center mt-2">
                         <h1 class="text-2xl font-bold tracking-tight text-white">Vortex</h1>
@@ -134,7 +209,6 @@
 
                     <!-- Score Circle -->
                     <div class="flex justify-center py-4 relative">
-                        <!-- Simple SVG Circle Progress -->
                         <div class="relative w-48 h-48">
                             <svg class="w-full h-full transform -rotate-90">
                                 <circle cx="96" cy="96" r="88" stroke="#12151A" stroke-width="12" fill="none" />
@@ -150,7 +224,7 @@
                     </div>
 
                     <!-- Master Switch -->
-                    <div class="bg-vortex-card rounded-2xl p-4 flex items-center justify-between shadow-lg border border-vortex-divider">
+                    <div class="bg-vortex-card rounded-2xl p-4 flex items-center justify-between shadow-lg border border-vortex-divider transition-transform active:scale-[0.98]">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-full bg-vortex-bg flex items-center justify-center text-vortex-accent border border-vortex-divider">
                                 <span class="material-symbols-rounded">shield</span>
@@ -170,18 +244,18 @@
 
                     <!-- Quick Stats Grid -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider">
+                        <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider active:bg-gray-800 transition-colors" @click="tab = 'device'">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="material-symbols-rounded text-vortex-textSec">smartphone</span>
-                                <span class="w-2 h-2 rounded-full bg-vortex-success"></span>
+                                <span class="w-2 h-2 rounded-full bg-vortex-success animate-pulse"></span>
                             </div>
                             <div class="text-sm text-vortex-textSec">Profile</div>
                             <div class="font-bold truncate" x-text="currentProfile"></div>
                         </div>
-                        <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider">
+                        <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider active:bg-gray-800 transition-colors" @click="tab = 'ids'">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="material-symbols-rounded text-vortex-textSec">fingerprint</span>
-                                <span class="w-2 h-2 rounded-full bg-vortex-success"></span>
+                                <span class="w-2 h-2 rounded-full bg-vortex-success animate-pulse"></span>
                             </div>
                             <div class="text-sm text-vortex-textSec">IDs</div>
                             <div class="font-bold">Spoofed</div>
@@ -190,7 +264,7 @@
                 </div>
 
                 <!-- DEVICE TAB -->
-                <div x-show="tab === 'device'" class="p-4 space-y-4">
+                <div x-show="tab === 'device'" x-transition:enter="animate-slide-up" class="p-4 space-y-4">
                     <h2 class="text-xl font-bold mb-4">Device Identity</h2>
 
                     <!-- Search -->
@@ -198,6 +272,9 @@
                         <span class="material-symbols-rounded absolute left-3 top-3 text-vortex-textSec">search</span>
                         <input type="text" placeholder="Search profiles..." x-model="deviceSearch"
                                class="w-full bg-vortex-card text-white pl-10 pr-4 py-3 rounded-xl border border-vortex-divider focus:border-vortex-accent outline-none placeholder-gray-600 transition-colors">
+                        <button x-show="deviceSearch.length > 0" @click="deviceSearch = ''" class="absolute right-3 top-3 text-vortex-textSec hover:text-white">
+                            <span class="material-symbols-rounded">close</span>
+                        </button>
                     </div>
 
                     <!-- Current Profile Display -->
@@ -207,14 +284,15 @@
                                 <h3 class="font-bold text-lg" x-text="currentProfile"></h3>
                                 <p class="text-xs text-vortex-success font-mono mt-1">ACTIVE</p>
                             </div>
-                            <button class="text-vortex-accent hover:text-white transition-colors">
+                            <button class="text-vortex-accent hover:text-white transition-colors p-2 -mr-2"
+                                    @mouseover="showTooltip($event, 'Edit custom profile')" @mouseout="hideTooltip()">
                                 <span class="material-symbols-rounded">edit</span>
                             </button>
                         </div>
 
                         <!-- Full Fingerprint Display -->
-                        <div class="bg-black/30 p-3 rounded-lg border border-vortex-divider mb-4">
-                            <p class="text-[10px] text-vortex-textSec font-mono break-all leading-tight"
+                        <div class="bg-black/30 p-3 rounded-lg border border-vortex-divider mb-4 overflow-x-auto no-scrollbar">
+                            <p class="text-[10px] text-vortex-textSec font-mono whitespace-nowrap"
                                x-text="profiles.find(p => p.name === currentProfile).fp"></p>
                         </div>
 
@@ -230,21 +308,30 @@
                         </div>
                     </div>
 
-                    <button @click="triggerRandom()" class="w-full bg-vortex-accent text-vortex-bg font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
-                        <span class="material-symbols-rounded" :class="randomizeAnim ? 'animate-spin' : ''">shuffle</span>
+                    <button @click="askConfirm('Randomize Profile', 'This will switch your device identity to a random profile. Continue?', () => { currentProfile = profiles[Math.floor(Math.random() * profiles.length)].name; })"
+                            class="w-full bg-vortex-accent text-vortex-bg font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 group">
+                        <span class="material-symbols-rounded group-hover:rotate-180 transition-transform duration-500">shuffle</span>
                         Randomize Profile
                     </button>
 
                     <!-- Profile List -->
-                    <div class="space-y-2 mt-4">
+                    <div class="space-y-2 mt-4 pb-4">
                         <div class="text-xs uppercase text-vortex-textSec font-bold tracking-wider mb-2">Available Profiles</div>
+
+                        <!-- Empty State -->
+                        <div x-show="profiles.filter(p => p.name.toLowerCase().includes(deviceSearch.toLowerCase())).length === 0"
+                             class="py-8 text-center text-vortex-textSec flex flex-col items-center">
+                            <span class="material-symbols-rounded text-4xl mb-2 opacity-50">search_off</span>
+                            <p>No profiles found</p>
+                        </div>
+
                         <template x-for="p in profiles.filter(p => p.name.toLowerCase().includes(deviceSearch.toLowerCase()))">
                             <div @click="currentProfile = p.name"
-                                 class="bg-vortex-card p-3 rounded-xl flex items-center justify-between border border-vortex-divider active:bg-gray-800 transition-colors cursor-pointer"
-                                 :class="currentProfile === p.name ? 'border-vortex-accent' : ''">
+                                 class="bg-vortex-card p-3 rounded-xl flex items-center justify-between border border-vortex-divider active:bg-gray-800 transition-colors cursor-pointer group"
+                                 :class="currentProfile === p.name ? 'border-vortex-accent' : 'hover:border-gray-600'">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-vortex-textSec"
-                                         :class="currentProfile === p.name ? 'bg-vortex-accent/20 text-vortex-accent' : 'bg-gray-800'">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-vortex-textSec transition-colors"
+                                         :class="currentProfile === p.name ? 'bg-vortex-accent/20 text-vortex-accent' : 'bg-gray-800 group-hover:bg-gray-700'">
                                         <span class="material-symbols-rounded text-sm">smartphone</span>
                                     </div>
                                     <div class="text-sm">
@@ -252,22 +339,24 @@
                                         <div class="text-xs text-vortex-textSec" x-text="p.detail"></div>
                                     </div>
                                 </div>
-                                <span x-show="currentProfile === p.name" class="material-symbols-rounded text-vortex-accent text-sm">check_circle</span>
+                                <span x-show="currentProfile === p.name" class="material-symbols-rounded text-vortex-accent text-sm animate-fade-in">check_circle</span>
                             </div>
                         </template>
                     </div>
                 </div>
 
                 <!-- NETWORK TAB -->
-                <div x-show="tab === 'network'" class="p-4 space-y-4">
+                <div x-show="tab === 'network'" x-transition:enter="animate-slide-up" class="p-4 space-y-4">
                     <h2 class="text-xl font-bold mb-4">Carrier & Connectivity</h2>
 
                     <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider space-y-4">
-                        <h3 class="text-sm font-bold text-vortex-accent uppercase tracking-wide">Telephony Hooks</h3>
+                        <h3 class="text-sm font-bold text-vortex-accent uppercase tracking-wide flex items-center gap-2">
+                            <span class="material-symbols-rounded text-lg">cell_tower</span> Telephony Hooks
+                        </h3>
 
                         <div class="space-y-1">
                             <label class="text-xs text-vortex-textSec">Operator Name</label>
-                            <input type="text" x-model="network.operator" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none">
+                            <input type="text" x-model="network.operator" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none transition-colors">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -285,7 +374,7 @@
                             <label class="text-xs text-vortex-textSec">SIM Serial (ICCID)</label>
                             <div class="flex gap-2">
                                 <input type="text" x-model="network.simSerial" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none font-mono">
-                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800"><span class="material-symbols-rounded">refresh</span></button>
+                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800 active:bg-gray-700 transition-colors"><span class="material-symbols-rounded">refresh</span></button>
                             </div>
                         </div>
 
@@ -293,7 +382,7 @@
                             <label class="text-xs text-vortex-textSec">IMSI (Subscriber ID)</label>
                             <div class="flex gap-2">
                                 <input type="text" x-model="network.imsi" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none font-mono">
-                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800"><span class="material-symbols-rounded">refresh</span></button>
+                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800 active:bg-gray-700 transition-colors"><span class="material-symbols-rounded">refresh</span></button>
                             </div>
                         </div>
 
@@ -301,35 +390,38 @@
                             <label class="text-xs text-vortex-textSec">Phone Number</label>
                             <div class="flex gap-2">
                                 <input type="text" x-model="network.phone" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none">
-                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800"><span class="material-symbols-rounded">refresh</span></button>
+                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800 active:bg-gray-700 transition-colors"><span class="material-symbols-rounded">refresh</span></button>
                             </div>
                         </div>
                     </div>
 
                      <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider space-y-4">
-                        <h3 class="text-sm font-bold text-vortex-accent uppercase tracking-wide">Hardware Addresses</h3>
+                        <h3 class="text-sm font-bold text-vortex-accent uppercase tracking-wide flex items-center gap-2">
+                            <span class="material-symbols-rounded text-lg">router</span> Hardware Addresses
+                        </h3>
                          <div class="space-y-1">
                             <label class="text-xs text-vortex-textSec">WiFi MAC Address</label>
                             <div class="flex gap-2">
                                 <input type="text" x-model="network.wifi" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none font-mono">
-                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800"><span class="material-symbols-rounded">refresh</span></button>
+                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800 active:bg-gray-700 transition-colors"><span class="material-symbols-rounded">refresh</span></button>
                             </div>
                         </div>
                         <div class="space-y-1">
                             <label class="text-xs text-vortex-textSec">Bluetooth MAC Address</label>
                             <div class="flex gap-2">
                                 <input type="text" x-model="network.bt" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-3 text-sm focus:border-vortex-accent outline-none font-mono">
-                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800"><span class="material-symbols-rounded">refresh</span></button>
+                                <button class="p-3 bg-vortex-bg border border-vortex-divider rounded-lg text-vortex-accent hover:bg-gray-800 active:bg-gray-700 transition-colors"><span class="material-symbols-rounded">refresh</span></button>
                             </div>
                         </div>
                      </div>
                 </div>
 
-                <!-- IDs TAB -->
-                <div x-show="tab === 'ids'" class="p-4 space-y-4">
+                <!-- ID TAB -->
+                <div x-show="tab === 'ids'" x-transition:enter="animate-slide-up" class="p-4 space-y-4">
                     <div class="flex justify-between items-center mb-2">
                          <h2 class="text-xl font-bold">System Identifiers</h2>
-                         <button @click="triggerRandom()" class="text-vortex-accent text-sm font-bold flex items-center gap-1 hover:text-white">
+                         <button @click="askConfirm('Regenerate All IDs', 'This will replace all unique identifiers (IMEI, SSAID, etc). Proceed?', () => randomizeAll())"
+                                 class="text-vortex-accent text-sm font-bold flex items-center gap-1 hover:text-white transition-colors">
                              <span class="material-symbols-rounded text-lg" :class="randomizeAnim ? 'animate-spin' : ''">sync</span>
                              GENERATE ALL
                          </button>
@@ -337,15 +429,17 @@
 
                     <div class="space-y-4">
                         <template x-for="(val, key) in ids">
-                            <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider">
+                            <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider hover:border-vortex-textSec/30 transition-colors">
                                 <div class="flex justify-between mb-1">
-                                    <label class="text-xs text-vortex-textSec uppercase" x-text="key.replace(/([A-Z])/g, ' $1').trim()"></label>
-                                    <span class="text-[10px] px-2 py-0.5 rounded bg-vortex-success/20 text-vortex-success font-bold">VALID</span>
+                                    <label class="text-xs text-vortex-textSec uppercase font-bold" x-text="key.replace(/([A-Z])/g, ' $1').trim()"></label>
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-vortex-success/20 text-vortex-success font-bold flex items-center gap-1">
+                                        <span class="material-symbols-rounded text-[10px]">check_circle</span> VALID
+                                    </span>
                                 </div>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <input type="text" x-model="ids[key]" class="w-full bg-transparent text-sm font-mono outline-none text-white">
-                                    <button class="text-vortex-textSec hover:text-white"><span class="material-symbols-rounded text-lg">content_copy</span></button>
-                                    <button class="text-vortex-accent hover:text-white"><span class="material-symbols-rounded text-lg">refresh</span></button>
+                                    <input type="text" x-model="ids[key]" class="w-full bg-transparent text-sm font-mono outline-none text-white focus:text-vortex-accent transition-colors">
+                                    <button class="text-vortex-textSec hover:text-white p-1" @mouseover="showTooltip($event, 'Copy to clipboard')" @mouseout="hideTooltip()"><span class="material-symbols-rounded text-lg">content_copy</span></button>
+                                    <button class="text-vortex-accent hover:text-white p-1" @mouseover="showTooltip($event, 'Regenerate this ID')" @mouseout="hideTooltip()"><span class="material-symbols-rounded text-lg">refresh</span></button>
                                 </div>
                             </div>
                         </template>
@@ -353,19 +447,26 @@
                 </div>
 
                 <!-- LOCATION TAB -->
-                <div x-show="tab === 'location'" class="p-4 space-y-4 h-full flex flex-col">
+                <div x-show="tab === 'location'" x-transition:enter="animate-slide-up" class="p-4 space-y-4 h-full flex flex-col">
                     <h2 class="text-xl font-bold mb-2">Mock Location</h2>
 
-                    <!-- Map Mock -->
-                    <div class="w-full bg-gray-800 rounded-2xl overflow-hidden relative border border-vortex-divider h-[250px] shadow-inner">
-                        <div class="absolute inset-0 opacity-40 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] bg-cover bg-center grayscale invert"></div>
-                        <div class="absolute inset-0 flex items-center justify-center">
+                    <!-- Interactive Map Mock -->
+                    <div class="w-full bg-gray-800 rounded-2xl overflow-hidden relative border border-vortex-divider h-[250px] shadow-inner group cursor-grab active:cursor-grabbing"
+                         @mousemove="if($event.buttons === 1) { location.mapX += $event.movementX; location.mapY += $event.movementY; }">
+                        <div class="absolute inset-0 opacity-40 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] bg-cover bg-center grayscale invert"
+                             :style="`background-position: ${location.mapX}px ${location.mapY}px`"></div>
+
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div class="w-4 h-4 bg-vortex-accent rounded-full shadow-[0_0_20px_rgba(0,212,255,1)] animate-pulse border-2 border-white"></div>
                         </div>
+
                         <div class="absolute bottom-4 right-4 flex flex-col gap-2">
-                             <button class="w-10 h-10 bg-vortex-card rounded-full flex items-center justify-center text-white shadow-lg border border-vortex-divider"><span class="material-symbols-rounded">my_location</span></button>
+                             <button @click="location.mapX = 0; location.mapY = 0" class="w-10 h-10 bg-vortex-card rounded-full flex items-center justify-center text-white shadow-lg border border-vortex-divider hover:bg-gray-700 transition-colors">
+                                 <span class="material-symbols-rounded">my_location</span>
+                             </button>
                         </div>
-                        <div class="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white border border-white/10">
+                        <div class="absolute top-4 left-4 bg-black/50 backdrop-blur px-3 py-1 rounded-full text-xs text-white border border-white/10 flex items-center gap-1">
+                            <span class="material-symbols-rounded text-[14px] text-vortex-accent">location_on</span>
                             San Jose, CA
                         </div>
                     </div>
@@ -388,21 +489,13 @@
                              <label class="text-xs text-vortex-textSec">Accuracy (m)</label>
                              <input type="text" x-model="location.acc" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-2 text-sm text-center focus:border-vortex-accent outline-none">
                         </div>
-                        <div class="space-y-1">
-                             <label class="text-xs text-vortex-textSec">Speed (m/s)</label>
-                             <input type="text" x-model="location.speed" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-2 text-sm text-center focus:border-vortex-accent outline-none">
-                        </div>
-                        <div class="space-y-1">
-                             <label class="text-xs text-vortex-textSec">Bearing (°)</label>
-                             <input type="text" x-model="location.bearing" class="w-full bg-vortex-bg border border-vortex-divider rounded-lg p-2 text-sm text-center focus:border-vortex-accent outline-none">
-                        </div>
                     </div>
 
                     <!-- Simulation Controls -->
                     <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider space-y-3">
                          <div class="flex justify-between items-center">
                             <div>
-                                <div class="text-sm font-bold">GPS Jitter</div>
+                                <div class="text-sm font-bold flex items-center gap-2"><span class="material-symbols-rounded text-vortex-accent">grain</span> GPS Jitter</div>
                                 <div class="text-xs text-vortex-textSec">Add noise to avoid static detection</div>
                             </div>
                             <button @click="location.jitter = !location.jitter" class="w-10 h-6 rounded-full relative transition-colors duration-300" :class="location.jitter ? 'bg-vortex-accent' : 'bg-gray-700'">
@@ -412,7 +505,7 @@
                         <div class="w-full h-[1px] bg-vortex-divider"></div>
                         <div class="flex justify-between items-center">
                             <div>
-                                <div class="text-sm font-bold">Simulate Movement</div>
+                                <div class="text-sm font-bold flex items-center gap-2"><span class="material-symbols-rounded text-vortex-accent">directions_walk</span> Simulate Movement</div>
                                 <div class="text-xs text-vortex-textSec">Random walk simulation</div>
                             </div>
                             <button @click="location.moving = !location.moving" class="w-10 h-6 rounded-full relative transition-colors duration-300" :class="location.moving ? 'bg-vortex-accent' : 'bg-gray-700'">
@@ -422,43 +515,69 @@
                     </div>
                 </div>
 
-                <!-- ADVANCED TAB -->
-                <div x-show="tab === 'advanced'" class="p-4 space-y-4">
-                    <h2 class="text-xl font-bold mb-4">Advanced Hooks</h2>
-                    <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider mb-4">
-                        <div class="flex gap-3">
-                            <span class="material-symbols-rounded text-vortex-accent">info</span>
-                            <p class="text-xs text-vortex-textSec">These hooks are applied dynamically based on the target app. Modifying them requires a reboot.</p>
+                <!-- ADVANCED TAB (UPDATED) -->
+                <div x-show="tab === 'advanced'" x-transition:enter="animate-slide-up" class="p-4 space-y-4">
+                    <h2 class="text-xl font-bold mb-4">Advanced Tools</h2>
+
+                    <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider mb-4 flex items-start gap-3">
+                        <span class="material-symbols-rounded text-vortex-accent mt-0.5">info</span>
+                        <p class="text-xs text-vortex-textSec leading-5">Use these tools to manage target apps and system power state. Actions are performed with root privileges.</p>
+                    </div>
+
+                    <!-- App Management -->
+                    <h3 class="text-lg font-bold text-white mt-6 mb-2">App Management</h3>
+                    <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider space-y-4">
+                        <div class="text-xs text-vortex-textSec uppercase font-bold tracking-wider mb-2">Target Apps</div>
+
+                        <!-- Toggles -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Snapchat</span>
+                                <button @click="selectedApps.snap = !selectedApps.snap" class="w-10 h-6 rounded-full relative transition-colors duration-300" :class="selectedApps.snap ? 'bg-vortex-accent' : 'bg-gray-700'"><div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md" :class="selectedApps.snap ? 'left-5' : 'left-1'"></div></button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Google Play Store</span>
+                                <button @click="selectedApps.gplay = !selectedApps.gplay" class="w-10 h-6 rounded-full relative transition-colors duration-300" :class="selectedApps.gplay ? 'bg-vortex-accent' : 'bg-gray-700'"><div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md" :class="selectedApps.gplay ? 'left-5' : 'left-1'"></div></button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Google Play Services</span>
+                                <button @click="selectedApps.gservices = !selectedApps.gservices" class="w-10 h-6 rounded-full relative transition-colors duration-300" :class="selectedApps.gservices ? 'bg-vortex-accent' : 'bg-gray-700'"><div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md" :class="selectedApps.gservices ? 'left-5' : 'left-1'"></div></button>
+                            </div>
+                        </div>
+
+                        <div class="w-full h-[1px] bg-vortex-divider"></div>
+
+                        <!-- Actions -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button @click="askConfirm('Force Stop', 'Are you sure you want to force stop selected apps?', () => {})" class="bg-yellow-600/20 text-yellow-500 border border-yellow-600/50 hover:bg-yellow-600/30 font-bold py-2 rounded-xl text-xs transition-colors flex flex-col items-center justify-center gap-1 h-16">
+                                <span class="material-symbols-rounded text-lg">stop_circle</span>
+                                Force Stop
+                            </button>
+                            <button @click="askConfirm('Clear Data', 'This will delete all data for selected apps. This action cannot be undone.', () => {})" class="bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 font-bold py-2 rounded-xl text-xs transition-colors flex flex-col items-center justify-center gap-1 h-16">
+                                <span class="material-symbols-rounded text-lg">delete_forever</span>
+                                Clear Data
+                            </button>
                         </div>
                     </div>
 
-                    <template x-for="(enabled, name) in hooks">
-                        <div class="bg-vortex-card p-4 rounded-2xl border border-vortex-divider flex items-center justify-between">
-                            <div>
-                                <h3 class="font-bold text-sm capitalize" x-text="name.replace(/([A-Z])/g, ' $1').trim() + ' Hook'"></h3>
-                                <p class="text-xs text-vortex-textSec" x-text="'Intercepts ' + name + ' related API calls'"></p>
-                            </div>
-                            <!-- Switch -->
-                            <button @click="hooks[name] = !hooks[name]"
-                                    class="w-10 h-6 rounded-full relative transition-colors duration-300"
-                                    :class="hooks[name] === false ? 'bg-gray-700' : 'bg-vortex-accent'">
-                                <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300 shadow-md"
-                                     :class="hooks[name] === false ? 'left-1' : 'left-5'"></div>
-                            </button>
-                        </div>
-                    </template>
+                    <!-- System Power -->
+                    <h3 class="text-lg font-bold text-white mt-6 mb-2">System</h3>
+                    <button @click="askConfirm('Reboot Device', 'Are you sure you want to reboot the device?', () => {})" class="w-full bg-vortex-card border border-red-500/50 text-red-500 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-red-500/10">
+                        <span class="material-symbols-rounded">restart_alt</span>
+                        Reboot Device
+                    </button>
                 </div>
             </div>
 
             <!-- Bottom Navigation -->
-            <div class="absolute bottom-0 w-full h-[70px] bg-vortex-card border-t border-vortex-divider flex justify-around items-center pb-2 z-50">
+            <div class="absolute bottom-0 w-full h-[70px] bg-vortex-card border-t border-vortex-divider flex justify-around items-center pb-2 z-50 rounded-b-[36px]">
                 <template x-for="item in ['status', 'device', 'network', 'ids', 'location', 'advanced']">
-                    <button @click="tab = item" class="flex flex-col items-center gap-1 p-2 w-1/6">
-                        <span class="material-symbols-rounded text-2xl transition-all duration-300"
-                              :class="tab === item ? 'text-vortex-accent -translate-y-1' : 'text-vortex-textSec'"
+                    <button @click="tab = item" class="flex flex-col items-center gap-1 p-2 w-1/6 group">
+                        <span class="material-symbols-rounded text-2xl transition-all duration-300 group-active:scale-90"
+                              :class="tab === item ? 'text-vortex-accent -translate-y-1' : 'text-vortex-textSec group-hover:text-white'"
                               x-text="item === 'ids' ? 'fingerprint' : (item === 'network' ? 'language' : (item === 'advanced' ? 'tune' : (item === 'status' ? 'dashboard' : (item === 'device' ? 'smartphone' : 'map'))))"></span>
                         <span class="text-[10px] uppercase font-bold tracking-wider transition-colors duration-300"
-                              :class="tab === item ? 'text-vortex-accent' : 'text-vortex-textSec'"
+                              :class="tab === item ? 'text-vortex-accent' : 'text-vortex-textSec group-hover:text-white'"
                               x-text="item"></span>
                     </button>
                 </template>
