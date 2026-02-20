@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/vortex_background">
+
+    <!-- TabLayout interno: Location | Advanced -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_settings"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabTextColor="@color/vortex_text_secondary"
+        app:tabSelectedTextColor="@color/vortex_accent"
+        app:tabIndicatorColor="@color/vortex_accent"
+        app:tabIndicatorHeight="2dp"
+        app:tabRippleColor="@color/vortex_accent_20"
+        android:background="@color/vortex_card_background">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_location"
+            android:text="Location" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_advanced"
+            android:text="Advanced" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- Contenedor de child fragments -->
+    <FrameLayout
+        android:id="@+id/settings_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

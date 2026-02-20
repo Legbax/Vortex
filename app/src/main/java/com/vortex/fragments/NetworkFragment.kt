@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import android.content.res.ColorStateList
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +16,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.vortex.MainHook
 import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
+import com.vortex.utils.ValidationUtils
 import com.vortex.R
 
 class NetworkFragment : Fragment() {
@@ -96,27 +99,60 @@ class NetworkFragment : Fragment() {
         // Restore selected carrier in list
         val savedMcc = PrefsManager.getString(ctx, "mcc_mnc", "310260")
         adapter.setSelected(savedMcc)
+
+        val imsi = etImsi.text.toString()
+        val iccid = etIccid.text.toString()
+        val bssid = etBssid.text.toString()
+        val wMac = etWifiMac.text.toString()
+        val bMac = etBtMac.text.toString()
+        if (imsi.isNotEmpty()) setValidationBadge(tilImsi, ValidationUtils.isValidImsi(imsi))
+        if (iccid.isNotEmpty()) setValidationBadge(tilIccid, ValidationUtils.isValidIccid(iccid))
+        if (bssid.isNotEmpty()) setValidationBadge(tilBssid, ValidationUtils.isValidMac(bssid))
+        if (wMac.isNotEmpty()) setValidationBadge(tilWifiMac, ValidationUtils.isValidMac(wMac))
+        if (bMac.isNotEmpty()) setValidationBadge(tilBtMac, ValidationUtils.isValidMac(bMac))
     }
 
     private fun setupListeners() {
         // Individual Randomizers
         tilImsi.setEndIconOnClickListener {
             val mcc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
-            etImsi.setText(SpoofingUtils.generateValidImsi(mcc))
+            val v = SpoofingUtils.generateValidImsi(mcc)
+            etImsi.setText(v)
+            setValidationBadge(tilImsi, ValidationUtils.isValidImsi(v))
         }
         tilIccid.setEndIconOnClickListener {
             val mcc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
-            etIccid.setText(SpoofingUtils.generateValidIccid(mcc))
+            val v = SpoofingUtils.generateValidIccid(mcc)
+            etIccid.setText(v)
+            setValidationBadge(tilIccid, ValidationUtils.isValidIccid(v))
         }
         tilPhone.setEndIconOnClickListener {
             val mcc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
             val carrier = MainHook.getUsCarriers().find { it.mccMnc == mcc }
-            etPhone.setText(SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList()))
+            val v = SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList())
+            etPhone.setText(v)
+            setValidationBadge(tilPhone, v.startsWith("+1") && v.length >= 12)
         }
-        tilSsid.setEndIconOnClickListener { etSsid.setText(SpoofingUtils.generateRealisticSsid()) }
-        tilBssid.setEndIconOnClickListener { etBssid.setText(SpoofingUtils.generateRandomMac()) }
-        tilWifiMac.setEndIconOnClickListener { etWifiMac.setText(SpoofingUtils.generateRandomMac()) }
-        tilBtMac.setEndIconOnClickListener { etBtMac.setText(SpoofingUtils.generateRandomMac()) }
+        tilSsid.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRealisticSsid()
+            etSsid.setText(v)
+            setValidationBadge(tilSsid, v.isNotEmpty())
+        }
+        tilBssid.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomMac()
+            etBssid.setText(v)
+            setValidationBadge(tilBssid, ValidationUtils.isValidMac(v))
+        }
+        tilWifiMac.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomMac()
+            etWifiMac.setText(v)
+            setValidationBadge(tilWifiMac, ValidationUtils.isValidMac(v))
+        }
+        tilBtMac.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomMac()
+            etBtMac.setText(v)
+            setValidationBadge(tilBtMac, ValidationUtils.isValidMac(v))
+        }
 
         // Randomize All
         btnRandomAll.setOnClickListener {
@@ -132,13 +168,21 @@ class NetworkFragment : Fragment() {
             PrefsManager.saveString(ctx, "carrier_name", carrier.name)
 
             // 3. Generate all values
-            etImsi.setText(SpoofingUtils.generateValidImsi(carrier.mccMnc))
-            etIccid.setText(SpoofingUtils.generateValidIccid(carrier.mccMnc))
-            etPhone.setText(SpoofingUtils.generatePhoneNumber(carrier.npas))
-            etSsid.setText(SpoofingUtils.generateRealisticSsid())
-            etBssid.setText(SpoofingUtils.generateRandomMac())
-            etWifiMac.setText(SpoofingUtils.generateRandomMac())
-            etBtMac.setText(SpoofingUtils.generateRandomMac())
+            val imsi = SpoofingUtils.generateValidImsi(carrier.mccMnc)
+            val iccid = SpoofingUtils.generateValidIccid(carrier.mccMnc)
+            val phone = SpoofingUtils.generatePhoneNumber(carrier.npas)
+            val ssid = SpoofingUtils.generateRealisticSsid()
+            val bssid = SpoofingUtils.generateRandomMac()
+            val wMac = SpoofingUtils.generateRandomMac()
+            val bMac = SpoofingUtils.generateRandomMac()
+
+            etImsi.setText(imsi); setValidationBadge(tilImsi, ValidationUtils.isValidImsi(imsi))
+            etIccid.setText(iccid); setValidationBadge(tilIccid, ValidationUtils.isValidIccid(iccid))
+            etPhone.setText(phone); setValidationBadge(tilPhone, phone.startsWith("+1") && phone.length >= 12)
+            etSsid.setText(ssid); setValidationBadge(tilSsid, ssid.isNotEmpty())
+            etBssid.setText(bssid); setValidationBadge(tilBssid, ValidationUtils.isValidMac(bssid))
+            etWifiMac.setText(wMac); setValidationBadge(tilWifiMac, ValidationUtils.isValidMac(wMac))
+            etBtMac.setText(bMac); setValidationBadge(tilBtMac, ValidationUtils.isValidMac(bMac))
 
             Toast.makeText(ctx, "Randomized Network Identity", Toast.LENGTH_SHORT).show()
         }
@@ -156,5 +200,15 @@ class NetworkFragment : Fragment() {
 
             Toast.makeText(ctx, "Network Identity Saved ✓", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setValidationBadge(til: TextInputLayout, isValid: Boolean) {
+        val ctx = requireContext()
+        val (text, color) = if (isValid)
+            "✓ Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
+        else
+            "✗ Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
+        til.helperText = text
+        til.setHelperTextColor(ColorStateList.valueOf(color))
     }
 }

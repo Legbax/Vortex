@@ -87,10 +87,8 @@ class MainHook : IXposedHookLoadPackage {
         val DEVICE_FINGERPRINTS = mapOf(
 
             // =========================================================
-            // GRUPO 1: XIAOMI / POCO / REDMI  (12 dispositivos)
+            // GRUPO 1: XIAOMI / POCO / REDMI (12 dispositivos)
             // =========================================================
-
-            // [01] Redmi 9 — MT6768 — MIUI 12.5.6.0 (ROM exacta del usuario)
             "Redmi 9" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Redmi", model = "Redmi 9",
                 device = "lancelot", product = "lancelot_global",
@@ -110,7 +108,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [02] POCO X3 Pro — SM8150-AC (SD860) / msmnile — CORREGIDO
             "POCO X3 Pro" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "POCO", model = "M2102J20SG",
                 device = "vayu", product = "vayu_global",
@@ -130,7 +127,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [03] Mi 10T — SM8250 (SD865) / kona
             "Mi 10T" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Xiaomi", model = "M2007J3SY",
                 device = "apollo", product = "apollo_global",
@@ -150,7 +146,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [04] Redmi Note 10 Pro — SM7150-AB (SD732G) / atoll
             "Redmi Note 10 Pro" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Redmi", model = "M2101K6G",
                 device = "sweet", product = "sweet_global",
@@ -170,7 +165,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [05] Redmi Note 9 Pro — SM7125 (SD720G) / atoll
             "Redmi Note 9 Pro" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Redmi", model = "M2003J6B2G",
                 device = "joyeuse", product = "joyeuse_global",
@@ -190,7 +184,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [06] Redmi Note 10 — SM6150 (SD678) / bengal
             "Redmi Note 10" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Redmi", model = "M2101K7AI",
                 device = "mojito", product = "mojito_global",
@@ -210,7 +203,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [07] POCO M3 Pro 5G — MT6833 (Dimensity 700) / mt6833
             "POCO M3 Pro 5G" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "POCO", model = "M2103K19PG",
                 device = "camellia", product = "camellia_global",
@@ -230,7 +222,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [08] POCO X3 NFC — SM7150-AB (SD732G) / atoll
             "POCO X3 NFC" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "POCO", model = "M2007J20CG",
                 device = "surya", product = "surya_global",
@@ -250,7 +241,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [09] Mi 11 Lite — SM7150-AB (SD732G) / atoll
             "Mi 11 Lite" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Xiaomi", model = "M2101K9AG",
                 device = "courbet", product = "courbet_global",
@@ -270,7 +260,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [10] Mi 11 — SM8350 (SD888) / lahaina
             "Mi 11" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Xiaomi", model = "M2011K2G",
                 device = "venus", product = "venus_global",
@@ -290,17 +279,16 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [11] Redmi 10X 4G — MT6873 (Dimensity 820) / mt6873
             "Redmi 10X 4G" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "Redmi", model = "M2004J7AC",
                 device = "merlin", product = "merlin",
-                hardware = "mt6873", board = "merlin", bootloader = "unknown",
+                hardware = "mt6769", board = "merlin", bootloader = "unknown",
                 fingerprint = "Redmi/merlin/merlin:11/RP1A.200720.011/V12.5.3.0.QJJCNXM:user/release-keys",
                 buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
                 radioVersion = "MOLY.LR12A.R3.MP.V110.6",
                 incremental = "V12.5.3.0.QJJCNXM", sdkInt = 30, release = "11",
-                boardPlatform = "mt6873", eglDriver = "mali", openGlEs = "196610",
-                hardwareChipname = "MT6873", zygote = "zygote64_32",
+                boardPlatform = "mt6769", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "MT6769", zygote = "zygote64_32",
                 vendorFingerprint = "Redmi/merlin/merlin:11/RP1A.200720.011/V12.5.3.0.QJJCNXM:user/release-keys",
                 display = "RP1A.200720.011",
                 buildDescription = "merlin-user 11 RP1A.200720.011 V12.5.3.0.QJJCNXM release-keys",
@@ -310,7 +298,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [12] POCO F3 — SM8250-AC (SD870) / kona
             "POCO F3" to DeviceFingerprint(
                 manufacturer = "Xiaomi", brand = "POCO", model = "M2012K11AG",
                 device = "alioth", product = "alioth_global",
@@ -320,7 +307,7 @@ class MainHook : IXposedHookLoadPackage {
                 radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
                 incremental = "V12.5.5.0.RKHMIXM", sdkInt = 30, release = "11",
                 boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
-                hardwareChipname = "SM8250-AC", zygote = "zygote64_32",
+                hardwareChipname = "SM8250", zygote = "zygote64_32",
                 vendorFingerprint = "POCO/alioth_global/alioth:11/RKQ1.200826.002/V12.5.5.0.RKHMIXM:user/release-keys",
                 display = "RKQ1.200826.002",
                 buildDescription = "alioth_global-user 11 RKQ1.200826.002 V12.5.5.0.RKHMIXM release-keys",
@@ -331,13 +318,11 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 2: SAMSUNG  (10 dispositivos)
+            // GRUPO 2: SAMSUNG (10 dispositivos) - CORREGIDOS
             // =========================================================
-
-            // [13] Galaxy A52 — SM7125 (SD720G) / atoll
             "Galaxy A52" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A525F",
-                device = "a52xnsxx", product = "a52xnsxx",
+                device = "a52x", product = "a52xnsxx",
                 hardware = "qcom", board = "sm6350", bootloader = "unknown",
                 fingerprint = "samsung/a52xnsxx/a52x:11/RP1A.200720.012/A525FXXU4AUH1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -354,10 +339,9 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [14] Galaxy A72 — SM7125 (SD720G) / atoll
             "Galaxy A72" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A725F",
-                device = "a72nsxx", product = "a72nsxx",
+                device = "a72", product = "a72nsxx",
                 hardware = "qcom", board = "sm6350", bootloader = "unknown",
                 fingerprint = "samsung/a72nsxx/a72:11/RP1A.200720.012/A725FXXU3AUH2:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -374,10 +358,9 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [15] Galaxy A32 5G — MT6853 (Dimensity 720) / mt6853
             "Galaxy A32 5G" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A326B",
-                device = "a32xnsxx", product = "a32xnsxx",
+                device = "a32x", product = "a32xnsxx",
                 hardware = "mt6853", board = "mt6853", bootloader = "unknown",
                 fingerprint = "samsung/a32xnsxx/a32x:11/RP1A.200720.012/A326BXXU4AUH1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -394,7 +377,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [16] Galaxy S20 FE 5G — SM8250 (SD865) / kona
             "Galaxy S20 FE" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-G781B",
                 device = "r8q", product = "r8qnsxx",
@@ -414,50 +396,47 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [17] Galaxy A51 — Exynos 9611 / exynos9610
             "Galaxy A51" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A515F",
-                device = "a51nsxx", product = "a51nsxx",
+                device = "a51", product = "a51nsxx",
                 hardware = "exynos9610", board = "exynos9610", bootloader = "unknown",
-                fingerprint = "samsung/a51nsxx/a51:11/RP1A.200720.012/A515FXXU5CUJ1:user/release-keys",
+                fingerprint = "samsung/a51nsxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "g9610-3286-210401",
-                incremental = "A515FXXU5CUJ1", sdkInt = 30, release = "11",
+                radioVersion = "",
+                incremental = "A515FXXU4CUG1", sdkInt = 30, release = "11",
                 boardPlatform = "exynos9610", eglDriver = "mali", openGlEs = "196610",
-                hardwareChipname = "exynos9610", zygote = "zygote64_32",
-                vendorFingerprint = "samsung/a51nsxx/a51:11/RP1A.200720.012/A515FXXU5CUJ1:user/release-keys",
+                hardwareChipname = "Exynos9611", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/a51nsxx/a51:11/RP1A.200720.012/A515FXXU4CUG1:user/release-keys",
                 display = "RP1A.200720.012",
-                buildDescription = "a51nsxx-user 11 RP1A.200720.012 A515FXXU5CUJ1 release-keys",
+                buildDescription = "a51nsxx-user 11 RP1A.200720.012 A515FXXU4CUG1 release-keys",
                 buildFlavor = "a51nsxx-user",
-                buildHost = "SWDD6290", buildUser = "dpi",
-                buildDateUtc = "1633046400", securityPatch = "2021-10-01",
-                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
-            ),
-
-            // [18] Galaxy M31 — Exynos 9611 / exynos9610
-            "Galaxy M31" to DeviceFingerprint(
-                manufacturer = "samsung", brand = "samsung", model = "SM-M315F",
-                device = "m31nsxx", product = "m31nsxx",
-                hardware = "exynos9610", board = "exynos9610", bootloader = "unknown",
-                fingerprint = "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU4CUG1:user/release-keys",
-                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "g9610-3286-210401",
-                incremental = "M315FXXU4CUG1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos9610", eglDriver = "mali", openGlEs = "196610",
-                hardwareChipname = "exynos9610", zygote = "zygote64_32",
-                vendorFingerprint = "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU4CUG1:user/release-keys",
-                display = "RP1A.200720.012",
-                buildDescription = "m31nsxx-user 11 RP1A.200720.012 M315FXXU4CUG1 release-keys",
-                buildFlavor = "m31nsxx-user",
-                buildHost = "SWDD6310", buildUser = "dpi",
+                buildHost = "21R3NF12", buildUser = "dpi",
                 buildDateUtc = "1625097600", securityPatch = "2021-07-01",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [19] Galaxy A12 — MT6765 (Helio P35) / mt6765
+            "Galaxy M31" to DeviceFingerprint(
+                manufacturer = "samsung", brand = "samsung", model = "SM-M315F",
+                device = "m31", product = "m31nsxx",
+                hardware = "exynos850", board = "m31", bootloader = "unknown",
+                fingerprint = "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU4CUG1:user/release-keys",
+                buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
+                radioVersion = "",
+                incremental = "M315FXXU4CUG1", sdkInt = 30, release = "11",
+                boardPlatform = "exynos850", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "S5E3830", zygote = "zygote64_32",
+                vendorFingerprint = "samsung/m31nsxx/m31:11/RP1A.200720.012/M315FXXU4CUG1:user/release-keys",
+                display = "RP1A.200720.012",
+                buildDescription = "m31nsxx-user 11 RP1A.200720.012 M315FXXU4CUG1 release-keys",
+                buildFlavor = "m31nsxx-user",
+                buildHost = "21R3NF12", buildUser = "dpi",
+                buildDateUtc = "1636934400", securityPatch = "2021-11-01",
+                buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
+            ),
+
             "Galaxy A12" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A125F",
-                device = "a12nsxx", product = "a12nsxx",
+                device = "a12", product = "a12nsxx",
                 hardware = "mt6765", board = "mt6765", bootloader = "unknown",
                 fingerprint = "samsung/a12nsxx/a12:11/RP1A.200720.012/A125FXXU5BUJ1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -474,10 +453,9 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [20] Galaxy A21s — Exynos 850 / exynos850
             "Galaxy A21s" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A217F",
-                device = "a21snsxx", product = "a21snsxx",
+                device = "a21s", product = "a21snsxx",
                 hardware = "exynos850", board = "exynos850", bootloader = "unknown",
                 fingerprint = "samsung/a21snsxx/a21s:11/RP1A.200720.012/A217FXXU4CUJ1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -490,14 +468,13 @@ class MainHook : IXposedHookLoadPackage {
                 buildDescription = "a21snsxx-user 11 RP1A.200720.012 A217FXXU4CUJ1 release-keys",
                 buildFlavor = "a21snsxx-user",
                 buildHost = "SWDD7700", buildUser = "dpi",
-                buildDateUtc = "1633046400", securityPatch = "2021-10-01",
+                buildDateUtc = "1625097600", securityPatch = "2021-07-01",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [21] Galaxy A31 — MT6768 (Helio G80) / mt6768
             "Galaxy A31" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-A315F",
-                device = "a31nsxx", product = "a31nsxx",
+                device = "a31", product = "a31nsxx",
                 hardware = "mt6768", board = "mt6768", bootloader = "unknown",
                 fingerprint = "samsung/a31nsxx/a31:11/RP1A.200720.012/A315FXXU4CUH1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
@@ -514,17 +491,16 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [22] Galaxy F62 — Exynos 9825 / exynos9820
             "Galaxy F62" to DeviceFingerprint(
                 manufacturer = "samsung", brand = "samsung", model = "SM-E625F",
-                device = "e1qnsxx", product = "e1qnsxx",
-                hardware = "exynos9820", board = "exynos9820", bootloader = "unknown",
+                device = "e1q", product = "e1qnsxx",
+                hardware = "exynos9825", board = "exynos9825", bootloader = "unknown",
                 fingerprint = "samsung/e1qnsxx/e1q:11/RP1A.200720.012/E625FXXU2BUG1:user/release-keys",
                 buildId = "RP1A.200720.012", tags = "release-keys", type = "user",
-                radioVersion = "g9820-3131-210401",
+                radioVersion = "",
                 incremental = "E625FXXU2BUG1", sdkInt = 30, release = "11",
-                boardPlatform = "exynos9820", eglDriver = "mali", openGlEs = "196610",
-                hardwareChipname = "exynos9820", zygote = "zygote64_32",
+                boardPlatform = "exynos9825", eglDriver = "mali", openGlEs = "196610",
+                hardwareChipname = "exynos9825", zygote = "zygote64_32",
                 vendorFingerprint = "samsung/e1qnsxx/e1q:11/RP1A.200720.012/E625FXXU2BUG1:user/release-keys",
                 display = "RP1A.200720.012",
                 buildDescription = "e1qnsxx-user 11 RP1A.200720.012 E625FXXU2BUG1 release-keys",
@@ -535,14 +511,12 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 3: ONEPLUS  (4 dispositivos)
+            // GRUPO 3: ONEPLUS (4 dispositivos)
             // =========================================================
-
-            // [23] OnePlus 8T — SM8250 (SD865) / kona
             "OnePlus 8T" to DeviceFingerprint(
                 manufacturer = "OnePlus", brand = "OnePlus", model = "KB2001",
                 device = "kebab", product = "kebab_EEA",
-                hardware = "qcom", board = "msmnile", bootloader = "unknown",
+                hardware = "qcom", board = "kona", bootloader = "unknown",
                 fingerprint = "OnePlus/kebab_EEA/OnePlus8T:11/RP1A.200720.011/2107142215:user/release-keys",
                 buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
@@ -558,7 +532,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [24] OnePlus Nord — SM7250 (SD765G) / lito
             "OnePlus Nord" to DeviceFingerprint(
                 manufacturer = "OnePlus", brand = "OnePlus", model = "AC2003",
                 device = "avicii", product = "avicii_EEA",
@@ -578,7 +551,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [25] OnePlus N10 5G — SM6350 (SD690) / lito
             "OnePlus N10 5G" to DeviceFingerprint(
                 manufacturer = "OnePlus", brand = "OnePlus", model = "BE2025",
                 device = "billie", product = "billie_EEA",
@@ -598,11 +570,10 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [26] OnePlus 8 — SM8250 (SD865) / kona
             "OnePlus 8" to DeviceFingerprint(
                 manufacturer = "OnePlus", brand = "OnePlus", model = "IN2013",
                 device = "instantnoodle", product = "instantnoodle_EEA",
-                hardware = "qcom", board = "msmnile", bootloader = "unknown",
+                hardware = "qcom", board = "kona", bootloader = "unknown",
                 fingerprint = "OnePlus/instantnoodle_EEA/OnePlus8:11/RP1A.200720.011/2105100150:user/release-keys",
                 buildId = "RP1A.200720.011", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.HI.3.2.c1.1-00085-SM8250_GEN_PACK-1",
@@ -619,10 +590,8 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 4: GOOGLE PIXEL  (4 dispositivos)
+            // GRUPO 4: GOOGLE PIXEL (4 dispositivos)
             // =========================================================
-
-            // [27] Pixel 5 — SM7250 (SD765G) / lito
             "Pixel 5" to DeviceFingerprint(
                 manufacturer = "Google", brand = "google", model = "Pixel 5",
                 device = "redfin", product = "redfin",
@@ -642,27 +611,26 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [28] Pixel 4a 5G — SM7250 (SD765G) / lito
             "Pixel 4a 5G" to DeviceFingerprint(
                 manufacturer = "Google", brand = "google", model = "Pixel 4a (5G)",
                 device = "bramble", product = "bramble",
-                hardware = "bramble", board = "bramble", bootloader = "r8.0.0-6692804",
-                fingerprint = "google/bramble/bramble:11/RQ3A.210805.001.A1/7474174:user/release-keys",
-                buildId = "RQ3A.210805.001.A1", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.VT.5.2-00075-SM7250_GEN_PACK-1",
-                incremental = "7474174", sdkInt = 30, release = "11",
+                hardware = "bramble", board = "bramble", bootloader = "b2-0.3-7214727",
+                fingerprint = "google/bramble/bramble:11/RQ3A.210705.001/7380771:user/release-keys",
+                buildId = "RQ3A.210705.001", tags = "release-keys", type = "user",
+                radioVersion = "g7250-00195-210614-B-7352378",
+                incremental = "7380771", sdkInt = 30, release = "11",
                 boardPlatform = "lito", eglDriver = "adreno", openGlEs = "196610",
                 hardwareChipname = "SM7250", zygote = "zygote64_32",
-                vendorFingerprint = "google/bramble/bramble:11/RQ3A.210805.001.A1/7474174:user/release-keys",
-                display = "RQ3A.210805.001.A1",
-                buildDescription = "bramble-user 11 RQ3A.210805.001.A1 7474174 release-keys",
+                vendorFingerprint = "google/bramble_vend/bramble:11/RQ3A.210705.001/7380771:vendor/release-keys",
+                display = "RQ3A.210705.001",
+                buildDescription = "bramble-user 11 RQ3A.210705.001 7380771 release-keys",
                 buildFlavor = "bramble-user",
-                buildHost = "abfarm-release-rbe-32-00026", buildUser = "android-build",
-                buildDateUtc = "1627776000", securityPatch = "2021-08-05",
+                buildHost = "abfarm-release-rbe-64.hot.corp.google.com",
+                buildUser = "android-build",
+                buildDateUtc = "1625616000", securityPatch = "2021-07-05",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [29] Pixel 4a — SM730 (SD730G) / trinket
             "Pixel 4a" to DeviceFingerprint(
                 manufacturer = "Google", brand = "google", model = "Pixel 4a",
                 device = "sunfish", product = "sunfish",
@@ -682,7 +650,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [30] Pixel 3a XL — SM670 (SD670) / sdm670
             "Pixel 3a XL" to DeviceFingerprint(
                 manufacturer = "Google", brand = "google", model = "Pixel 3a XL",
                 device = "bonito", product = "bonito",
@@ -703,30 +670,27 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 5: MOTOROLA  (4 dispositivos)
+            // GRUPO 5: MOTOROLA (4 dispositivos)
             // =========================================================
-
-            // [31] Moto G Power (2021) — SM6115 (SD662) / bengal
             "Moto G Power 2021" to DeviceFingerprint(
-                manufacturer = "motorola", brand = "motorola", model = "motorola one 5G ace",
-                device = "borneo", product = "borneo_retail",
+                manufacturer = "motorola", brand = "motorola", model = "moto g power (2021)",
+                device = "borneo", product = "borneo",
                 hardware = "qcom", board = "bengal", bootloader = "unknown",
-                fingerprint = "motorola/borneo_retail/borneo:11/RPES31.Q1-25-22-8/22-8:user/release-keys",
-                buildId = "RPES31.Q1-25-22-8", tags = "release-keys", type = "user",
+                fingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
+                buildId = "RRQ31.Q3-47-22", tags = "release-keys", type = "user",
                 radioVersion = "MPSS.AT.4.0-00055-SM6115_GEN_PACK-1",
-                incremental = "22-8", sdkInt = 30, release = "11",
+                incremental = "2b4fae", sdkInt = 30, release = "11",
                 boardPlatform = "bengal", eglDriver = "adreno", openGlEs = "196610",
                 hardwareChipname = "SM6115", zygote = "zygote64_32",
-                vendorFingerprint = "motorola/borneo_retail/borneo:11/RPES31.Q1-25-22-8/22-8:user/release-keys",
-                display = "RPES31.Q1-25-22-8",
-                buildDescription = "borneo_retail-user 11 RPES31.Q1-25-22-8 22-8 release-keys",
-                buildFlavor = "borneo_retail-user",
-                buildHost = "moto-build-prod-01", buildUser = "moto",
-                buildDateUtc = "1625097600", securityPatch = "2021-07-01",
+                vendorFingerprint = "motorola/borneo/borneo:11/RRQ31.Q3-47-22/2b4fae:user/release-keys",
+                display = "RRQ31.Q3-47-22",
+                buildDescription = "borneo-user 11 RRQ31.Q3-47-22 2b4fae release-keys",
+                buildFlavor = "borneo-user",
+                buildHost = "buildbot-motoauto06.mcd.mot.com", buildUser = "hudsoncm",
+                buildDateUtc = "1619827200", securityPatch = "2021-05-01",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [32] Moto G Stylus (2021) — SM6150 (SD678) / bengal
             "Moto G Stylus 2021" to DeviceFingerprint(
                 manufacturer = "motorola", brand = "motorola", model = "moto g stylus (2021)",
                 device = "nairo", product = "nairo_retail",
@@ -746,7 +710,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [33] Moto Edge — SM7250 (SD765G) / lito
             "Moto Edge" to DeviceFingerprint(
                 manufacturer = "motorola", brand = "motorola", model = "moto edge",
                 device = "racer", product = "racer_retail",
@@ -766,7 +729,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [34] Moto Edge Plus — SM8250-AB (SD865+) / kona
             "Moto Edge Plus" to DeviceFingerprint(
                 manufacturer = "motorola", brand = "motorola", model = "motorola edge+",
                 device = "sofiar", product = "sofiar_retail",
@@ -787,10 +749,8 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 6: NOKIA  (2 dispositivos)
+            // GRUPO 6: NOKIA (2 dispositivos)
             // =========================================================
-
-            // [35] Nokia 8.3 5G — SM7250 (SD765G) / lito
             "Nokia 8.3 5G" to DeviceFingerprint(
                 manufacturer = "HMD Global", brand = "Nokia", model = "Nokia 8.3 5G",
                 device = "nokia_8.3_5g", product = "BVUB_00WW",
@@ -810,7 +770,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [36] Nokia 5.4 — SM7125 (SD720G) / atoll
             "Nokia 5.4" to DeviceFingerprint(
                 manufacturer = "HMD Global", brand = "Nokia", model = "Nokia 5.4",
                 device = "nokia_5.4", product = "CAV_00WW",
@@ -831,10 +790,8 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 7: REALME  (2 dispositivos)
+            // GRUPO 7: REALME (2 dispositivos)
             // =========================================================
-
-            // [37] Realme 8 Pro — SM7125 (SD720G) / atoll
             "Realme 8 Pro" to DeviceFingerprint(
                 manufacturer = "realme", brand = "realme", model = "RMX3091",
                 device = "RMX3091", product = "RMX3091",
@@ -854,7 +811,6 @@ class MainHook : IXposedHookLoadPackage {
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [38] Realme GT Master — SM7325 (SD778G) / holi
             "Realme GT Master" to DeviceFingerprint(
                 manufacturer = "realme", brand = "realme", model = "RMX3363",
                 device = "RE58B2L1", product = "RMX3363",
@@ -875,17 +831,15 @@ class MainHook : IXposedHookLoadPackage {
             ),
 
             // =========================================================
-            // GRUPO 8: OTROS  (2 dispositivos)
+            // GRUPO 8: OTROS (2 dispositivos)
             // =========================================================
-
-            // [39] ASUS ZenFone 7 — SM8250-AB (SD865+) / kona
             "ASUS ZenFone 7" to DeviceFingerprint(
                 manufacturer = "asus", brand = "asus", model = "ASUS_I002D",
                 device = "ASUS_I002D", product = "WW_I002D",
                 hardware = "qcom", board = "kona", bootloader = "unknown",
                 fingerprint = "asus/WW_I002D/ASUS_I002D:11/RKQ1.200826.002/18.0840.2101.26-0:user/release-keys",
                 buildId = "RKQ1.200826.002", tags = "release-keys", type = "user",
-                radioVersion = "MPSS.HI.3.2.c1.1-00125-SM8250_GEN_PACK-1",
+                radioVersion = "M3.13.24.51-Sake_0000100",
                 incremental = "18.0840.2101.26-0", sdkInt = 30, release = "11",
                 boardPlatform = "kona", eglDriver = "adreno", openGlEs = "196610",
                 hardwareChipname = "SM8250-AB", zygote = "zygote64_32",
@@ -893,12 +847,11 @@ class MainHook : IXposedHookLoadPackage {
                 display = "RKQ1.200826.002",
                 buildDescription = "WW_I002D-user 11 RKQ1.200826.002 18.0840.2101.26-0 release-keys",
                 buildFlavor = "WW_I002D-user",
-                buildHost = "ASUS_BUILD_SERVER_01", buildUser = "asus",
-                buildDateUtc = "1617235200", securityPatch = "2021-04-01",
+                buildHost = "android-build", buildUser = "jenkins",
+                buildDateUtc = "1629859200", securityPatch = "2021-08-01",
                 buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
             ),
 
-            // [40] Realme 8 — MT6785 (Helio G95) / mt6785
             "Realme 8" to DeviceFingerprint(
                 manufacturer = "realme", brand = "realme", model = "RMX3085",
                 device = "RMX3085", product = "RMX3085",

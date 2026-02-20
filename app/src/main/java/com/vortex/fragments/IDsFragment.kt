@@ -55,22 +55,52 @@ class IDsFragment : Fragment() {
         val ctx = requireContext()
         tilImei.setEndIconOnClickListener {
             val p = PrefsManager.getString(ctx, "profile", "Redmi 9")
-            etImei.setText(SpoofingUtils.generateValidImei(p))
+            val v = SpoofingUtils.generateValidImei(p)
+            etImei.setText(v)
+            setValidationBadge(tilImei, ValidationUtils.isValidImei(v))
         }
         tilImei2.setEndIconOnClickListener {
             val p = PrefsManager.getString(ctx, "profile", "Redmi 9")
-            etImei2.setText(SpoofingUtils.generateValidImei(p))
+            val v = SpoofingUtils.generateValidImei(p)
+            etImei2.setText(v)
+            setValidationBadge(tilImei2, ValidationUtils.isValidImei(v))
         }
-        tilAndroidId.setEndIconOnClickListener { etAndroidId.setText(SpoofingUtils.generateRandomId(16)) }
-        tilSsaid.setEndIconOnClickListener     { etSsaid.setText(SpoofingUtils.generateRandomId(16)) }
-        tilGaid.setEndIconOnClickListener      { etGaid.setText(SpoofingUtils.generateRandomGaid()) }
-        tilGsfId.setEndIconOnClickListener     { etGsfId.setText(SpoofingUtils.generateRandomId(16)) }
-        tilMediaDrm.setEndIconOnClickListener  { etMediaDrm.setText(SpoofingUtils.generateRandomId(32)) }
-        tilSerial.setEndIconOnClickListener    {
-            val brand = MainHook.DEVICE_FINGERPRINTS[PrefsManager.getString(ctx,"profile","")]?.brand ?: ""
-            etSerial.setText(SpoofingUtils.generateRandomSerial(brand))
+        tilAndroidId.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomId(16)
+            etAndroidId.setText(v)
+            setValidationBadge(tilAndroidId, ValidationUtils.isValidAndroidId(v))
         }
-        tilGmail.setEndIconOnClickListener     { etGmail.setText(SpoofingUtils.generateRealisticGmail()) }
+        tilSsaid.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomId(16)
+            etSsaid.setText(v)
+            setValidationBadge(tilSsaid, ValidationUtils.isValidAndroidId(v))
+        }
+        tilGaid.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomGaid()
+            etGaid.setText(v)
+            setValidationBadge(tilGaid, ValidationUtils.isValidGaid(v))
+        }
+        tilGsfId.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomId(16)
+            etGsfId.setText(v)
+            setValidationBadge(tilGsfId, ValidationUtils.isValidAndroidId(v))
+        }
+        tilMediaDrm.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRandomId(32)
+            etMediaDrm.setText(v)
+            setValidationBadge(tilMediaDrm, v.length == 32 && v.all { it.isLetterOrDigit() })
+        }
+        tilSerial.setEndIconOnClickListener {
+            val brand = MainHook.DEVICE_FINGERPRINTS[PrefsManager.getString(ctx, "profile", "")]?.brand ?: ""
+            val v = SpoofingUtils.generateRandomSerial(brand)
+            etSerial.setText(v)
+            setValidationBadge(tilSerial, v.isNotEmpty())
+        }
+        tilGmail.setEndIconOnClickListener {
+            val v = SpoofingUtils.generateRealisticGmail()
+            etGmail.setText(v)
+            setValidationBadge(tilGmail, android.util.Patterns.EMAIL_ADDRESS.matcher(v).matches())
+        }
 
         return view
     }
@@ -86,6 +116,28 @@ class IDsFragment : Fragment() {
         etMediaDrm.setText(PrefsManager.getString(ctx, "media_drm_id", ""))
         etSerial.setText(PrefsManager.getString(ctx, "serial", ""))
         etGmail.setText(PrefsManager.getString(ctx, "gmail", ""))
+        validateAndBadgeAll()
+    }
+
+    private fun validateAndBadgeAll() {
+        val imei = etImei.text.toString()
+        val imei2 = etImei2.text.toString()
+        val aid = etAndroidId.text.toString()
+        val ssaid = etSsaid.text.toString()
+        val gaid = etGaid.text.toString()
+        val gsf = etGsfId.text.toString()
+        val drm = etMediaDrm.text.toString()
+        val serial = etSerial.text.toString()
+        val gmail = etGmail.text.toString()
+        if (imei.isNotEmpty()) setValidationBadge(tilImei, ValidationUtils.isValidImei(imei))
+        if (imei2.isNotEmpty()) setValidationBadge(tilImei2, ValidationUtils.isValidImei(imei2))
+        if (aid.isNotEmpty()) setValidationBadge(tilAndroidId, ValidationUtils.isValidAndroidId(aid))
+        if (ssaid.isNotEmpty()) setValidationBadge(tilSsaid, ValidationUtils.isValidAndroidId(ssaid))
+        if (gaid.isNotEmpty()) setValidationBadge(tilGaid, ValidationUtils.isValidGaid(gaid))
+        if (gsf.isNotEmpty()) setValidationBadge(tilGsfId, ValidationUtils.isValidAndroidId(gsf))
+        if (drm.isNotEmpty()) setValidationBadge(tilMediaDrm, drm.length == 32 && drm.all { it.isLetterOrDigit() })
+        if (serial.isNotEmpty()) setValidationBadge(tilSerial, true)
+        if (gmail.isNotEmpty()) setValidationBadge(tilGmail, android.util.Patterns.EMAIL_ADDRESS.matcher(gmail).matches())
     }
 
     private fun randomizeAll() {
@@ -94,14 +146,35 @@ class IDsFragment : Fragment() {
         val brand = MainHook.DEVICE_FINGERPRINTS[profile]?.brand ?: ""
 
         etImei.setText(SpoofingUtils.generateValidImei(profile))
+        .also { setValidationBadge(tilImei, true) }
         etImei2.setText(SpoofingUtils.generateValidImei(profile))
+        .also { setValidationBadge(tilImei2, true) }
         etAndroidId.setText(SpoofingUtils.generateRandomId(16))
+        .also { setValidationBadge(tilAndroidId, true) }
         etSsaid.setText(SpoofingUtils.generateRandomId(16))
+        .also { setValidationBadge(tilSsaid, true) }
         etGaid.setText(SpoofingUtils.generateRandomGaid())
+        .also { setValidationBadge(tilGaid, true) }
         etGsfId.setText(SpoofingUtils.generateRandomId(16))
+        .also { setValidationBadge(tilGsfId, true) }
         etMediaDrm.setText(SpoofingUtils.generateRandomId(32))
+        .also { setValidationBadge(tilMediaDrm, true) }
         etSerial.setText(SpoofingUtils.generateRandomSerial(brand))
+        .also { setValidationBadge(tilSerial, true) }
         etGmail.setText(SpoofingUtils.generateRealisticGmail())
+        .also { setValidationBadge(tilGmail, true) }
+    }
+
+    private fun setValidationBadge(til: TextInputLayout, isValid: Boolean) {
+        val ctx = requireContext()
+        val (text, color) = if (isValid)
+            "✓ Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
+        else
+            "✗ Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
+        til.helperText = text
+        til.setHelperTextColor(ColorStateList.valueOf(color))
+        // Feedback visual en el ícono de validación
+        setValidationIcon(til, isValid)
     }
 
     private fun setValidationIcon(til: TextInputLayout, isValid: Boolean) {
