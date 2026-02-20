@@ -1512,29 +1512,82 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookFile(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val fileClass = XposedHelpers.findClass("java.io.File", lpparam.classLoader)
-            val rootPaths = setOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su")
-            XposedHelpers.findAndHookMethod(fileClass, "exists", object : XC_MethodHook() {
+
+            val hookExists = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val file = param.thisObject as java.io.File
-                    if (rootPaths.contains(file.absolutePath)) {
+                    if (SpoofingUtils.isSensitivePath(file.absolutePath)) {
                         param.result = false
                     }
                 }
-            })
+            }
+
+            XposedHelpers.findAndHookMethod(fileClass, "exists", hookExists)
+            XposedHelpers.findAndHookMethod(fileClass, "isFile", hookExists)
+            XposedHelpers.findAndHookMethod(fileClass, "isDirectory", hookExists)
+            XposedHelpers.findAndHookMethod(fileClass, "canRead", hookExists)
+            XposedHelpers.findAndHookMethod(fileClass, "canExecute", hookExists)
+            XposedHelpers.findAndHookMethod(fileClass, "canWrite", hookExists)
+
         } catch (_: Throwable) {}
     }
 
     private fun hookProcessBuilderAndRuntime(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
+            // 1. Hook ProcessBuilder.start() - The choke point for most execs
+            val pbClass = XposedHelpers.findClass("java.lang.ProcessBuilder", lpparam.classLoader)
+            XposedHelpers.findAndHookMethod(pbClass, "start", object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val pb = param.thisObject as ProcessBuilder
+                    if (SpoofingUtils.isSensitiveCommand(pb.command())) {
+                        param.throwable = java.io.IOException("Permission denied")
+                    }
+                }
+            })
+
+            // 2. Hook Runtime.exec variants (legacy/reflection)
             val runtimeClass = XposedHelpers.findClass("java.lang.Runtime", lpparam.classLoader)
+
+            // exec(String)
             XposedHelpers.findAndHookMethod(runtimeClass, "exec", String::class.java, object : XC_MethodHook() {
                  override fun beforeHookedMethod(param: MethodHookParam) {
                      val cmd = param.args[0] as String
-                     if (cmd == "su" || cmd.startsWith("su ")) {
+                     if (SpoofingUtils.isSensitiveCommand(cmd)) {
                          param.throwable = java.io.IOException("Permission denied")
                      }
                  }
             })
+
+            // exec(String[])
+            XposedHelpers.findAndHookMethod(runtimeClass, "exec", Array<String>::class.java, object : XC_MethodHook() {
+                 override fun beforeHookedMethod(param: MethodHookParam) {
+                     val cmdArray = param.args[0] as Array<String>
+                     if (SpoofingUtils.isSensitiveCommand(cmdArray.toList())) {
+                         param.throwable = java.io.IOException("Permission denied")
+                     }
+                 }
+            })
+
+            // exec(String, String[], File)
+            XposedHelpers.findAndHookMethod(runtimeClass, "exec", String::class.java, Array<String>::class.java, java.io.File::class.java, object : XC_MethodHook() {
+                 override fun beforeHookedMethod(param: MethodHookParam) {
+                     val cmd = param.args[0] as String
+                     if (SpoofingUtils.isSensitiveCommand(cmd)) {
+                         param.throwable = java.io.IOException("Permission denied")
+                     }
+                 }
+            })
+
+            // exec(String[], String[], File)
+            XposedHelpers.findAndHookMethod(runtimeClass, "exec", Array<String>::class.java, Array<String>::class.java, java.io.File::class.java, object : XC_MethodHook() {
+                 override fun beforeHookedMethod(param: MethodHookParam) {
+                     val cmdArray = param.args[0] as Array<String>
+                     if (SpoofingUtils.isSensitiveCommand(cmdArray.toList())) {
+                         param.throwable = java.io.IOException("Permission denied")
+                     }
+                 }
+            })
+
         } catch (_: Throwable) {}
     }
 

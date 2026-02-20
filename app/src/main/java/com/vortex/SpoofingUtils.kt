@@ -5,6 +5,58 @@ import java.util.UUID
 
 object SpoofingUtils {
 
+    private val SENSITIVE_PATHS = listOf(
+        "/system/bin/su",
+        "/system/xbin/su",
+        "/sbin/su",
+        "/system/sd/xbin/su",
+        "/system/bin/failsafe/su",
+        "/data/local/su",
+        "/data/local/bin/su",
+        "/data/local/xbin/su",
+        "/su/bin/su",
+        "/proc/net/unix",
+        "/data/adb",
+        "/data/adb/modules",
+        "/data/adb/magisk",
+        "/data/adb/ksu"
+    )
+
+    private val SENSITIVE_PATH_PREFIXES = listOf(
+        "/data/adb/",
+        "/data/user_de/0/de.robv.android.xposed.installer"
+    )
+
+    private val SENSITIVE_COMMANDS = listOf(
+        "su",
+        "which su",
+        "busybox",
+        "magisk",
+        "/system/bin/su",
+        "/system/xbin/su"
+    )
+
+    fun isSensitivePath(path: String): Boolean {
+        if (path in SENSITIVE_PATHS) return true
+        if (SENSITIVE_PATH_PREFIXES.any { path.startsWith(it) }) return true
+        if (path.endsWith("/su") && !path.contains("/src/")) return true
+        return false
+    }
+
+    fun isSensitiveCommand(command: String): Boolean {
+        return SENSITIVE_COMMANDS.any { command == it || command.startsWith("$it ") }
+    }
+
+    fun isSensitiveCommand(args: List<String>): Boolean {
+        if (args.isEmpty()) return false
+        val cmd = args[0]
+        if (isSensitiveCommand(cmd)) return true
+        for (arg in args) {
+             if (isSensitivePath(arg)) return true
+        }
+        return false
+    }
+
     // TACs mapeados POR FABRICANTE para correlacionar con el perfil activo.
     private val TACS_BY_BRAND = mapOf(
         "Xiaomi"   to listOf("86413404", "86413405", "35271311", "35361311", "86814904"),
