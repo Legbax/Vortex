@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.vortex.fragments.*
+import com.vortex.fragments.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -69,8 +70,7 @@ class MainActivity : AppCompatActivity() {
         R.id.nav_device   -> DeviceFragment()
         R.id.nav_ids      -> IDsFragment()
         R.id.nav_network  -> NetworkFragment()
-        R.id.nav_location -> LocationFragment()
-        R.id.nav_advanced -> AdvancedFragment()
+        R.id.nav_settings -> SettingsFragment()
         else              -> StatusFragment()
     }
 }

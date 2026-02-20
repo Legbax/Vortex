@@ -17,6 +17,7 @@
 
     <!-- Estados -->
     <color name="vortex_success">#00E676</color>
+    <color name="vortex_warning">#FFB300</color>
     <color name="vortex_error">#FF1744</color>
 
     <!-- Legacy Overrides -->

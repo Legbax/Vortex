@@ -15,71 +15,166 @@
         android:clipToPadding="false">
 
         <TextView
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
             android:text="VORTEX"
-            style="@style/Vortex.Text.Title" android:textSize="32sp" />
+            style="@style/Vortex.Text.Title"
+            android:textSize="32sp" />
 
         <TextView
             android:id="@+id/text_subtitle"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/developer_subtitle"
-            style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="32dp"
+            style="@style/Vortex.Text.Subtitle"
+            android:layout_marginBottom="32dp"
             android:textSize="12sp" />
 
         <FrameLayout
-            android:layout_width="200dp" android:layout_height="200dp"
-            android:layout_gravity="center_horizontal" android:layout_marginBottom="32dp">
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp">
 
+            <!-- Track decorativo de fondo -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:layout_gravity="center" app:indicatorSize="180dp" app:trackThickness="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:progress="100"
+                app:indicatorSize="180dp"
+                app:trackThickness="12dp"
                 app:trackColor="@color/vortex_card_background"
-                app:indicatorColor="@color/vortex_card_background" android:progress="100" />
+                app:indicatorColor="@color/vortex_card_background" />
 
+            <!-- Indicador real del score -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progress_evasion"
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:layout_gravity="center" app:indicatorSize="180dp" app:trackThickness="12dp"
-                app:trackColor="@android:color/transparent" app:indicatorColor="@color/vortex_accent"
-                app:trackCornerRadius="6dp" android:progress="0" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:progress="0"
+                app:indicatorSize="180dp"
+                app:trackThickness="12dp"
+                app:trackColor="@android:color/transparent"
+                app:indicatorColor="@color/vortex_accent"
+                app:trackCornerRadius="6dp" />
 
             <LinearLayout
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_gravity="center" android:gravity="center" android:orientation="vertical">
-                <TextView android:id="@+id/text_score" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="--"
-                    style="@style/Vortex.Text.Title" android:textSize="48sp" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_score"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    style="@style/Vortex.Text.Title"
+                    android:textSize="48sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/status_evasion_score"
-                    style="@style/Vortex.Text.SectionHeader" android:textSize="10sp" />
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:textSize="10sp" />
+
             </LinearLayout>
         </FrameLayout>
 
         <!-- Profile Summary -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             style="@style/Vortex.Card">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:padding="16dp">
 
-                <TextView android:text="ACTIVE CONFIGURATION" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp">
-                    <TextView android:text="Fingerprint:" android:layout_width="0dp" android:layout_weight="1" style="@style/Vortex.Text.Subtitle"/>
-                    <TextView android:id="@+id/text_current_profile" android:text="--" style="@style/Vortex.Text.Title" android:gravity="end"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ACTIVE CONFIGURATION"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fingerprint:"
+                        style="@style/Vortex.Text.Subtitle" />
+
+                    <TextView
+                        android:id="@+id/text_current_profile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:gravity="end"
+                        style="@style/Vortex.Text.Title" />
+
                 </LinearLayout>
 
-                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp">
-                    <TextView android:text="SIM Country:" android:layout_width="0dp" android:layout_weight="1" style="@style/Vortex.Text.Subtitle"/>
-                    <TextView android:id="@+id/text_sim_country" android:text="US" style="@style/Vortex.Text.Title" android:gravity="end"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="SIM Country:"
+                        style="@style/Vortex.Text.Subtitle" />
+
+                    <TextView
+                        android:id="@+id/text_sim_country"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="US"
+                        android:gravity="end"
+                        style="@style/Vortex.Text.Title" />
+
                 </LinearLayout>
 
-                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
-                    <TextView android:text="Location:" android:layout_width="0dp" android:layout_weight="1" style="@style/Vortex.Text.Subtitle"/>
-                    <TextView android:id="@+id/text_location_status" android:text="--" style="@style/Vortex.Text.Title" android:gravity="end"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Location:"
+                        style="@style/Vortex.Text.Subtitle" />
+
+                    <TextView
+                        android:id="@+id/text_location_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:gravity="end"
+                        style="@style/Vortex.Text.Title" />
+
                 </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
