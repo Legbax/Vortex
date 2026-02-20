@@ -40,7 +40,7 @@ object SpoofingUtils {
      */
     fun generateValidImei(profileName: String = "", seed: Long? = null): String {
         val rng = if (seed != null) Random(seed) else Random()
-        val brand = MainHook.DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
+        val brand = DeviceData.DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
         val tacList = TACS_BY_BRAND[brand] ?: TACS_BY_BRAND["default"]!!
         // Use deterministic index if seeded, otherwise random
         val tac = if (seed != null) tacList[Math.abs(rng.nextInt()) % tacList.size] else tacList.random()
@@ -196,11 +196,11 @@ object SpoofingUtils {
         // Semilla determinista: hash del nombre del perfil + mccmnc
         // Esto asegura que "Expected" sea constante para una configuración dada.
         val seed = (profileName.hashCode() + mccMnc.hashCode()).toLong()
-        val fp = MainHook.DEVICE_FINGERPRINTS[profileName]
+        val fp = DeviceData.DEVICE_FINGERPRINTS[profileName]
         val brand = fp?.brand ?: ""
 
         // Obtener carrier (si existe) para NPAs
-        val carrier = MainHook.getUsCarriers().find { it.mccMnc == mccMnc }
+        val carrier = DeviceData.getUsCarriers().find { it.mccMnc == mccMnc }
         val npas = carrier?.npas ?: emptyList()
 
         return mapOf(

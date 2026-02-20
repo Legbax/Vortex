@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
 import com.vortex.utils.ValidationUtils
@@ -91,7 +91,7 @@ class IDsFragment : Fragment() {
             setValidationBadge(tilMediaDrm, v.length == 32 && v.all { it.isLetterOrDigit() })
         }
         tilSerial.setEndIconOnClickListener {
-            val brand = MainHook.DEVICE_FINGERPRINTS[PrefsManager.getString(ctx, "profile", "")]?.brand ?: ""
+            val brand = DeviceData.DEVICE_FINGERPRINTS[PrefsManager.getString(ctx, "profile", "")]?.brand ?: ""
             val v = SpoofingUtils.generateRandomSerial(brand)
             etSerial.setText(v)
             setValidationBadge(tilSerial, v.isNotEmpty())
@@ -143,7 +143,7 @@ class IDsFragment : Fragment() {
     private fun randomizeAll() {
         val ctx = requireContext()
         val profile = PrefsManager.getString(ctx, "profile", "Redmi 9")
-        val brand = MainHook.DEVICE_FINGERPRINTS[profile]?.brand ?: ""
+        val brand = DeviceData.DEVICE_FINGERPRINTS[profile]?.brand ?: ""
 
         etImei.setText(SpoofingUtils.generateValidImei(profile))
         .also { setValidationBadge(tilImei, true) }

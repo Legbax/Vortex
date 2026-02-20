@@ -9,7 +9,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.PrefsManager
 import com.vortex.R
 import com.google.android.material.textfield.TextInputLayout
@@ -36,7 +36,7 @@ class DeviceFragment : Fragment() {
     }
 
     private fun setupDropdown() {
-        val profiles = MainHook.DEVICE_FINGERPRINTS.keys.toList().sorted()
+        val profiles = DeviceData.DEVICE_FINGERPRINTS.keys.toList().sorted()
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, profiles)
         actvProfile.setAdapter(adapter)
 
@@ -45,7 +45,7 @@ class DeviceFragment : Fragment() {
 
         btnSelect.setOnClickListener {
             val selected = actvProfile.text.toString()
-            if (selected in MainHook.DEVICE_FINGERPRINTS) {
+            if (selected in DeviceData.DEVICE_FINGERPRINTS) {
                 PrefsManager.saveString(requireContext(), "profile", selected)
                 Toast.makeText(context, "Profile Applied: $selected. Reboot required.", Toast.LENGTH_LONG).show()
             } else {

@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.R
 
 class DeviceAdapter(
-    private val profiles: Map<String, MainHook.DeviceFingerprint>,
+    private val profiles: Map<String, DeviceData.DeviceFingerprint>,
     private val onSelected: (String) -> Unit
 ) : RecyclerView.Adapter<DeviceAdapter.VH>() {
 

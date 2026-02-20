@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.R
 
 class CarrierAdapter(
-    private val carriers: List<MainHook.Companion.UsCarrier>,
-    private val onSelected: (MainHook.Companion.UsCarrier) -> Unit
+    private val carriers: List<DeviceData.UsCarrier>,
+    private val onSelected: (DeviceData.UsCarrier) -> Unit
 ) : RecyclerView.Adapter<CarrierAdapter.VH>() {
 
     private var selectedIdx = -1
