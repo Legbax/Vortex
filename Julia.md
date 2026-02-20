@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.3 (Production Candidate - Dalí Edition)
+## 📦 Current Release State: v1.4 (Stability & UI Refactor)
 **Date:** 20 de febrero de 2026  
 **Agent:** Jules  
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -27,6 +27,17 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 ---
 
 ## 📅 Changelog / Journal
+
+### [v1.4] Stability Refactor & UI Polish (20 Feb 2026)
+- **Stability:** Solucionado crash `NoClassDefFoundError` al desacoplar la UI de Xposed.
+  - Creado `DeviceData.kt` (objeto puro Kotlin) para compartir datos estáticos sin dependencias de Xposed.
+  - UI (Fragments/Adapters) ahora consumen `DeviceData` en lugar de `MainHook`.
+- **UI Improvements:**
+  - **Device Tab:** Añadida tarjeta "Current Device" superior y lista "Recent Profiles" inferior (con auto-populate aleatorio).
+  - **Navigation:** Renombrado "Settings" -> "Advanced" en bottom nav; Tab interna "Advanced" -> "Settings".
+  - **Icons:** Añadidos iconos en headers de secciones (Status, IDs, Network, Device).
+  - **Layouts:** Corregidos atributos `layout_width`/`height` faltantes en XMLs para prevenir crashes de inflación.
+- **Defaults:** Toggles de Hooks (Root, Debug, Webview) ahora predeterminados a `false` por seguridad.
 
 ### [v1.3] Production Build - Dalí UI & Security Hardening (20 Feb 2026)
 - **Build System:** Revertido AGP a 7.4.2 y Gradle a 7.5 (compatibilidad perfecta con Android 11).
@@ -52,13 +63,15 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ### Hooking Logic (`MainHook.kt`)
 - Entry point: `IXposedHookLoadPackage`.
-- Perfiles: `DEVICE_FINGERPRINTS` map (40 perfiles coherentes).
+- Perfiles: `DEVICE_FINGERPRINTS` (copia interna para hook process).
 - Persistencia: Preferencias cifradas (`vortex_prefs`).
 
+### Data & UI Layer (`DeviceData.kt`)
+- **Single Source of Truth (Static):** Contiene `DEVICE_FINGERPRINTS` y `US_CARRIERS` para uso exclusivo de la UI (Activities/Fragments).
+- **Desacoplamiento:** Evita crashes por `NoClassDefFoundError` al no depender del framework Xposed.
+
 ### Utilities
-- `DeviceFingerprint.kt` → Data class extraída (recomendado).
-- `SpoofingUtils.kt` → Generación de IMEI Luhn, IMSI, GAID, MACs, etc.
-- `PropertyUtils.kt` → Centraliza spoofing de system properties (recomendado).
+- `SpoofingUtils.kt` → Generación de IMEI Luhn, IMSI, GAID, MACs, etc. (Usa `DeviceData`).
 - `CryptoUtils.kt` → AES-GCM para preferencias.
 
 ### UI
@@ -102,9 +115,9 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 ## 📝 Instructions for Next Agent
 
 - **DO NOT** actualizar AGP/Gradle sin confirmar compatibilidad con Android 11.
-- **DO NOT** implementar hiding de archivos nativos (`File.exists` para su) sin consentimiento del usuario (conflicto con SusFS).
-- **Always** verificar compilación de `MainHook.kt` después de tocar `DeviceFingerprint`.
-- **Maintain** la paleta Dalí (`vortex_background`, `vortex_accent`).
+- **DO NOT** importar `MainHook` en clases de UI (Fragments, Activities, Adapters). Usar `DeviceData` en su lugar.
+- **Always** mantener sincronizados `DeviceData.DEVICE_FINGERPRINTS` y `MainHook.DEVICE_FINGERPRINTS` si se añaden nuevos perfiles.
+- **Maintain** la paleta Dalí (`vortex_background`, `vortex_accent`) y el uso de iconos en headers.
 - Al hacer cambios, actualiza este `Julia.md` con:
   - Fecha y agente.
   - Resumen de cambios.
