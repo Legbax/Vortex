@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.4 (Stability & UI Refactor)
+## 📦 Current Release State: v1.5 (Dalí UI Implementation)
 **Date:** 20 de febrero de 2026  
 **Agent:** Jules  
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -27,6 +27,13 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 ---
 
 ## 📅 Changelog / Journal
+
+### [v1.6] Dalí UI Integration (20 Feb 2026)
+- **Integration:** Finalizada la implementación de la UI "Dalí" para los fragments de Location, Network, Advanced y Settings.
+- **Files Created:**
+  - `CarrierAdapter.kt`: Adapter estándar para RecyclerView de Network, usando `DeviceData.UsCarrier`.
+  - `item_carrier.xml`: Layout para items de carrier usando estilos `@style/Vortex.Text.Title`.
+- **Note:** Se omitieron los chequeos de Gradle y Lint por instrucción explícita para evitar OOM/freezes en el entorno de CI. La validación visual se asume correcta basada en `UI_PREVIEW.html`.
 
 ### [v1.5] UI Preview Overhaul & Accessibility Fixes (21 Feb 2026)
 - **UI Preview:** Reescrito `UI_PREVIEW.html` completo usando TailwindCSS + Alpine.js.
