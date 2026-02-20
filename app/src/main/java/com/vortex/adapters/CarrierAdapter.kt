@@ -9,17 +9,24 @@ import com.vortex.DeviceData
 import com.vortex.R
 
 class CarrierAdapter(
-    private val carriers: List<DeviceData.UsCarrier>,
+    private val allCarriers: List<DeviceData.UsCarrier>,
     private val onCarrierSelected: (DeviceData.UsCarrier) -> Unit
 ) : RecyclerView.Adapter<CarrierAdapter.CarrierViewHolder>() {
+
+    private var filteredCarriers = allCarriers.toList()
+    private var selectedPosition = -1
+    // Track selected MCC/MNC to maintain selection across filters
+    private var selectedMccMnc: String? = null
 
     class CarrierViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tv_carrier_name)
         val tvMccMnc: TextView = itemView.findViewById(R.id.tv_mcc_mnc)
 
-        fun bind(carrier: DeviceData.UsCarrier) {
+        fun bind(carrier: DeviceData.UsCarrier, isSelected: Boolean) {
             tvName.text = carrier.name
             tvMccMnc.text = carrier.mccMnc
+            itemView.isSelected = isSelected
+            itemView.alpha = if (isSelected) 1.0f else 0.7f
         }
     }
 
@@ -29,16 +36,37 @@ class CarrierAdapter(
     }
 
     override fun onBindViewHolder(holder: CarrierViewHolder, position: Int) {
-        val carrier = carriers[position]
-        holder.bind(carrier)
+        val carrier = filteredCarriers[position]
+        // Check if this carrier matches the selected one
+        val isSelected = carrier.mccMnc == selectedMccMnc
+        holder.bind(carrier, isSelected)
 
         holder.itemView.setOnClickListener {
-            // FIX #21: Reemplazado adapterPosition por bindingAdapterPosition + guarda
             val pos = holder.bindingAdapterPosition
             if (pos == RecyclerView.NO_POSITION) return@setOnClickListener
-            onCarrierSelected(carriers[pos])
+
+            selectedMccMnc = carrier.mccMnc
+            notifyDataSetChanged() // Refresh all to update selection state visual
+            onCarrierSelected(carrier)
         }
     }
 
-    override fun getItemCount(): Int = carriers.size
+    override fun getItemCount(): Int = filteredCarriers.size
+
+    fun setSelected(mccMnc: String) {
+        selectedMccMnc = mccMnc
+        notifyDataSetChanged()
+    }
+
+    fun filter(query: String) {
+        filteredCarriers = if (query.isEmpty()) {
+            allCarriers.toList()
+        } else {
+            allCarriers.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                it.mccMnc.contains(query)
+            }
+        }
+        notifyDataSetChanged()
+    }
 }

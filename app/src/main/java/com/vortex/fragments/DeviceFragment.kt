@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.vortex.DeviceData
 import com.vortex.PrefsManager
 import com.vortex.R
+import com.vortex.adapters.DeviceAdapter
 import com.google.android.material.textfield.TextInputLayout
 
 class DeviceFragment : Fragment() {

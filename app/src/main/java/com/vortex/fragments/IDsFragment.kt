@@ -168,9 +168,9 @@ class IDsFragment : Fragment() {
     private fun setValidationBadge(til: TextInputLayout, isValid: Boolean) {
         val ctx = requireContext()
         val (text, color) = if (isValid)
-            "✓ Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
+            "Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
         else
-            "✗ Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
+            "Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
         til.helperText = text
         til.setHelperTextColor(ColorStateList.valueOf(color))
         // Feedback visual en el ícono de validación
