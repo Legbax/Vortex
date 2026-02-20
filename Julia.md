@@ -28,6 +28,17 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ## 📅 Changelog / Journal
 
+### [v1.5] UI Preview Overhaul & Accessibility Fixes (21 Feb 2026)
+- **UI Preview:** Reescrito `UI_PREVIEW.html` completo usando TailwindCSS + Alpine.js.
+  - Simulación exacta del Redmi 9 Lancelot (360x800 viewport).
+  - Interacciones completas: Tab switching (incluyendo sub-tabs Location/Settings), Toggles, Validations.
+  - Diseño "Dalí" pixel-perfect (#080A0F, #E040FB).
+- **Accessibility:**
+  - Auditados todos los XML layouts.
+  - Añadidos `android:contentDescription`, `app:startIconContentDescription`, `app:endIconContentDescription` faltantes en `IDs` y `Network` fragments.
+  - Nuevos strings: `action_randomize`, `action_search`.
+- **Verification:** Script Playwright `verify_ui.py` creado para validar automáticamente el look & feel del preview.
+
 ### [v1.4] Stability Refactor & UI Polish (20 Feb 2026)
 - **Stability:** Solucionado crash `NoClassDefFoundError` al desacoplar la UI de Xposed.
   - Creado `DeviceData.kt` (objeto puro Kotlin) para compartir datos estáticos sin dependencias de Xposed.
