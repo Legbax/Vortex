@@ -30,6 +30,17 @@ android {
             )
         }
     }
+
+    // --- LÓGICA PARA CAMBIAR EL NOMBRE DEL APK ---
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            output.outputFileName = "vortex-${variant.name}.apk"
+        }
+    }
+    // ----------------------------------------------
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
