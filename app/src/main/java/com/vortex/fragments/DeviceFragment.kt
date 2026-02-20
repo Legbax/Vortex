@@ -4,47 +4,53 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.vortex.MainHook
 import com.vortex.PrefsManager
 import com.vortex.R
+import com.google.android.material.textfield.TextInputLayout
 
 class DeviceFragment : Fragment() {
 
-    private lateinit var rvDevices: RecyclerView
-    private lateinit var btnRandom: Button
-    private lateinit var adapter: DeviceAdapter
+    private lateinit var tilProfile: TextInputLayout
+    private lateinit var actvProfile: AutoCompleteTextView
+    private lateinit var btnSelect: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_device, container, false)
-        rvDevices = view.findViewById(R.id.rv_devices)
-        btnRandom = view.findViewById(R.id.btn_random_profile)
 
-        adapter = DeviceAdapter(MainHook.DEVICE_FINGERPRINTS) { key ->
-            PrefsManager.saveString(requireContext(), "profile", key)
-            Toast.makeText(requireContext(), "Profile saved: $key", Toast.LENGTH_SHORT).show()
-        }
-        rvDevices.layoutManager = LinearLayoutManager(context)
-        rvDevices.adapter = adapter
+        // Remove search bar & list from previous step, replace with Dropdown + Button logic as requested
+        // Need to update XML too. For now, let's bind assuming updated XML.
 
-        val saved = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
-        if (saved.isNotEmpty()) adapter.setSelected(saved)
+        tilProfile = view.findViewById(R.id.til_profile_selector)
+        actvProfile = view.findViewById(R.id.actv_profile_selector)
+        btnSelect = view.findViewById(R.id.btn_apply_profile)
 
-        btnRandom.setOnClickListener {
-            val keys = MainHook.DEVICE_FINGERPRINTS.keys.toList()
-            val randomKey = keys.random()
-            adapter.setSelected(randomKey)
-            PrefsManager.saveString(requireContext(), "profile", randomKey)
-            Toast.makeText(requireContext(), "Random Profile: $randomKey", Toast.LENGTH_SHORT).show()
-            // Scroll to selected
-            val index = keys.indexOf(randomKey)
-            rvDevices.smoothScrollToPosition(index)
-        }
+        setupDropdown()
 
         return view
+    }
+
+    private fun setupDropdown() {
+        val profiles = MainHook.DEVICE_FINGERPRINTS.keys.toList().sorted()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, profiles)
+        actvProfile.setAdapter(adapter)
+
+        val current = PrefsManager.getString(requireContext(), "profile", "Redmi 9")
+        actvProfile.setText(current, false)
+
+        btnSelect.setOnClickListener {
+            val selected = actvProfile.text.toString()
+            if (selected in MainHook.DEVICE_FINGERPRINTS) {
+                PrefsManager.saveString(requireContext(), "profile", selected)
+                Toast.makeText(context, "Profile Applied: $selected. Reboot required.", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(context, "Invalid Profile", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
