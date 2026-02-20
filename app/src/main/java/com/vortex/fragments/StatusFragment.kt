@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.util.Log
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.vortex.MainHook
 import com.vortex.PrefsManager
 import com.vortex.R
 import com.vortex.utils.ValidationUtils
@@ -69,7 +69,7 @@ class StatusFragment : Fragment() {
         )
         val score = checks.filter { it.passes() }.sumOf { it.points }
 
-        MainHook.log("StatusFragment: score=$score/100 | profile=$profile | mock=$isMock")
+        Log.d("Vortex", "StatusFragment: score=$score/100 | profile=$profile | mock=$isMock")
 
         // --- Color del indicador según rango ---------------------------------
         // >=80 verde éxito | 50-79 naranja advertencia | <50 rojo error

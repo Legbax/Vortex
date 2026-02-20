@@ -118,6 +118,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Fingerprint:"
+                        app:drawableStartCompat="@drawable/ic_device"
+                        android:drawablePadding="8dp"
+                        app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle" />
 
                     <TextView
@@ -141,6 +144,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="SIM Country:"
+                        app:drawableStartCompat="@drawable/ic_network"
+                        android:drawablePadding="8dp"
+                        app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle" />
 
                     <TextView
@@ -163,6 +169,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Location:"
+                        app:drawableStartCompat="@drawable/ic_location"
+                        android:drawablePadding="8dp"
+                        app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle" />
 
                     <TextView

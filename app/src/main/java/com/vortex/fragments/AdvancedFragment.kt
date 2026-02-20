@@ -61,10 +61,10 @@ class AdvancedFragment : Fragment() {
 
     private fun setupState() {
         val ctx = requireContext()
-        swHideRoot.isChecked = PrefsManager.getBoolean(ctx, "hook_hide_root", true)
-        swHideDebug.isChecked = PrefsManager.getBoolean(ctx, "hook_hide_debug", true)
-        swPackages.isChecked = PrefsManager.getBoolean(ctx, "hook_packages", true)
-        swWebView.isChecked = PrefsManager.getBoolean(ctx, "hook_webview", true)
+        swHideRoot.isChecked = PrefsManager.getBoolean(ctx, "hook_hide_root", false)
+        swHideDebug.isChecked = PrefsManager.getBoolean(ctx, "hook_hide_debug", false)
+        swPackages.isChecked = PrefsManager.getBoolean(ctx, "hook_packages", false)
+        swWebView.isChecked = PrefsManager.getBoolean(ctx, "hook_webview", false)
     }
 
     private fun setupListeners() {

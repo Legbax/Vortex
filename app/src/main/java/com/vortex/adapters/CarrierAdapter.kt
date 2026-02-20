@@ -5,19 +5,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.R
 
 class CarrierAdapter(
-    private val carriers: List<MainHook.Companion.UsCarrier>,
-    private val onCarrierSelected: (MainHook.Companion.UsCarrier) -> Unit
+    private val carriers: List<DeviceData.UsCarrier>,
+    private val onCarrierSelected: (DeviceData.UsCarrier) -> Unit
 ) : RecyclerView.Adapter<CarrierAdapter.CarrierViewHolder>() {
 
     class CarrierViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tv_carrier_name)
         val tvMccMnc: TextView = itemView.findViewById(R.id.tv_mcc_mnc)
 
-        fun bind(carrier: MainHook.Companion.UsCarrier) {
+        fun bind(carrier: DeviceData.UsCarrier) {
             tvName.text = carrier.name
             tvMccMnc.text = carrier.mccMnc
         }

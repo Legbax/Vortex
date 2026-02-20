@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.vortex.MainHook
+import com.vortex.DeviceData
 import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
 import com.vortex.utils.ValidationUtils
@@ -63,7 +63,7 @@ class NetworkFragment : Fragment() {
     }
 
     private fun setupCarrierList() {
-        adapter = CarrierAdapter(MainHook.getUsCarriers()) { carrier ->
+        adapter = CarrierAdapter(DeviceData.getUsCarriers()) { carrier ->
             val ctx = requireContext()
             // Set context fields (read-only base)
             etSimOp.setText("${carrier.name} (${carrier.mccMnc})")
@@ -128,7 +128,7 @@ class NetworkFragment : Fragment() {
         }
         tilPhone.setEndIconOnClickListener {
             val mcc = PrefsManager.getString(requireContext(), "mcc_mnc", "310260")
-            val carrier = MainHook.getUsCarriers().find { it.mccMnc == mcc }
+            val carrier = DeviceData.getUsCarriers().find { it.mccMnc == mcc }
             val v = SpoofingUtils.generatePhoneNumber(carrier?.npas ?: emptyList())
             etPhone.setText(v)
             setValidationBadge(tilPhone, v.startsWith("+1") && v.length >= 12)
@@ -158,7 +158,7 @@ class NetworkFragment : Fragment() {
         btnRandomAll.setOnClickListener {
             val ctx = requireContext()
             // 1. Pick random carrier
-            val carrier = MainHook.getUsCarriers().random()
+            val carrier = DeviceData.getUsCarriers().random()
             adapter.setSelected(carrier.mccMnc)
 
             // 2. Set context
