@@ -27,7 +27,12 @@
         </LinearLayout>
 
         <!-- Carrier Context Selection -->
-        <TextView android:text="Carrier Context (MCC/MNC)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Carrier Context (MCC/MNC)"
+            style="@style/Vortex.Text.Subtitle"
+            android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_search_carrier"
@@ -58,9 +63,17 @@
             android:background="@drawable/bg_card_normal"/>
 
         <!-- Cellular Identity -->
-        <com.google.android.material.card.MaterialCardView style="@style/Vortex.Card">
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Vortex.Card">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:text="Cellular Identity" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cellular Identity"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="12dp"
                     app:drawableStartCompat="@drawable/ic_network" android:drawablePadding="8dp" app:drawableTint="@color/vortex_text_secondary"/>
 
                 <!-- SIM Operator -->
@@ -110,9 +123,18 @@
         </com.google.android.material.card.MaterialCardView>
 
         <!-- WiFi & Bluetooth -->
-        <com.google.android.material.card.MaterialCardView style="@style/Vortex.Card" android:layout_marginTop="16dp">
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Vortex.Card"
+            android:layout_marginTop="16dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:text="WiFi &amp; Bluetooth" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WiFi &amp; Bluetooth"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="12dp"
                     app:drawableStartCompat="@drawable/ic_network" android:drawablePadding="8dp" app:drawableTint="@color/vortex_text_secondary"/>
 
                 <!-- SSID -->
