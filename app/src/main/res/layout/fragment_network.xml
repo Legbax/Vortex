@@ -60,7 +60,8 @@
         <!-- Cellular Identity -->
         <com.google.android.material.card.MaterialCardView style="@style/Vortex.Card">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:text="Cellular Identity" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"/>
+                <TextView android:text="Cellular Identity" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"
+                    app:drawableStartCompat="@drawable/ic_network" android:drawablePadding="8dp" app:drawableTint="@color/vortex_text_secondary"/>
 
                 <!-- SIM Operator -->
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_sim_operator"
@@ -111,7 +112,8 @@
         <!-- WiFi & Bluetooth -->
         <com.google.android.material.card.MaterialCardView style="@style/Vortex.Card" android:layout_marginTop="16dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                <TextView android:text="WiFi &amp; Bluetooth" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"/>
+                <TextView android:text="WiFi &amp; Bluetooth" style="@style/Vortex.Text.SectionHeader" android:layout_marginBottom="12dp"
+                    app:drawableStartCompat="@drawable/ic_network" android:drawablePadding="8dp" app:drawableTint="@color/vortex_text_secondary"/>
 
                 <!-- SSID -->
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_ssid"
