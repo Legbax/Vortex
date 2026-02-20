@@ -1,45 +1,60 @@
 package com.vortex.utils
 
 import android.util.Base64
+import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
-    private const val ALGO    = "AES/GCM/NoPadding"
-    private const val TAG_LEN = 128
-    private const val IV_LEN  = 12
+    private const val ALGORITHM = "AES/GCM/NoPadding"
+    private const val TAG_LENGTH = 128
+    private const val IV_LENGTH = 12
+    private const val PREFIX = "ENC:"
 
-    // Clave AES-256 fija, ofuscada por ProGuard en release.
-    // Se usa clave estática porque XSharedPreferences necesita
-    // que el proceso hook (UID diferente) pueda leer el mismo valor.
-    private val KEY = SecretKeySpec(
-        byteArrayOf(
-            0x56,0x4F,0x52,0x54,0x45,0x58,0x4B,0x45,
-            0x59,0x32,0x30,0x32,0x36,0x56,0x4F,0x52,
-            0x54,0x45,0x58,0x4D,0x4F,0x44,0x55,0x4C,
-            0x45,0x53,0x45,0x43,0x52,0x45,0x54,0x21
-        ), "AES"
-    )
+    private val KEY: SecretKeySpec by lazy {
+        val seed = "Vortex2026SecureKeyForPrefsEncryption!".toByteArray(Charsets.UTF_8)
+        val digest = MessageDigest.getInstance("SHA-256")
+        SecretKeySpec(digest.digest(seed), "AES")
+    }
 
-    fun encrypt(plaintext: String): String? = try {
-        val cipher = Cipher.getInstance(ALGO)
-        cipher.init(Cipher.ENCRYPT_MODE, KEY)
-        val iv = cipher.iv
-        val ct = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
-        Base64.encodeToString(iv + ct, Base64.NO_WRAP)
-    } catch (_: Exception) { null }
+    fun encrypt(data: String): String? {
+        if (data.isEmpty()) return ""
+        try {
+            val cipher = Cipher.getInstance(ALGORITHM)
+            cipher.init(Cipher.ENCRYPT_MODE, KEY)
+            val iv = cipher.iv
+            val encrypted = cipher.doFinal(data.toByteArray(Charsets.UTF_8))
 
-    fun decrypt(encoded: String?): String? {
-        if (encoded.isNullOrEmpty()) return null
-        return try {
-            val raw = Base64.decode(encoded, Base64.NO_WRAP)
-            if (raw.size <= IV_LEN) return null
-            val iv = raw.sliceArray(0 until IV_LEN)
-            val ct = raw.sliceArray(IV_LEN until raw.size)
-            val cipher = Cipher.getInstance(ALGO)
-            cipher.init(Cipher.DECRYPT_MODE, KEY, GCMParameterSpec(TAG_LEN, iv))
-            String(cipher.doFinal(ct), Charsets.UTF_8)
-        } catch (_: Exception) { null }
+            val combined = ByteArray(iv.size + encrypted.size)
+            System.arraycopy(iv, 0, combined, 0, iv.size)
+            System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
+
+            return PREFIX + Base64.encodeToString(combined, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    fun decrypt(data: String?): String? {
+        if (data.isNullOrEmpty()) return ""
+        if (!data.startsWith(PREFIX)) return data // Return raw if not encrypted (legacy support)
+
+        try {
+            val raw = Base64.decode(data.substring(PREFIX.length), Base64.NO_WRAP)
+            val iv = ByteArray(IV_LENGTH)
+            val encrypted = ByteArray(raw.size - IV_LENGTH)
+
+            System.arraycopy(raw, 0, iv, 0, IV_LENGTH)
+            System.arraycopy(raw, IV_LENGTH, encrypted, 0, encrypted.size)
+
+            val spec = GCMParameterSpec(TAG_LENGTH, iv)
+            val cipher = Cipher.getInstance(ALGORITHM)
+            cipher.init(Cipher.DECRYPT_MODE, KEY, spec)
+
+            return String(cipher.doFinal(encrypted), Charsets.UTF_8)
+        } catch (e: Exception) {
+            return null
+        }
     }
 }
