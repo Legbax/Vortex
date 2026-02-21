@@ -3,74 +3,65 @@ package com.vortex
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.vortex.fragments.*
-import com.vortex.fragments.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
-
-    // FIX #19: currentFragment rastreado para usar show/hide en lugar de replace,
-    // lo que preserva el estado de la View sin recrear el Fragment.
-    private var currentFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
+        val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
 
-        bottomNav.setOnItemSelectedListener { item ->
-            navigateTo(item.itemId)
-            true
-        }
+        val adapter = ViewPagerAdapter(this)
+        viewPager.adapter = adapter
+        viewPager.isUserInputEnabled = false // Deshabilitar swipe (opcional, para sentir más nativo BottomNav)
 
-        // FIX #20: Solo establecer tab inicial si es un arranque limpio (no rotación).
-        // Sin esta guarda, la tab vuelve a nav_status cada vez que se rota la pantalla.
-        if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.nav_status
-        } else {
-            // Restaurar referencia al fragment actualmente visible tras recreación
-            val savedTag = savedInstanceState.getString("current_fragment_tag")
-            if (savedTag != null) {
-                currentFragment = supportFragmentManager.findFragmentByTag(savedTag)
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            when (position) {
+                0 -> { tab.text = "Status"; tab.setIcon(R.drawable.ic_status) }
+                1 -> { tab.text = "Device"; tab.setIcon(R.drawable.ic_device) }
+                2 -> { tab.text = "Network"; tab.setIcon(R.drawable.ic_network) }
+                3 -> { tab.text = "IDs"; tab.setIcon(R.drawable.ic_ids) }
+                4 -> { tab.text = "Loc"; tab.setIcon(R.drawable.ic_location) }
+                5 -> { tab.text = "Adv"; tab.setIcon(R.drawable.ic_advanced) }
+            }
+        }.attach()
+
+        // Seleccionar íconos cuando se hace click para cambiar el tint
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                tab.icon?.setTint(getColor(R.color.vortex_accent))
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                tab.icon?.setTint(getColor(R.color.vortex_text_secondary))
+            }
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
+
+        // Initial Tint Update
+        tabLayout.getTabAt(0)?.icon?.setTint(getColor(R.color.vortex_accent))
+    }
+
+    private inner class ViewPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
+        override fun getItemCount(): Int = 6
+
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> StatusFragment()
+                1 -> DeviceFragment()
+                2 -> NetworkFragment()
+                3 -> IDsFragment()
+                4 -> LocationFragment()
+                5 -> AdvancedFragment()
+                else -> StatusFragment()
             }
         }
-    }
-
-    // FIX #20: Guardar el tag del fragment actual para restaurarlo tras rotación
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        currentFragment?.let { outState.putString("current_fragment_tag", it.tag) }
-    }
-
-    // FIX #19: show/hide preserva las Views; findFragmentByTag evita recrear
-    // instancias en cada cambio de tab.
-    private fun navigateTo(itemId: Int) {
-        val tag = "frag_$itemId"
-        val transaction = supportFragmentManager.beginTransaction()
-
-        // Ocultar el fragment actual
-        currentFragment?.let { transaction.hide(it) }
-
-        // Buscar o crear el fragment destino
-        var target = supportFragmentManager.findFragmentByTag(tag)
-        if (target == null) {
-            target = createFragment(itemId)
-            transaction.add(R.id.fragment_container, target, tag)
-        } else {
-            transaction.show(target)
-        }
-
-        currentFragment = target
-        transaction.commitAllowingStateLoss()
-    }
-
-    private fun createFragment(itemId: Int): Fragment = when (itemId) {
-        R.id.nav_status   -> StatusFragment()
-        R.id.nav_device   -> DeviceFragment()
-        R.id.nav_ids      -> IDsFragment()
-        R.id.nav_network  -> NetworkFragment()
-        R.id.nav_settings -> SettingsFragment()
-        else              -> StatusFragment()
     }
 }

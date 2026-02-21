@@ -3,9 +3,9 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.4 (Stability & UI Refactor)
+## 📦 Current Release State: v1.5 (UI/UX Overhaul)
 **Date:** 20 de febrero de 2026  
-**Agent:** Jules  
+**Agent:** Dalí (Jules)
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
 
 **Core Philosophy:** Symbiosis perfecta entre la App (Identity) y el Entorno (Stealth).  
@@ -27,6 +27,13 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 ---
 
 ## 📅 Changelog / Journal
+
+### [v1.5] UI/UX Overhaul - Dalí Edition (Current)
+- **Design:** Created high-fidelity `UI_PREVIEW.html` using TailwindCSS + Alpine.js.
+- **UI Port:** Ported design to Android XML layouts (`fragment_status`, `fragment_device`, `fragment_network`, `fragment_ids`, `fragment_location`, `fragment_advanced`).
+- **Assets:** Created missing vector drawables (`ic_snapchat`, `ic_gms`, `bg_border_bottom`).
+- **Styles:** Enforced `Vortex.InputLayout` and `Vortex.Card` styles across all fragments.
+- **Verification:** Verified compilation and resource linking.
 
 ### [v1.4] Stability Refactor & UI Polish (20 Feb 2026)
 - **Stability:** Solucionado crash `NoClassDefFoundError` al desacoplar la UI de Xposed.
@@ -118,6 +125,7 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **DO NOT** importar `MainHook` en clases de UI (Fragments, Activities, Adapters). Usar `DeviceData` en su lugar.
 - **Always** mantener sincronizados `DeviceData.DEVICE_FINGERPRINTS` y `MainHook.DEVICE_FINGERPRINTS` si se añaden nuevos perfiles.
 - **Maintain** la paleta Dalí (`vortex_background`, `vortex_accent`) y el uso de iconos en headers.
+- **Verify** `UI_PREVIEW.html` when making UI changes to ensure it stays in sync.
 - Al hacer cambios, actualiza este `Julia.md` con:
   - Fecha y agente.
   - Resumen de cambios.

@@ -14,46 +14,58 @@
         android:layout_marginBottom="24dp"
         style="@style/Vortex.Card">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Faded Background Icon -->
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/ic_device"
+                app:tint="@color/vortex_accent"
+                android:alpha="0.1"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="CURRENT DEVICE"
-                style="@style/Vortex.Text.SectionHeader"
-                android:layout_marginBottom="12dp"
-                app:drawableStartCompat="@drawable/ic_device"
-                android:drawablePadding="8dp"
-                app:drawableTint="@color/vortex_text_secondary"/>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_current_device_model"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Redmi 9"
-                style="@style/Vortex.Text.Title"
-                android:textSize="20sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CURRENT DEVICE"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="8dp" />
 
-            <TextView
-                android:id="@+id/tv_current_device_detail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Xiaomi · Android 11"
-                style="@style/Vortex.Text.Subtitle"
-                android:layout_marginTop="4dp" />
+                <TextView
+                    android:id="@+id/tv_current_device_model"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Redmi 9"
+                    style="@style/Vortex.Text.Title"
+                    android:textSize="24sp" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_current_device_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xiaomi · Android 11"
+                    style="@style/Vortex.Text.Subtitle"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+        </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
         style="@style/Vortex.Text.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/device_select_profile"
+        android:text="Select Fingerprint"
         android:layout_marginBottom="12dp" />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -61,21 +73,27 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Device Fingerprint"
+        android:hint="Device Profile"
         android:textColorHint="@color/vortex_text_secondary"
         app:boxStrokeColor="@color/vortex_accent"
-        app:hintTextColor="@color/vortex_accent">
+        app:hintTextColor="@color/vortex_accent"
+        app:boxBackgroundColor="@color/vortex_card_background"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <AutoCompleteTextView
             android:id="@+id/actv_profile_selector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            android:textColor="@color/vortex_text_primary" />
+            android:textColor="@color/vortex_text_primary"
+            android:text="Redmi 9 (Global)"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_apply_profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -83,15 +101,19 @@
         android:backgroundTint="@color/vortex_accent"
         android:textColor="#000000"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:padding="12dp"
+        app:cornerRadius="8dp"
+        android:stateListAnimator="@null"/>
 
     <TextView
         style="@style/Vortex.Text.SectionHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="RECENT PROFILES"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:letterSpacing="0.1"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_recent_profiles"

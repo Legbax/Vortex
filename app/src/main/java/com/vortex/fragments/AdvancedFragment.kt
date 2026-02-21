@@ -26,10 +26,10 @@ class AdvancedFragment : Fragment() {
     private lateinit var swPackages: SwitchMaterial
     private lateinit var swWebView: SwitchMaterial
 
-    // Root Utils (Dalí: Changed to CompoundButton for SwitchMaterial compatibility)
-    private lateinit var cbSnapchat: CompoundButton
-    private lateinit var cbPlayStore: CompoundButton
-    private lateinit var cbGms: CompoundButton
+    // App Management (Switches)
+    private lateinit var cbSnapchat: SwitchMaterial
+    private lateinit var cbPlayStore: SwitchMaterial
+    private lateinit var cbGms: SwitchMaterial
 
     private lateinit var btnForceStop: Button
     private lateinit var btnClearData: Button
@@ -44,7 +44,7 @@ class AdvancedFragment : Fragment() {
         swPackages = view.findViewById(R.id.sw_packages)
         swWebView = view.findViewById(R.id.sw_webview)
 
-        // Bind Root Utils
+        // Bind Root Utils (Now SwitchMaterial)
         cbSnapchat = view.findViewById(R.id.cb_snapchat)
         cbPlayStore = view.findViewById(R.id.cb_play_store)
         cbGms = view.findViewById(R.id.cb_gms)
@@ -65,6 +65,9 @@ class AdvancedFragment : Fragment() {
         swHideDebug.isChecked = PrefsManager.getBoolean(ctx, "hook_hide_debug", false)
         swPackages.isChecked = PrefsManager.getBoolean(ctx, "hook_packages", false)
         swWebView.isChecked = PrefsManager.getBoolean(ctx, "hook_webview", false)
+
+        // App selection state is transient or could be saved if needed, defaulting to false/unchecked except maybe Snapchat
+        cbSnapchat.isChecked = true
     }
 
     private fun setupListeners() {

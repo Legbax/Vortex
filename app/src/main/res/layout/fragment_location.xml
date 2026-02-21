@@ -9,7 +9,7 @@
         android:orientation="vertical" android:padding="16dp">
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/nav_location" style="@style/Vortex.Text.Title"
+            android:text="Location Spoofing" style="@style/Vortex.Text.Title"
             android:layout_marginBottom="16dp" />
 
         <!-- Map View -->
@@ -18,13 +18,27 @@
             android:layout_height="300dp"
             app:cardBackgroundColor="@color/vortex_card_background"
             app:cardCornerRadius="12dp"
-            app:strokeWidth="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/vortex_accent_20"
             android:layout_marginBottom="16dp">
 
             <WebView
                 android:id="@+id/webview_map"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+            <!-- Overlay Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Map Preview (Simulated)"
+                android:background="#80000000"
+                android:textColor="@color/vortex_text_secondary"
+                android:textSize="10sp"
+                android:padding="4dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="8dp"
+                android:id="@+id/tv_map_label"/>
 
         </com.google.android.material.card.MaterialCardView>
 
@@ -43,7 +57,9 @@
                 </LinearLayout>
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/sw_mock_location"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    app:thumbTint="@color/vortex_accent"
+                    app:trackTint="@color/vortex_accent_20"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -91,15 +107,19 @@
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:layout_marginTop="16dp">
+            android:orientation="horizontal" android:layout_marginTop="16dp" android:layout_marginBottom="24dp">
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_random_location"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="Random US City" android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:text="Random City" android:layout_marginEnd="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textColor="@color/vortex_accent"
+                app:strokeColor="@color/vortex_accent"/>
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_save_location"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="@string/action_save"
-                style="@style/Widget.MaterialComponents.Button" />
+                android:text="SAVE LOCATION"
+                android:backgroundTint="@color/vortex_accent"
+                android:textColor="#000000"
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>

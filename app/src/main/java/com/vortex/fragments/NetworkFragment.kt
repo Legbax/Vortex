@@ -1,6 +1,8 @@
 package com.vortex.fragments
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,7 @@ import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
 import com.vortex.utils.ValidationUtils
 import com.vortex.R
+import com.vortex.adapters.CarrierAdapter
 
 class NetworkFragment : Fragment() {
 
@@ -25,6 +28,9 @@ class NetworkFragment : Fragment() {
     private lateinit var adapter: CarrierAdapter
     private lateinit var btnRandomAll: Button
     private lateinit var btnSave: Button
+
+    // Search
+    private lateinit var etSearch: TextInputEditText
 
     // Campos
     private lateinit var etSimOp: TextInputEditText; private lateinit var tilSimOp: TextInputLayout
@@ -43,6 +49,7 @@ class NetworkFragment : Fragment() {
         btnRandomAll = view.findViewById(R.id.btn_random_network)
         btnSave = view.findViewById(R.id.btn_save_network)
         rvCarriers = view.findViewById(R.id.rv_carriers)
+        etSearch = view.findViewById(R.id.et_search_carrier)
 
         // Bind fields
         etSimOp = view.findViewById(R.id.et_sim_operator); tilSimOp = view.findViewById(R.id.til_sim_operator)
@@ -78,6 +85,14 @@ class NetworkFragment : Fragment() {
         }
         rvCarriers.layoutManager = LinearLayoutManager(context)
         rvCarriers.adapter = adapter
+
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                adapter.filter(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun loadData() {
@@ -205,9 +220,9 @@ class NetworkFragment : Fragment() {
     private fun setValidationBadge(til: TextInputLayout, isValid: Boolean) {
         val ctx = requireContext()
         val (text, color) = if (isValid)
-            "✓ Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
+            "Valid" to ContextCompat.getColor(ctx, R.color.vortex_success)
         else
-            "✗ Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
+            "Invalid" to ContextCompat.getColor(ctx, R.color.vortex_error)
         til.helperText = text
         til.setHelperTextColor(ColorStateList.valueOf(color))
     }
