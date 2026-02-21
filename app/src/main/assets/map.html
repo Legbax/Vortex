@@ -9,18 +9,24 @@
         body { padding: 0; margin: 0; }
         html, body, #map { height: 100%; width: 100%; background: #080A0F; }
         .leaflet-container { background: #080A0F; }
+        
+        /* MAGIA CSS: Convierte el mapa claro detallado en un mapa oscuro estilo hacker */
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
-        // Default to New York if no coordinates set
         var map = L.map('map').setView([40.7128, -74.0060], 13);
 
-        // Use Dark Matter tiles for Vortex aesthetic
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
+        // Usamos el mapa base estándar de OSM (mucho más rápido y detallado)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap',
             maxZoom: 19
         }).addTo(map);
 
