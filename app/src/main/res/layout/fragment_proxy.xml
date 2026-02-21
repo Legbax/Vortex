@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_enable"
+                        android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="Enable SOCKS5 Proxy" android:textColor="@color/vortex_text_primary" android:textSize="16sp" android:textStyle="bold"
+                        app:thumbTint="@color/vortex_accent" app:trackTint="@color/vortex_accent_20"/>
+                    <TextView android:id="@+id/tv_proxy_status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="✗ STOPPED" android:textColor="@color/vortex_text_secondary" android:textSize="12sp" android:textStyle="bold" android:layout_marginStart="8dp"/>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:hint="Host (IP)" style="@style/Vortex.InputLayout" android:layout_marginEnd="8dp">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxy_host" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/vortex_text_primary"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="Port" style="@style/Vortex.InputLayout">
+                        <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxy_port" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="number" android:textColor="@color/vortex_text_primary"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Username (Optional)" style="@style/Vortex.InputLayout" android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxy_user" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Password (Optional)" style="@style/Vortex.InputLayout" android:layout_marginTop="12dp" app:passwordToggleEnabled="true" app:passwordToggleTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_proxy_pass" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textPassword" android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_global"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Global Mode (Override Per-App)" android:textColor="@color/vortex_text_secondary" android:textSize="14sp"
+                    app:thumbTint="@color/vortex_text_secondary" android:layout_marginTop="12dp"/>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_webview"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Proxy Android WebView (OpSec Avanzado)" android:textColor="@color/vortex_accent" android:textSize="14sp"
+                    app:thumbTint="@color/vortex_accent" android:layout_marginTop="12dp"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Atrapa fugas de renderers aislados. Recomendado para Snapchat Discover. Afectará otros navegadores web internos."
+                    android:textColor="#F44336" android:textSize="11sp" android:layout_marginBottom="8dp"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="16dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_proxy_stop"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="STOP / RESET" android:layout_marginEnd="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:textColor="#F44336" app:strokeColor="#F44336"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_proxy_apply"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="SAVE CONFIG"
+                android:backgroundTint="@color/vortex_accent" android:textColor="#000000" android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

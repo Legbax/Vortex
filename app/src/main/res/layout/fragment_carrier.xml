@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/vortex_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:clipToPadding="false">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Network Identity"
+                style="@style/Vortex.Text.Title" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_random_network"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RANDOMIZE ALL"
+                style="@style/Vortex.Button.Text"
+                android:textColor="@color/vortex_accent"
+                app:icon="@drawable/ic_refresh"
+                app:iconTint="@color/vortex_accent"
+                android:padding="0dp"/>
+        </LinearLayout>
+
+        <!-- Carrier Selector (Dropdown) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_carrier_selector"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Carrier"
+            android:layout_marginBottom="24dp"
+            android:textColorHint="@color/vortex_text_secondary"
+            app:boxStrokeColor="@color/vortex_accent"
+            app:hintTextColor="@color/vortex_accent"
+            app:boxBackgroundColor="@color/vortex_card_background"
+            app:startIconDrawable="@drawable/ic_nav_network"
+            app:startIconTint="@color/vortex_text_secondary">
+
+            <AutoCompleteTextView
+                android:id="@+id/actv_carrier_selector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:textColor="@color/vortex_text_primary"
+                android:text="Select a Carrier..." />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Cellular Identity -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Vortex.Card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CELLULAR IDENTITY"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="16dp"
+                    app:drawableStartCompat="@drawable/ic_nav_network"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/vortex_accent"/>
+
+                <!-- SIM Operator -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_sim_operator"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="SIM Operator">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_sim_operator"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- SIM Country -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_sim_country"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="SIM Country ISO"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_sim_country"
+                        android:focusable="false"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- IMSI -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_imsi"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="IMSI"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_imsi"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- ICCID -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_iccid"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="ICCID"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_iccid"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Phone -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_phone"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Mobile Number"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_phone"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- WiFi & Bluetooth -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Vortex.Card"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WIFI &amp; BLUETOOTH"
+                    style="@style/Vortex.Text.SectionHeader"
+                    android:layout_marginBottom="16dp"
+                    app:drawableStartCompat="@drawable/ic_nav_network"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/vortex_accent"/>
+
+                <!-- SSID -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_ssid"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="WiFi SSID"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_ssid"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- BSSID -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_bssid"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="WiFi BSSID"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_bssid"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- WiFi MAC -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_wifi_mac"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="WiFi MAC Address"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_wifi_mac"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- BT MAC -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_bt_mac"
+                    style="@style/Vortex.InputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Bluetooth MAC Address"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_refresh"
+                    app:endIconTint="@color/vortex_accent">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_bt_mac"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/vortex_text_primary"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save_network"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SAVE IDENTITY"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="@color/vortex_accent"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            app:cornerRadius="8dp"
+            android:padding="12dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

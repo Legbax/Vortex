@@ -1,5 +1,6 @@
 package com.vortex.utils
 
+import android.content.Context
 import android.util.Base64
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -56,5 +57,29 @@ object CryptoUtils {
         } catch (e: Exception) {
             return null
         }
+    }
+
+    // --- VORTEX PROXY CONFIG (AES-GCM Seguro) ---
+    data class ProxyConfig(
+        val host: String, val port: Int,
+        val user: String, val pass: String,
+        val isGlobal: Boolean,
+        val includeWebView: Boolean
+    )
+
+    fun saveProxyConfig(context: Context, config: ProxyConfig) {
+        val data = "${config.host}|${config.port}|${config.user}|${config.pass}|${config.isGlobal}|${config.includeWebView}"
+        val encrypted = encrypt(data) ?: return
+        context.getSharedPreferences("vortex_secure", Context.MODE_PRIVATE)
+            .edit().putString("proxy_conf_secure", encrypted).apply()
+    }
+
+    fun getProxyConfig(context: Context): ProxyConfig? {
+        val prefs = context.getSharedPreferences("vortex_secure", Context.MODE_PRIVATE)
+        val encrypted = prefs.getString("proxy_conf_secure", null) ?: return null
+        val decrypted = decrypt(encrypted) ?: return null
+        val parts = decrypted.split("|")
+        if (parts.size != 6) return null
+        return ProxyConfig(parts[0], parts[1].toIntOrNull() ?: 1080, parts[2], parts[3], parts[4].toBoolean(), parts[5].toBoolean())
     }
 }
