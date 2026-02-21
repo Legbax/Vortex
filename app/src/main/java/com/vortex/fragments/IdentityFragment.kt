@@ -38,11 +38,11 @@ class IdentityFragment : Fragment() {
             when (position) {
                 0 -> {
                     tab.text = "Device"
-                    tab.setIcon(R.drawable.ic_device)
+                    tab.setIcon(R.drawable.ic_nav_device)
                 }
                 1 -> {
                     tab.text = "Identifiers"
-                    tab.setIcon(R.drawable.ic_ids)
+                    tab.setIcon(R.drawable.ic_nav_ids)
                 }
             }
         }.attach()

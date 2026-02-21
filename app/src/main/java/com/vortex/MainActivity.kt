@@ -21,17 +21,15 @@ class MainActivity : AppCompatActivity() {
 
         val adapter = ViewPagerAdapter(this)
         viewPager.adapter = adapter
-        // User might want to swipe between main tabs? Usually BottomNav doesn't swipe.
-        // Code had it false. Keeping false to act like BottomNav.
         viewPager.isUserInputEnabled = false
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
-                0 -> { tab.setIcon(R.drawable.ic_status) }
-                1 -> { tab.setIcon(R.drawable.ic_device) }
-                2 -> { tab.setIcon(R.drawable.ic_network) }
-                3 -> { tab.setIcon(R.drawable.ic_location) }
-                4 -> { tab.setIcon(R.drawable.ic_advanced) }
+                0 -> { tab.setIcon(R.drawable.ic_nav_status) }
+                1 -> { tab.setIcon(R.drawable.ic_nav_device) }
+                2 -> { tab.setIcon(R.drawable.ic_nav_network) }
+                3 -> { tab.setIcon(R.drawable.ic_nav_location) }
+                4 -> { tab.setIcon(R.drawable.ic_nav_advanced) }
             }
         }.attach()
 
