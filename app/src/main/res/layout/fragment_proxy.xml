@@ -35,7 +35,7 @@
 
                 <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_global"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Global Mode (Override Per-App)" android:textColor="@color/vortex_text_secondary" android:textSize="14sp"
+                    android:text="Modo Global (Todas las apps)" android:textColor="@color/vortex_text_secondary" android:textSize="14sp"
                     app:thumbTint="@color/vortex_text_secondary" android:layout_marginTop="12dp"/>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_webview"

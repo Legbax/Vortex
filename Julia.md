@@ -217,3 +217,18 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Pixel Compatibility:** Added `"google"` (lowercase) to `SpoofingUtils.TACS_BY_BRAND` map to correctly handle manufacturer strings for Pixel devices, preventing IMEI mismatches.
 - **Cleanup:** Removed unused `SettingsFragment.kt` and `OriginalBuildValues.kt`.
 - **Persistence:** Verified `AdvancedFragment` app selection persistence logic (confirmed correct).
+
+### [v9.0] Universal Architecture, Blacklist & UX Refinement (22 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Transición a Modelo Universal + Blacklist + Proxy Corregido (v9.0)..." & "Refinamiento de UX/OpSec - Renombrar Modo Proxy..."
+- **Core Architecture:**
+  - **MainHook:** Removed `TARGET_APPS` whitelist. Implemented `SYSTEM_BLACKLIST` to protect core OS processes (`android`, `systemui`, etc.) while allowing universal injection into any user app scoped in LSPosed.
+  - **SSL Pinning:** Made universal by removing package name checks in the hook.
+- **Proxy Logic:**
+  - `ProxyManager` keeps using `TARGET_APPS` for kernel routing (iptables) to maintain strict OpSec on critical apps.
+  - Added `context.packageName` (Vortex) to routing for self-diagnosis.
+- **UX/OpSec:**
+  - Renamed Proxy modes in `fragment_proxy.xml`:
+    - "Global Mode" -> "Modo Global (Todas las apps)"
+    - "Per-App" (implicit default) -> "Modo Snapchat (Target Apps)" (clarified via text).
+  - Added explicit red warning text explaining the difference between Universal Hook Scope (LSPosed) and Restricted Proxy Scope.
