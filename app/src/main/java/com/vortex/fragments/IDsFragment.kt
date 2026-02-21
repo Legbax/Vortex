@@ -65,20 +65,22 @@ class IDsFragment : Fragment() {
         btnRefreshGPU.setOnClickListener {
             AlertDialog.Builder(ctx)
                 .setTitle("⚠️ Force Refresh GPU Fingerprint")
-                .setMessage("Esto romperá la correlación con el modelo actual. Riesgo alto de detección si no borras datos primero.\n\n¿Continuar?")
+                .setMessage("Esto romperá la correlación actual. Reinicia Snapchat para aplicar.\n\n¿Continuar?")
                 .setPositiveButton("Sí, Refresh") { _, _ ->
-                    PrefsManager.saveBoolean(ctx, "gpu_force_refresh", true)
-                    Toast.makeText(ctx, "Flag GPU activada. Reinicia la app objetivo.", Toast.LENGTH_LONG).show()
+                    val newSeed = java.util.UUID.randomUUID().toString()
+                    PrefsManager.saveString(ctx, "gpu_seed", newSeed)
+                    Toast.makeText(ctx, "Nueva semilla GPU generada. Reinicia Snapchat.", Toast.LENGTH_LONG).show()
                 }.setNegativeButton("Cancelar", null).show()
         }
 
         btnRefreshJA3.setOnClickListener {
             AlertDialog.Builder(ctx)
                 .setTitle("⚠️ Force Refresh JA3 Fingerprint")
-                .setMessage("Rotar la semilla TLS/JA3 manualmente alterará el ClientHello.\n\n¿Continuar?")
+                .setMessage("Esto generará una nueva semilla TLS determinística estable.\n\n¿Continuar?")
                 .setPositiveButton("Sí, Refresh") { _, _ ->
-                    PrefsManager.saveBoolean(ctx, "ja3_force_refresh", true)
-                    Toast.makeText(ctx, "Flag JA3 activada. Reinicia la app objetivo.", Toast.LENGTH_LONG).show()
+                    val newSeed = java.util.UUID.randomUUID().toString()
+                    PrefsManager.saveString(ctx, "ja3_seed", newSeed)
+                    Toast.makeText(ctx, "Nueva semilla JA3 generada. Reinicia Snapchat.", Toast.LENGTH_LONG).show()
                 }.setNegativeButton("Cancelar", null).show()
         }
 

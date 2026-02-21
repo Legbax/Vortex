@@ -194,3 +194,17 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Integration:** Initialized both hooks in `MainHook.kt` inside the `TARGET_APPS` block.
 - **Verification:** Verified compilation and file integrity.
 - **Note to Next Agent:** The hooks use `XSharedPreferences` for reading preferences. Writing back to preferences from the Xposed module (e.g., to reset the "Force Refresh" flag) is not supported in this implementation due to Android permissions. The logic assumes "Force Refresh" = True means "use random seed every time".
+
+### [v8.1] Stateless Architecture Patch (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Parche de Seguridad Crítico - Arquitectura Stateless JA3/GPU..."
+- **Architecture:** Migrated "Force Refresh" logic to a **Stateless UI-Seeding** model.
+  - Xposed hooks cannot write back to module preferences (read-only restriction).
+  - Previous boolean flags (`force_refresh = true`) created logic loops or couldn't be reset.
+  - New model: UI generates a unique UUID seed (`gpu_seed`, `ja3_seed`) on button click. Hook reads this seed.
+- **TLSRandomizer:**
+  - Rewritten to instantiate `java.util.Random` **inside** the hook method using the static seed.
+  - Ensures deterministic behavior per session (socket consistency) while allowing user-triggered rotation.
+  - Removed dependency on `PrefsManager` context, using `XSharedPreferences` exclusively.
+- **UI:** Updated `IDsFragment` to generate UUIDs instead of toggling booleans.
+- **Note to Next Agent:** This architecture is robust for Xposed/SELinux restrictions. Do not revert to boolean flags for triggers unless the hook has write access (unlikely in modern Android).

@@ -6,12 +6,12 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XSharedPreferences
 import com.vortex.utils.CryptoUtils
-import com.vortex.BuildConfig
 import java.util.Random
 
 object TLSRandomizer {
     fun init(classLoader: ClassLoader) {
         val prefs = XSharedPreferences("com.vortex", "vortex_prefs")
+        prefs.makeWorldReadable()
         prefs.reload()
 
         fun getStr(key: String, def: String): String {
@@ -27,19 +27,13 @@ object TLSRandomizer {
         if (!getBool("ja3_randomizer_enabled", false)) return
 
         val currentFingerprintId = getStr("profile", "Redmi 9")
-        val forceRefresh = getBool("ja3_force_refresh", false)
+
+        // Lee la semilla de la UI (stateless). Si no hay botón pulsado, usa el profile.
+        val ja3SeedStr = getStr("ja3_seed", currentFingerprintId)
 
         try {
-            // If forceRefresh is on (and we can't reset it in Xposed), we generate a random seed every time.
-            // Otherwise, we use a deterministic seed based on the profile to keep JA3 stable per session/profile.
-            val seed = if (forceRefresh) {
-                System.currentTimeMillis()
-            } else {
-                currentFingerprintId.hashCode().toLong()
-            }
-            val random = Random(seed)
+            val staticSeed = ja3SeedStr.hashCode().toLong()
 
-            // Intercept SSLSocket (base of JSSE/Conscrypt in Android) to shuffle Cipher Suites
             XposedHelpers.findAndHookMethod(
                 "javax.net.ssl.SSLSocket", classLoader,
                 "setEnabledCipherSuites", Array<String>::class.java,
@@ -48,20 +42,18 @@ object TLSRandomizer {
                         val suites = param.args[0] as? Array<String> ?: return
                         val suitesList = suites.toMutableList()
 
-                        // Shuffling the list order changes the JA3 hash generated in ClientHello
+                        // CRÍTICO OPSEC: Random se instancia AQUÍ ADENTRO.
+                        // Garantiza que cada socket baraje la lista exactamente en el mismo orden.
+                        val random = Random(staticSeed)
                         suitesList.shuffle(random)
 
                         param.args[0] = suitesList.toTypedArray()
                     }
                 }
             )
-            if (BuildConfig.DEBUG) {
-                XposedBridge.log("[Vortex] JA3/TLS Randomizer v8.0 ACTIVATED (Seed: $seed)")
-            }
+            XposedBridge.log("[Vortex] JA3/TLS Randomizer v8.1 ACTIVATED (Stable seed: $staticSeed)")
         } catch (e: Throwable) {
-            if (BuildConfig.DEBUG) {
-                XposedBridge.log("[Vortex] TLSRandomizer init failed: ${e.message}")
-            }
+            XposedBridge.log("[Vortex] TLSRandomizer init failed: ${e.message}")
         }
     }
 }
