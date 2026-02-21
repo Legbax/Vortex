@@ -194,3 +194,41 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Integration:** Initialized both hooks in `MainHook.kt` inside the `TARGET_APPS` block.
 - **Verification:** Verified compilation and file integrity.
 - **Note to Next Agent:** The hooks use `XSharedPreferences` for reading preferences. Writing back to preferences from the Xposed module (e.g., to reset the "Force Refresh" flag) is not supported in this implementation due to Android permissions. The logic assumes "Force Refresh" = True means "use random seed every time".
+
+### [v8.1] Stateless Architecture Patch (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Parche de Seguridad Crítico - Arquitectura Stateless JA3/GPU..."
+- **Architecture:** Migrated "Force Refresh" logic to a **Stateless UI-Seeding** model.
+  - Xposed hooks cannot write back to module preferences (read-only restriction).
+  - Previous boolean flags (`force_refresh = true`) created logic loops or couldn't be reset.
+  - New model: UI generates a unique UUID seed (`gpu_seed`, `ja3_seed`) on button click. Hook reads this seed.
+- **TLSRandomizer:**
+  - Rewritten to instantiate `java.util.Random` **inside** the hook method using the static seed.
+  - Ensures deterministic behavior per session (socket consistency) while allowing user-triggered rotation.
+  - Removed dependency on `PrefsManager` context, using `XSharedPreferences` exclusively.
+- **UI:** Updated `IDsFragment` to generate UUIDs instead of toggling booleans.
+- **Note to Next Agent:** This architecture is robust for Xposed/SELinux restrictions. Do not revert to boolean flags for triggers unless the hook has write access (unlikely in modern Android).
+
+### [v8.1-Patch] Maintenance & Hardening (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Parche de Mantenimiento y Hardening (Limpieza de Bugs)..."
+- **OpSec:** Removed sensitive logging (score, profile, mock) from `StatusFragment.kt` to prevent Logcat leakage.
+- **SSL Pinning:** Replaced unreliable `X509TrustManager` hook with direct `javax.net.ssl.HttpsURLConnection` bypass (nullifying `SSLSocketFactory` and `HostnameVerifier` setters). This fixes silent failures on newer Android versions.
+- **Pixel Compatibility:** Added `"google"` (lowercase) to `SpoofingUtils.TACS_BY_BRAND` map to correctly handle manufacturer strings for Pixel devices, preventing IMEI mismatches.
+- **Cleanup:** Removed unused `SettingsFragment.kt` and `OriginalBuildValues.kt`.
+- **Persistence:** Verified `AdvancedFragment` app selection persistence logic (confirmed correct).
+
+### [v9.0] Universal Architecture, Blacklist & UX Refinement (22 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Transición a Modelo Universal + Blacklist + Proxy Corregido (v9.0)..." & "Refinamiento de UX/OpSec - Renombrar Modo Proxy..."
+- **Core Architecture:**
+  - **MainHook:** Removed `TARGET_APPS` whitelist. Implemented `SYSTEM_BLACKLIST` to protect core OS processes (`android`, `systemui`, etc.) while allowing universal injection into any user app scoped in LSPosed.
+  - **SSL Pinning:** Made universal by removing package name checks in the hook.
+- **Proxy Logic:**
+  - `ProxyManager` keeps using `TARGET_APPS` for kernel routing (iptables) to maintain strict OpSec on critical apps.
+  - Added `context.packageName` (Vortex) to routing for self-diagnosis.
+- **UX/OpSec:**
+  - Renamed Proxy modes in `fragment_proxy.xml`:
+    - "Global Mode" -> "Modo Global (Todas las apps)"
+    - "Per-App" (implicit default) -> "Modo Snapchat (Target Apps)" (clarified via text).
+  - Added explicit red warning text explaining the difference between Universal Hook Scope (LSPosed) and Restricted Proxy Scope.

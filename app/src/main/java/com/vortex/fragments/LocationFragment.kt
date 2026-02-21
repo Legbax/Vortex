@@ -46,16 +46,56 @@ class LocationFragment : Fragment() {
     }
 
     private val usCities = listOf(
-        Pair(40.7128, -74.0060),   // New York
-        Pair(34.0522, -118.2437),  // Los Angeles
-        Pair(41.8781, -87.6298),   // Chicago
-        Pair(29.7604, -95.3698),   // Houston
-        Pair(33.4484, -112.0740),  // Phoenix
-        Pair(39.9526, -75.1652),   // Philadelphia
-        Pair(32.7767, -96.7970),   // Dallas
-        Pair(37.3382, -121.8863),  // San Jose
-        Pair(47.6062, -122.3321),  // Seattle
-        Pair(25.7617, -80.1918)    // Miami
+        Pair(40.7128, -74.0060),     // 1. New York, NY
+        Pair(34.0522, -118.2437),    // 2. Los Angeles, CA
+        Pair(41.8781, -87.6298),     // 3. Chicago, IL
+        Pair(29.7604, -95.3698),     // 4. Houston, TX
+        Pair(33.4484, -112.0740),    // 5. Phoenix, AZ
+        Pair(29.4241, -98.4936),     // 6. San Antonio, TX
+        Pair(32.7157, -117.1611),    // 7. San Diego, CA
+        Pair(32.7767, -96.7970),     // 8. Dallas, TX
+        Pair(37.3382, -121.8863),    // 9. San Jose, CA
+        Pair(30.2672, -97.7431),     // 10. Austin, TX
+        Pair(39.9526, -75.1652),     // 11. Philadelphia, PA
+        Pair(30.3322, -81.6557),     // 12. Jacksonville, FL
+        Pair(32.7555, -97.3308),     // 13. Fort Worth, TX
+        Pair(39.9612, -82.9988),     // 14. Columbus, OH
+        Pair(39.7684, -86.1581),     // 15. Indianapolis, IN
+        Pair(35.2271, -80.8431),     // 16. Charlotte, NC
+        Pair(37.7749, -122.4194),    // 17. San Francisco, CA
+        Pair(47.6062, -122.3321),    // 18. Seattle, WA
+        Pair(39.7392, -104.9903),    // 19. Denver, CO
+        Pair(35.4676, -97.5164),     // 20. Oklahoma City, OK
+        Pair(36.1627, -86.7816),     // 21. Nashville, TN
+        Pair(31.7619, -106.4850),    // 22. El Paso, TX
+        Pair(38.9072, -77.0369),     // 23. Washington, DC
+        Pair(42.3601, -71.0589),     // 24. Boston, MA
+        Pair(36.1699, -115.1398),    // 25. Las Vegas, NV
+        Pair(45.5231, -122.6765),    // 26. Portland, OR
+        Pair(42.3314, -83.0458),     // 27. Detroit, MI
+        Pair(38.2527, -85.7585),     // 28. Louisville, KY
+        Pair(35.1495, -90.0490),     // 29. Memphis, TN
+        Pair(39.2904, -76.6122),     // 30. Baltimore, MD
+        Pair(43.0389, -87.9065),     // 31. Milwaukee, WI
+        Pair(35.0844, -106.6504),    // 32. Albuquerque, NM
+        Pair(32.2226, -110.9747),    // 33. Tucson, AZ
+        Pair(36.7378, -119.7871),    // 34. Fresno, CA
+        Pair(38.5816, -121.4944),    // 35. Sacramento, CA
+        Pair(33.4152, -111.8315),    // 36. Mesa, AZ
+        Pair(39.0997, -94.5786),     // 37. Kansas City, MO
+        Pair(33.7490, -84.3880),     // 38. Atlanta, GA
+        Pair(33.7701, -118.1937),    // 39. Long Beach, CA
+        Pair(41.2565, -95.9345),     // 40. Omaha, NE
+        Pair(35.7796, -78.6382),     // 41. Raleigh, NC
+        Pair(38.8339, -104.8214),    // 42. Colorado Springs, CO
+        Pair(25.7617, -80.1918),     // 43. Miami, FL
+        Pair(36.8529, -75.9779),     // 44. Virginia Beach, VA
+        Pair(37.8044, -122.2711),    // 45. Oakland, CA
+        Pair(44.9778, -93.2650),     // 46. Minneapolis, MN
+        Pair(36.1540, -95.9928),     // 47. Tulsa, OK
+        Pair(32.7357, -97.1081),     // 48. Arlington, TX
+        Pair(29.9511, -90.0715),     // 49. New Orleans, LA
+        Pair(37.6872, -97.3301)      // 50. Wichita, KS
     )
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
