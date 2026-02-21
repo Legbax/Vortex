@@ -30,7 +30,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IMEI (Slot 1)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_imei" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_ids" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_ids" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_imei" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -42,7 +42,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IMEI (Slot 2)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_imei2" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_ids" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_ids" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_imei2" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:inputType="number" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -54,7 +54,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Android ID" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_android_id" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_ids" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_ids" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_android_id" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -78,7 +78,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Advertising ID (GAID)" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_gaid" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_ids" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_ids" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_gaid" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -102,7 +102,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MediaDRM Device ID" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_media_drm" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_device" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_device" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_media_drm" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -114,7 +114,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Serial Number" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_serial" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_device" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_device" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_serial" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="monospace" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -126,7 +126,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gmail Account" style="@style/Vortex.Text.Subtitle" android:layout_marginBottom="8dp" />
                 <com.google.android.material.textfield.TextInputLayout android:id="@+id/til_gmail" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/Vortex.InputLayout"
                     app:endIconMode="custom" app:endIconDrawable="@drawable/ic_refresh" app:endIconTint="@color/vortex_accent"
-                    app:startIconDrawable="@drawable/ic_ids" app:startIconTint="@color/vortex_text_secondary">
+                    app:startIconDrawable="@drawable/ic_nav_ids" app:startIconTint="@color/vortex_text_secondary">
                     <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_gmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textEmailAddress" android:textColor="@color/vortex_text_primary" android:focusable="false" android:clickable="true" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>

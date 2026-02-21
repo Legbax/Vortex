@@ -19,7 +19,7 @@
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_device"
+            android:src="@drawable/ic_nav_device"
             app:tint="@color/vortex_accent"
             android:scaleType="fitCenter" />
 
@@ -47,7 +47,7 @@
             <ImageView
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                android:src="@drawable/ic_device"
+                android:src="@drawable/ic_nav_device"
                 app:tint="@color/vortex_accent"
                 android:alpha="0.05"
                 android:layout_gravity="bottom|end"

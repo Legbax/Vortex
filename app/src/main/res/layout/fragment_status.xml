@@ -135,7 +135,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_network"
+                        android:src="@drawable/ic_nav_network"
                         app:tint="@color/vortex_proxy_inactive"
                         android:layout_marginBottom="4dp"/>
 
@@ -176,7 +176,7 @@
                      <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_network"
+                        android:src="@drawable/ic_nav_network"
                         app:tint="@color/vortex_accent"
                         android:layout_marginBottom="4dp"/>
 
@@ -212,7 +212,7 @@
                     android:text="ACTIVE CONFIGURATION"
                     style="@style/Vortex.Text.SectionHeader"
                     android:layout_marginBottom="16dp"
-                    app:drawableStartCompat="@drawable/ic_device"
+                    app:drawableStartCompat="@drawable/ic_nav_device"
                     android:drawablePadding="8dp"
                     app:drawableTint="@color/vortex_accent" />
 
@@ -228,7 +228,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Fingerprint"
-                        app:drawableStartCompat="@drawable/ic_device"
+                        app:drawableStartCompat="@drawable/ic_nav_device"
                         android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
@@ -257,7 +257,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="SIM Country"
-                        app:drawableStartCompat="@drawable/ic_network"
+                        app:drawableStartCompat="@drawable/ic_nav_network"
                         android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
@@ -285,7 +285,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Location"
-                        app:drawableStartCompat="@drawable/ic_location"
+                        app:drawableStartCompat="@drawable/ic_nav_location"
                         android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
