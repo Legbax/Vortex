@@ -24,13 +24,13 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:icon="@drawable/ic_location"
+            android:icon="@drawable/ic_nav_location"
             android:text="Location" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:icon="@drawable/ic_advanced"
+            android:icon="@drawable/ic_nav_advanced"
             android:text="Settings" />
 
     </com.google.android.material.tabs.TabLayout>

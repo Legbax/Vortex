@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.6 (Stealth Hardening)
+## 📦 Current Release State: v1.8 (UI/UX - Minimalist Navigation)
 **Date:** 20 de febrero de 2026  
 **Agent:** Dalí (Jules)
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -28,7 +28,22 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ## 📅 Changelog / Journal
 
-### [v1.6] Stealth Hardening & Audit (Current)
+### [v1.8] UI/UX - Minimalist Navigation & Custom Icons (Current)
+- **Navigation:** Removed text labels from the main bottom navigation bar (`MainActivity.kt`), leaving only icons for a minimalist look.
+- **Icons:** Replaced all 5 main navigation icons (Status, Device, Network, Location, Advanced) + IDs icon with high-quality, sharp stroke vectors derived from `UI_PREVIEW.html`.
+- **Identity:** Updated `ic_device.xml` to match the new sharper aesthetic.
+
+### [v1.7] UI/UX Modernization - Dalí Refinement (20 Feb 2026)
+- **UI Architecture:** Merged `Device` and `IDs` fragments into a single `IdentityFragment` with `TabLayout`, reducing main navigation to 5 tabs.
+- **Status Tab:** Redesigned with modern cards for Proxy Status and IP Address.
+- **Network Tab:** Replaced Carrier Search/RecyclerView with a clean `ExposedDropdownMenu`.
+- **Styling:**
+  - Added header images to `DeviceFragment`.
+  - Added start icons to all fields in `IDsFragment`.
+  - Refined color palette (`vortex_proxy_active`, `vortex_proxy_inactive`).
+- **Code:** Updated `MainActivity.kt`, `NetworkFragment.kt`, `IdentityFragment.kt` and XML layouts.
+
+### [v1.6] Stealth Hardening & Audit (20 Feb 2026)
 - **Security:** Hardened `MainHook` logging to strictly respect `BuildConfig.DEBUG`. Removed unconditional "Vortex" logs in release builds to prevent log-based detection.
 - **Stealth:** Added `/data/adb` to `hookFile` sensitive paths list to better hide KernelSU/Magisk indicators.
 - **UX:** Added feedback toasts to `AdvancedFragment` app selection switches to clarify they control the "Force Stop" / "Clear Data" actions.
@@ -139,3 +154,26 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
   - Nota personal para el siguiente agente.
 
 **Fin del documento. Este es el contexto persistente actualizado.**
+
+### [v1.9] UI/UX Overhaul - Modern Aesthetics & Icon Refresh (20 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Necesito mejores la UI/UX de la aplicación... Pestaña status moderna... Device e IDs fusionadas... Iconos esteticos... Network dropdown... App Icon."
+- **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
+- **Identity Tab:** Confirmed merge of Device & IDs.
+- **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
+- **IDs Tab:** Replaced repetitive  with distinct vectors:  (IMEI/AndroidID),  (Gmail),  (Serial/DRM),  (GAID).
+- **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with  to prevent confusion.
+- **App Icon:** Updated  (Manifest & Resource) with user-provided .
+- **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in  and ; consider generating proper densities if build size becomes an issue.
+
+
+### [v1.9] UI/UX Overhaul - Modern Aesthetics & Icon Refresh (20 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Necesito mejores la UI/UX de la aplicación... Pestaña status moderna... Device e IDs fusionadas... Iconos esteticos... Network dropdown... App Icon."
+- **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
+- **Identity Tab:** Confirmed merge of Device & IDs.
+- **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
+- **IDs Tab:** Replaced repetitive `ic_nav_ids` with distinct vectors: `ic_fingerprint` (IMEI/AndroidID), `ic_email` (Gmail), `ic_qr_code` (Serial/DRM), `ic_ad_units` (GAID).
+- **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with `ic_nav_network` to prevent confusion.
+- **App Icon:** Updated `ic_launcher` (Manifest & Resource) with user-provided `App Icon.png`.
+- **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in `drawable` and `mipmap-xxxhdpi`; consider generating proper densities if build size becomes an issue.

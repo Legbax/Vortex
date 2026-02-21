@@ -21,16 +21,15 @@ class MainActivity : AppCompatActivity() {
 
         val adapter = ViewPagerAdapter(this)
         viewPager.adapter = adapter
-        viewPager.isUserInputEnabled = false // Deshabilitar swipe (opcional, para sentir más nativo BottomNav)
+        viewPager.isUserInputEnabled = false
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
-                0 -> { tab.text = "Status"; tab.setIcon(R.drawable.ic_status) }
-                1 -> { tab.text = "Device"; tab.setIcon(R.drawable.ic_device) }
-                2 -> { tab.text = "Network"; tab.setIcon(R.drawable.ic_network) }
-                3 -> { tab.text = "IDs"; tab.setIcon(R.drawable.ic_ids) }
-                4 -> { tab.text = "Loc"; tab.setIcon(R.drawable.ic_location) }
-                5 -> { tab.text = "Adv"; tab.setIcon(R.drawable.ic_advanced) }
+                0 -> { tab.setIcon(R.drawable.ic_nav_status) }
+                1 -> { tab.setIcon(R.drawable.ic_nav_device) }
+                2 -> { tab.setIcon(R.drawable.ic_nav_network) }
+                3 -> { tab.setIcon(R.drawable.ic_nav_location) }
+                4 -> { tab.setIcon(R.drawable.ic_nav_advanced) }
             }
         }.attach()
 
@@ -50,16 +49,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private inner class ViewPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
-        override fun getItemCount(): Int = 6
+        override fun getItemCount(): Int = 5
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> StatusFragment()
-                1 -> DeviceFragment()
+                1 -> IdentityFragment()
                 2 -> NetworkFragment()
-                3 -> IDsFragment()
-                4 -> LocationFragment()
-                5 -> AdvancedFragment()
+                3 -> LocationFragment()
+                4 -> AdvancedFragment()
                 else -> StatusFragment()
             }
         }

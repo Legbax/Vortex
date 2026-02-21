@@ -40,35 +40,30 @@
                 android:padding="0dp"/>
         </LinearLayout>
 
+        <!-- Carrier Selector (Dropdown) -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_search_carrier"
-            style="@style/Vortex.InputLayout"
+            android:id="@+id/til_carrier_selector"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Carriers..."
-            android:layout_marginBottom="16dp"
-            app:startIconDrawable="@drawable/ic_search"
+            android:hint="Select Carrier"
+            android:layout_marginBottom="24dp"
+            android:textColorHint="@color/vortex_text_secondary"
+            app:boxStrokeColor="@color/vortex_accent"
+            app:hintTextColor="@color/vortex_accent"
+            app:boxBackgroundColor="@color/vortex_card_background"
+            app:startIconDrawable="@drawable/ic_nav_network"
             app:startIconTint="@color/vortex_text_secondary">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_search_carrier"
+            <AutoCompleteTextView
+                android:id="@+id/actv_carrier_selector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:maxLines="1"
-                android:textColor="@color/vortex_text_primary" />
+                android:inputType="none"
+                android:textColor="@color/vortex_text_primary"
+                android:text="Select a Carrier..." />
 
         </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Carrier List (Placeholder height, populated by Adapter) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_carriers"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginBottom="24dp"
-            android:clipToPadding="false"
-            android:background="@drawable/bg_card_normal"
-            android:padding="4dp"/>
 
         <!-- Cellular Identity -->
         <com.google.android.material.card.MaterialCardView
@@ -88,7 +83,7 @@
                     android:text="CELLULAR IDENTITY"
                     style="@style/Vortex.Text.SectionHeader"
                     android:layout_marginBottom="16dp"
-                    app:drawableStartCompat="@drawable/ic_network" 
+                    app:drawableStartCompat="@drawable/ic_nav_network"
                     android:drawablePadding="8dp" 
                     app:drawableTint="@color/vortex_accent"/>
 
@@ -212,7 +207,7 @@
                     android:text="WIFI &amp; BLUETOOTH"
                     style="@style/Vortex.Text.SectionHeader"
                     android:layout_marginBottom="16dp"
-                    app:drawableStartCompat="@drawable/ic_network" 
+                    app:drawableStartCompat="@drawable/ic_nav_network"
                     android:drawablePadding="8dp" 
                     app:drawableTint="@color/vortex_accent"/>
 

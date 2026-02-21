@@ -10,15 +10,22 @@
     <!-- Acento: Morado neón (Ghost Eye) -->
     <color name="vortex_accent">#E040FB</color>
     <color name="vortex_accent_20">#33E040FB</color>
+    <color name="vortex_accent_10">#1AE040FB</color>
 
     <!-- Texto -->
     <color name="vortex_text_primary">#FFFFFF</color>
     <color name="vortex_text_secondary">#B0B0B0</color>
+    <color name="vortex_text_tertiary">#707070</color>
 
     <!-- Estados -->
     <color name="vortex_success">#00E676</color>
     <color name="vortex_warning">#FFB300</color>
     <color name="vortex_error">#FF1744</color>
+
+    <!-- Proxy Status -->
+    <color name="vortex_proxy_active">#FF1744</color>
+    <color name="vortex_proxy_inactive">#00E676</color>
+    <color name="vortex_ip_text">#E0E0E0</color>
 
     <!-- Legacy Overrides -->
     <color name="purple_200">#E040FB</color>
