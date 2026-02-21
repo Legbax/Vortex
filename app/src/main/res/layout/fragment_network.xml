@@ -52,7 +52,7 @@
             app:boxStrokeColor="@color/vortex_accent"
             app:hintTextColor="@color/vortex_accent"
             app:boxBackgroundColor="@color/vortex_card_background"
-            app:startIconDrawable="@drawable/ic_search"
+            app:startIconDrawable="@drawable/ic_nav_network"
             app:startIconTint="@color/vortex_text_secondary">
 
             <AutoCompleteTextView

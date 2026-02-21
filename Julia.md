@@ -154,3 +154,26 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
   - Nota personal para el siguiente agente.
 
 **Fin del documento. Este es el contexto persistente actualizado.**
+
+### [v1.9] UI/UX Overhaul - Modern Aesthetics & Icon Refresh (20 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Necesito mejores la UI/UX de la aplicación... Pestaña status moderna... Device e IDs fusionadas... Iconos esteticos... Network dropdown... App Icon."
+- **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
+- **Identity Tab:** Confirmed merge of Device & IDs.
+- **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
+- **IDs Tab:** Replaced repetitive  with distinct vectors:  (IMEI/AndroidID),  (Gmail),  (Serial/DRM),  (GAID).
+- **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with  to prevent confusion.
+- **App Icon:** Updated  (Manifest & Resource) with user-provided .
+- **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in  and ; consider generating proper densities if build size becomes an issue.
+
+
+### [v1.9] UI/UX Overhaul - Modern Aesthetics & Icon Refresh (20 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Necesito mejores la UI/UX de la aplicación... Pestaña status moderna... Device e IDs fusionadas... Iconos esteticos... Network dropdown... App Icon."
+- **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
+- **Identity Tab:** Confirmed merge of Device & IDs.
+- **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
+- **IDs Tab:** Replaced repetitive `ic_nav_ids` with distinct vectors: `ic_fingerprint` (IMEI/AndroidID), `ic_email` (Gmail), `ic_qr_code` (Serial/DRM), `ic_ad_units` (GAID).
+- **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with `ic_nav_network` to prevent confusion.
+- **App Icon:** Updated `ic_launcher` (Manifest & Resource) with user-provided `App Icon.png`.
+- **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in `drawable` and `mipmap-xxxhdpi`; consider generating proper densities if build size becomes an issue.

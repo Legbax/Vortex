@@ -14,42 +14,23 @@
         android:padding="16dp"
         android:clipToPadding="false">
 
-        <!-- App Bar Simulation -->
-        <LinearLayout
+        <!-- Modern Header -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:text="System Status"
+            style="@style/Vortex.Text.Title"
+            android:textSize="24sp"
             android:gravity="center"
-            android:paddingBottom="16dp"
-            android:background="@drawable/bg_border_bottom">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="VORTEX"
-                android:letterSpacing="0.1"
-                style="@style/Vortex.Text.Title"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/text_subtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/developer_subtitle"
-                style="@style/Vortex.Text.Subtitle"
-                android:textAllCaps="true"
-                android:letterSpacing="0.2"
-                android:textSize="10sp"
-                android:layout_marginTop="2dp"/>
-        </LinearLayout>
-
-        <!-- Evasion Score -->
+        <!-- Evasion Score (Modern Circular) -->
         <FrameLayout
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="32dp">
 
             <!-- Background Track -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -57,23 +38,23 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:progress="100"
-                app:indicatorSize="180dp"
-                app:trackThickness="12dp"
+                app:indicatorSize="200dp"
+                app:trackThickness="16dp"
                 app:trackColor="@color/vortex_card_background"
                 app:indicatorColor="@color/vortex_card_background" />
 
-            <!-- Actual Score Indicator -->
+            <!-- Active Score Indicator -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progress_evasion"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:progress="0"
-                app:indicatorSize="180dp"
-                app:trackThickness="12dp"
+                app:indicatorSize="200dp"
+                app:trackThickness="16dp"
                 app:trackColor="@android:color/transparent"
                 app:indicatorColor="@color/vortex_accent"
-                app:trackCornerRadius="6dp" />
+                app:trackCornerRadius="8dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -88,20 +69,23 @@
                     android:layout_height="wrap_content"
                     android:text="--"
                     style="@style/Vortex.Text.Title"
-                    android:textSize="48sp" />
+                    android:textSize="56sp"
+                    android:textColor="@color/vortex_text_primary"
+                    android:fontFamily="sans-serif-medium"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/status_evasion_score"
+                    android:text="EVASION SCORE"
                     style="@style/Vortex.Text.SectionHeader"
-                    android:textSize="10sp"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="11sp"
+                    android:layout_marginTop="4dp"
+                    android:letterSpacing="0.15"/>
 
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Proxy & IP Cards (New) -->
+        <!-- Proxy & IP Cards -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +99,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                style="@style/Vortex.Card">
+                style="@style/Vortex.Card"
+                app:cardBackgroundColor="#1A1D24"
+                app:strokeColor="#2A2E36"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -124,19 +111,19 @@
                     android:padding="16dp"
                     android:gravity="center">
 
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_nav_network"
+                        app:tint="@color/vortex_proxy_inactive"
+                        android:layout_marginBottom="8dp"/>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="PROXY STATUS"
+                        android:text="PROXY"
                         style="@style/Vortex.Text.SectionHeader"
                         android:textSize="10sp"
-                        android:layout_marginBottom="8dp"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_nav_network"
-                        app:tint="@color/vortex_proxy_inactive"
                         android:layout_marginBottom="4dp"/>
 
                     <TextView
@@ -156,7 +143,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                style="@style/Vortex.Card">
+                style="@style/Vortex.Card"
+                app:cardBackgroundColor="#1A1D24"
+                app:strokeColor="#2A2E36"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -165,26 +155,26 @@
                     android:padding="16dp"
                     android:gravity="center">
 
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_nav_location"
+                        app:tint="@color/vortex_accent"
+                        android:layout_marginBottom="8dp"/>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="IP ADDRESS"
                         style="@style/Vortex.Text.SectionHeader"
                         android:textSize="10sp"
-                        android:layout_marginBottom="8dp"/>
-
-                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_nav_network"
-                        app:tint="@color/vortex_accent"
                         android:layout_marginBottom="4dp"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="127.0.0.1"
-                        android:textColor="@color/vortex_ip_text"
+                        android:textColor="@color/vortex_text_primary"
                         style="@style/Vortex.Text.Title"
                         android:textSize="14sp"/>
 
@@ -193,8 +183,15 @@
 
         </LinearLayout>
 
+        <!-- Configuration Summary -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACTIVE CONFIGURATION"
+            style="@style/Vortex.Text.SectionHeader"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"/>
 
-        <!-- Profile Summary (Existing) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -204,52 +201,47 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ACTIVE CONFIGURATION"
-                    style="@style/Vortex.Text.SectionHeader"
-                    android:layout_marginBottom="16dp"
-                    app:drawableStartCompat="@drawable/ic_nav_device"
-                    android:drawablePadding="8dp"
-                    app:drawableTint="@color/vortex_accent" />
+                android:padding="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Fingerprint"
+                        android:text="Device Fingerprint"
+                        android:drawablePadding="12dp"
                         app:drawableStartCompat="@drawable/ic_nav_device"
-                        android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
-                        android:textSize="12sp"/>
+                        android:textSize="14sp"/>
 
                     <TextView
                         android:id="@+id/text_current_profile"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="--"
-                        android:gravity="end"
                         style="@style/Vortex.Text.Title"
-                        android:textSize="14sp"/>
-
+                        android:textSize="14sp"
+                        android:gravity="end"/>
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2A2E36"
+                    android:layout_marginBottom="16dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     android:gravity="center_vertical">
 
                     <TextView
@@ -257,22 +249,27 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="SIM Country"
+                        android:drawablePadding="12dp"
                         app:drawableStartCompat="@drawable/ic_nav_network"
-                        android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
-                        android:textSize="12sp"/>
+                        android:textSize="14sp"/>
 
                     <TextView
                         android:id="@+id/text_sim_country"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="US"
-                        android:gravity="end"
                         style="@style/Vortex.Text.Title"
-                        android:textSize="14sp"/>
-
+                        android:textSize="14sp"
+                        android:gravity="end"/>
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2A2E36"
+                    android:layout_marginBottom="16dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -284,23 +281,22 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Location"
+                        android:text="Location Status"
+                        android:drawablePadding="12dp"
                         app:drawableStartCompat="@drawable/ic_nav_location"
-                        android:drawablePadding="8dp"
                         app:drawableTint="@color/vortex_text_secondary"
                         style="@style/Vortex.Text.Subtitle"
-                        android:textSize="12sp"/>
+                        android:textSize="14sp"/>
 
                     <TextView
                         android:id="@+id/text_location_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="--"
-                        android:gravity="end"
                         style="@style/Vortex.Text.Title"
                         android:textSize="14sp"
-                        android:textColor="@color/vortex_success"/>
-
+                        android:textColor="@color/vortex_success"
+                        android:gravity="end"/>
                 </LinearLayout>
 
             </LinearLayout>
