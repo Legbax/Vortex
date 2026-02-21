@@ -27,11 +27,11 @@ class MainActivity : AppCompatActivity() {
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             when (position) {
-                0 -> { tab.text = "Status"; tab.setIcon(R.drawable.ic_status) }
-                1 -> { tab.text = "Identity"; tab.setIcon(R.drawable.ic_device) }
-                2 -> { tab.text = "Network"; tab.setIcon(R.drawable.ic_network) }
-                3 -> { tab.text = "Loc"; tab.setIcon(R.drawable.ic_location) }
-                4 -> { tab.text = "Adv"; tab.setIcon(R.drawable.ic_advanced) }
+                0 -> { tab.setIcon(R.drawable.ic_status) }
+                1 -> { tab.setIcon(R.drawable.ic_device) }
+                2 -> { tab.setIcon(R.drawable.ic_network) }
+                3 -> { tab.setIcon(R.drawable.ic_location) }
+                4 -> { tab.setIcon(R.drawable.ic_advanced) }
             }
         }.attach()
 

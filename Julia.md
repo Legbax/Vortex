@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.7 (UI/UX Modernization)
+## 📦 Current Release State: v1.8 (UI/UX - Minimalist Navigation)
 **Date:** 20 de febrero de 2026  
 **Agent:** Dalí (Jules)
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -28,7 +28,12 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ## 📅 Changelog / Journal
 
-### [v1.7] UI/UX Modernization - Dalí Refinement (Current)
+### [v1.8] UI/UX - Minimalist Navigation & Custom Icons (Current)
+- **Navigation:** Removed text labels from the main bottom navigation bar (`MainActivity.kt`), leaving only icons for a minimalist look.
+- **Icons:** Replaced all 5 main navigation icons (Status, Device, Network, Location, Advanced) + IDs icon with high-quality, sharp stroke vectors derived from `UI_PREVIEW.html`.
+- **Identity:** Updated `ic_device.xml` to match the new sharper aesthetic.
+
+### [v1.7] UI/UX Modernization - Dalí Refinement (20 Feb 2026)
 - **UI Architecture:** Merged `Device` and `IDs` fragments into a single `IdentityFragment` with `TabLayout`, reducing main navigation to 5 tabs.
 - **Status Tab:** Redesigned with modern cards for Proxy Status and IP Address.
 - **Network Tab:** Replaced Carrier Search/RecyclerView with a clean `ExposedDropdownMenu`.
