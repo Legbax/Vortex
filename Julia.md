@@ -161,18 +161,6 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
 - **Identity Tab:** Confirmed merge of Device & IDs.
 - **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
-- **IDs Tab:** Replaced repetitive  with distinct vectors:  (IMEI/AndroidID),  (Gmail),  (Serial/DRM),  (GAID).
-- **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with  to prevent confusion.
-- **App Icon:** Updated  (Manifest & Resource) with user-provided .
-- **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in  and ; consider generating proper densities if build size becomes an issue.
-
-
-### [v1.9] UI/UX Overhaul - Modern Aesthetics & Icon Refresh (20 Feb 2026)
-- **Agent:** Jules
-- **Prompt:** "Necesito mejores la UI/UX de la aplicación... Pestaña status moderna... Device e IDs fusionadas... Iconos esteticos... Network dropdown... App Icon."
-- **Status Tab:** Completely redesigned. Removed generic App Bar. Added "Modern Circular" Evasion Score. Added dedicated Cards for "Proxy Status" and "IP Address" (visual placeholders).
-- **Identity Tab:** Confirmed merge of Device & IDs.
-- **Device Tab:** Modernized header with large centered Card/Gradient. Improved typography and spacing for Profile Selector.
 - **IDs Tab:** Replaced repetitive `ic_nav_ids` with distinct vectors: `ic_fingerprint` (IMEI/AndroidID), `ic_email` (Gmail), `ic_qr_code` (Serial/DRM), `ic_ad_units` (GAID).
 - **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with `ic_nav_network` to prevent confusion.
 - **App Icon:** Updated `ic_launcher` (Manifest & Resource) with user-provided `App Icon.png`.
@@ -193,3 +181,16 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Dependencies:** Added `com.github.topjohnwu.libsu:core:5.2.0`.
 - **Assets:** Added dummy `redsocks` binary (Agent must verify binary architecture before production).
 - **Note to Next Agent:** The `redsocks` binary in assets is a dummy. Ideally, this should be replaced with a real ARM64 static binary for functionality testing. The build system is standard (MavenCentral) so `libsu` should resolve fine.
+
+### [v8.0] Implementation Final JA3/TLS Randomizer Real + EGL GPU Spoof (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Implementación Final JA3/TLS Randomizer Real + EGL GPU Spoof (v8.0)..."
+- **UI:**
+  - Added "GPU Spoof (EGL/OpenGL)" and "JA3/TLS Randomizer" cards to `IDsFragment` (`fragment_ids.xml`).
+  - Added switches and "Force Refresh" buttons with confirmation dialogs.
+- **Backend:**
+  - **GPUSpoofer:** Implemented `com.vortex.hooks.GPUSpoofer` hooking `EGL14.eglQueryString` and `GLES20/30/31/32.glGetString` to spoof Adreno 660. Adapted to use `XSharedPreferences`.
+  - **TLSRandomizer:** Implemented `com.vortex.hooks.TLSRandomizer` hooking `SSLSocket.setEnabledCipherSuites` to shuffle cipher suites. Uses random seed if "Force Refresh" is requested.
+- **Integration:** Initialized both hooks in `MainHook.kt` inside the `TARGET_APPS` block.
+- **Verification:** Verified compilation and file integrity.
+- **Note to Next Agent:** The hooks use `XSharedPreferences` for reading preferences. Writing back to preferences from the Xposed module (e.g., to reset the "Force Refresh" flag) is not supported in this implementation due to Android permissions. The logic assumes "Force Refresh" = True means "use random seed every time".

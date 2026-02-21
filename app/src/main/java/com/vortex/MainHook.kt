@@ -938,6 +938,10 @@ class MainHook : IXposedHookLoadPackage {
             hookSSLPinning(lpparam)
             hookSensors(lpparam, fp)
 
+            // New Hooks v8.0
+            com.vortex.hooks.GPUSpoofer.init(lpparam.classLoader)
+            com.vortex.hooks.TLSRandomizer.init(lpparam.classLoader)
+
         } catch (e: Throwable) {
             if (BuildConfig.DEBUG) XposedBridge.log("Vortex error: ${e.message}")
         }
