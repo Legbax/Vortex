@@ -826,4 +826,17 @@ object DeviceData {
             buildVersionCodename = "REL", buildVersionPreviewSdk = "0"
         )
     )
+
+    // TARGET_APPS puro (Objetivos principales de Vortex)
+    val TARGET_APPS = listOf(
+        "com.snapchat.android",
+        "com.snapchat.android.beta"
+    )
+
+    // WEBVIEW_PACKAGES (Proveedores del sistema para interceptar renderers aislados u0_iXXX)
+    val WEBVIEW_PACKAGES = listOf(
+        "com.google.android.webview",
+        "com.android.chrome",
+        "com.android.webview"
+    )
 }
