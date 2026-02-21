@@ -70,8 +70,10 @@ class AdvancedFragment : Fragment() {
         swPackages.isChecked = PrefsManager.getBoolean(ctx, "hook_packages", false)
         swWebView.isChecked = PrefsManager.getBoolean(ctx, "hook_webview", false)
 
-        // App selection state is transient or could be saved if needed, defaulting to false/unchecked except maybe Snapchat
-        cbSnapchat.isChecked = true
+        // App selection state
+        cbSnapchat.isChecked = PrefsManager.getBoolean(ctx, "target_snapchat", true)
+        cbPlayStore.isChecked = PrefsManager.getBoolean(ctx, "target_play_store", false)
+        cbGms.isChecked = PrefsManager.getBoolean(ctx, "target_gms", false)
     }
 
     private fun setupListeners() {
@@ -84,8 +86,17 @@ class AdvancedFragment : Fragment() {
         swWebView.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "hook_webview", isChecked) }
 
         // App Selection Feedback
-        val selectionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        val selectionListener = CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked) Toast.makeText(ctx, "Selected for Force Stop / Clear Data", Toast.LENGTH_SHORT).show()
+
+            // Save state [FIX #3]
+            val key = when (buttonView.id) {
+                R.id.cb_snapchat -> "target_snapchat"
+                R.id.cb_play_store -> "target_play_store"
+                R.id.cb_gms -> "target_gms"
+                else -> return@OnCheckedChangeListener
+            }
+            PrefsManager.saveBoolean(ctx, key, isChecked)
         }
         cbSnapchat.setOnCheckedChangeListener(selectionListener)
         cbPlayStore.setOnCheckedChangeListener(selectionListener)

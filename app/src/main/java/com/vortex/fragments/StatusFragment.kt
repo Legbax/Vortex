@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.util.Log
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -68,8 +67,6 @@ class StatusFragment : Fragment() {
             ScoreCheck("Location Spoof",  10) { isMock }
         )
         val score = checks.filter { it.passes() }.sumOf { it.points }
-
-        Log.d("Vortex", "StatusFragment: score=$score/100 | profile=$profile | mock=$isMock")
 
         // --- Color del indicador según rango ---------------------------------
         // >=80 verde éxito | 50-79 naranja advertencia | <50 rojo error
