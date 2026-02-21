@@ -106,7 +106,8 @@ class DeviceFragment : Fragment() {
 
     private fun setupDropdown() {
         val profiles = DeviceData.DEVICE_FINGERPRINTS.keys.toList().sorted()
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, profiles)
+        // Use custom layout for dropdown items (Fix visibility issue)
+        val adapter = ArrayAdapter(requireContext(), R.layout.item_dropdown, profiles)
         actvProfile.setAdapter(adapter)
 
         val current = PrefsManager.getString(requireContext(), "profile", "Redmi 9")

@@ -69,7 +69,8 @@ class NetworkFragment : Fragment() {
         val carriers = DeviceData.getUsCarriers()
         val carrierNames = carriers.map { "${it.name} (${it.mccMnc})" }
 
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, carrierNames)
+        // Use custom layout for dropdown items (Fix visibility issue)
+        val adapter = ArrayAdapter(requireContext(), R.layout.item_dropdown, carrierNames)
         actvCarrierSelector.setAdapter(adapter)
 
         actvCarrierSelector.setOnItemClickListener { parent, _, position, _ ->
