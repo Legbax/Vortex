@@ -133,6 +133,46 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_gpu_spoof"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="GPU Spoof (EGL/OpenGL)"
+                    android:textColor="@color/vortex_accent" android:textSize="16sp" android:textStyle="bold"
+                    app:thumbTint="@color/vortex_accent" app:trackTint="@color/vortex_accent_20" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_refresh_gpu"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Force Refresh GPU Identity" android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#F44336" android:textColor="#F44336"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            style="@style/Vortex.Card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sw_ja3_randomizer"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="JA3/TLS Randomizer"
+                    android:textColor="@color/vortex_accent" android:textSize="16sp" android:textStyle="bold"
+                    app:thumbTint="@color/vortex_accent" app:trackTint="@color/vortex_accent_20" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_refresh_ja3"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Force Refresh JA3 Seed" android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#F44336" android:textColor="#F44336"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
             android:layout_width="match_parent" android:layout_height="wrap_content"

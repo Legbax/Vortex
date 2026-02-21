@@ -7,10 +7,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import android.content.res.ColorStateList
+import android.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.button.MaterialButton
 import com.vortex.DeviceData
 import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
@@ -46,13 +49,45 @@ class IDsFragment : Fragment() {
         btnRandomize = view.findViewById(R.id.btn_generate_random)
         btnSave      = view.findViewById(R.id.btn_save)
 
+        val swGPUSpoof = view.findViewById<SwitchMaterial>(R.id.sw_gpu_spoof)
+        val swJA3 = view.findViewById<SwitchMaterial>(R.id.sw_ja3_randomizer)
+        val btnRefreshGPU = view.findViewById<MaterialButton>(R.id.btn_refresh_gpu)
+        val btnRefreshJA3 = view.findViewById<MaterialButton>(R.id.btn_refresh_ja3)
+
+        val ctx = requireContext()
+
+        swGPUSpoof.isChecked = PrefsManager.getBoolean(ctx, "gpu_spoof_enabled", false)
+        swJA3.isChecked = PrefsManager.getBoolean(ctx, "ja3_randomizer_enabled", false)
+
+        swGPUSpoof.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "gpu_spoof_enabled", isChecked) }
+        swJA3.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "ja3_randomizer_enabled", isChecked) }
+
+        btnRefreshGPU.setOnClickListener {
+            AlertDialog.Builder(ctx)
+                .setTitle("⚠️ Force Refresh GPU Fingerprint")
+                .setMessage("Esto romperá la correlación con el modelo actual. Riesgo alto de detección si no borras datos primero.\n\n¿Continuar?")
+                .setPositiveButton("Sí, Refresh") { _, _ ->
+                    PrefsManager.saveBoolean(ctx, "gpu_force_refresh", true)
+                    Toast.makeText(ctx, "Flag GPU activada. Reinicia la app objetivo.", Toast.LENGTH_LONG).show()
+                }.setNegativeButton("Cancelar", null).show()
+        }
+
+        btnRefreshJA3.setOnClickListener {
+            AlertDialog.Builder(ctx)
+                .setTitle("⚠️ Force Refresh JA3 Fingerprint")
+                .setMessage("Rotar la semilla TLS/JA3 manualmente alterará el ClientHello.\n\n¿Continuar?")
+                .setPositiveButton("Sí, Refresh") { _, _ ->
+                    PrefsManager.saveBoolean(ctx, "ja3_force_refresh", true)
+                    Toast.makeText(ctx, "Flag JA3 activada. Reinicia la app objetivo.", Toast.LENGTH_LONG).show()
+                }.setNegativeButton("Cancelar", null).show()
+        }
+
         loadData()
 
         btnRandomize.setOnClickListener { randomizeAll() }
         btnSave.setOnClickListener      { saveData() }
 
         // Botones de randomize individuales por campo
-        val ctx = requireContext()
         tilImei.setEndIconOnClickListener {
             val p = PrefsManager.getString(ctx, "profile", "Redmi 9")
             val v = SpoofingUtils.generateValidImei(p)
