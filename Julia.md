@@ -208,3 +208,12 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
   - Removed dependency on `PrefsManager` context, using `XSharedPreferences` exclusively.
 - **UI:** Updated `IDsFragment` to generate UUIDs instead of toggling booleans.
 - **Note to Next Agent:** This architecture is robust for Xposed/SELinux restrictions. Do not revert to boolean flags for triggers unless the hook has write access (unlikely in modern Android).
+
+### [v8.1-Patch] Maintenance & Hardening (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Parche de Mantenimiento y Hardening (Limpieza de Bugs)..."
+- **OpSec:** Removed sensitive logging (score, profile, mock) from `StatusFragment.kt` to prevent Logcat leakage.
+- **SSL Pinning:** Replaced unreliable `X509TrustManager` hook with direct `javax.net.ssl.HttpsURLConnection` bypass (nullifying `SSLSocketFactory` and `HostnameVerifier` setters). This fixes silent failures on newer Android versions.
+- **Pixel Compatibility:** Added `"google"` (lowercase) to `SpoofingUtils.TACS_BY_BRAND` map to correctly handle manufacturer strings for Pixel devices, preventing IMEI mismatches.
+- **Cleanup:** Removed unused `SettingsFragment.kt` and `OriginalBuildValues.kt`.
+- **Persistence:** Verified `AdvancedFragment` app selection persistence logic (confirmed correct).
