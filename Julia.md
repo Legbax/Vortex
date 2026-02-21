@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.6 (Stealth Hardening)
+## 📦 Current Release State: v1.7 (UI/UX Modernization)
 **Date:** 20 de febrero de 2026  
 **Agent:** Dalí (Jules)
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -28,7 +28,17 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ## 📅 Changelog / Journal
 
-### [v1.6] Stealth Hardening & Audit (Current)
+### [v1.7] UI/UX Modernization - Dalí Refinement (Current)
+- **UI Architecture:** Merged `Device` and `IDs` fragments into a single `IdentityFragment` with `TabLayout`, reducing main navigation to 5 tabs.
+- **Status Tab:** Redesigned with modern cards for Proxy Status and IP Address.
+- **Network Tab:** Replaced Carrier Search/RecyclerView with a clean `ExposedDropdownMenu`.
+- **Styling:**
+  - Added header images to `DeviceFragment`.
+  - Added start icons to all fields in `IDsFragment`.
+  - Refined color palette (`vortex_proxy_active`, `vortex_proxy_inactive`).
+- **Code:** Updated `MainActivity.kt`, `NetworkFragment.kt`, `IdentityFragment.kt` and XML layouts.
+
+### [v1.6] Stealth Hardening & Audit (20 Feb 2026)
 - **Security:** Hardened `MainHook` logging to strictly respect `BuildConfig.DEBUG`. Removed unconditional "Vortex" logs in release builds to prevent log-based detection.
 - **Stealth:** Added `/data/adb` to `hookFile` sensitive paths list to better hide KernelSU/Magisk indicators.
 - **UX:** Added feedback toasts to `AdvancedFragment` app selection switches to clarify they control the "Force Stop" / "Clear Data" actions.

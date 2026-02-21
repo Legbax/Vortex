@@ -5,17 +5,17 @@
         android:icon="@drawable/ic_status"
         android:title="Status" />
     <item
-        android:id="@+id/nav_device"
+        android:id="@+id/nav_identity"
         android:icon="@drawable/ic_device"
-        android:title="Device" />
-    <item
-        android:id="@+id/nav_ids"
-        android:icon="@drawable/ic_ids"
-        android:title="IDs" />
+        android:title="Identity" />
     <item
         android:id="@+id/nav_network"
         android:icon="@drawable/ic_network"
         android:title="Network" />
+    <item
+        android:id="@+id/nav_location"
+        android:icon="@drawable/ic_location"
+        android:title="Location" />
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_advanced"

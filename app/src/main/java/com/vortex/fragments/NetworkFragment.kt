@@ -6,13 +6,13 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.Toast
 import android.content.res.ColorStateList
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.vortex.DeviceData
@@ -20,17 +20,14 @@ import com.vortex.PrefsManager
 import com.vortex.SpoofingUtils
 import com.vortex.utils.ValidationUtils
 import com.vortex.R
-import com.vortex.adapters.CarrierAdapter
 
 class NetworkFragment : Fragment() {
 
-    private lateinit var rvCarriers: RecyclerView
-    private lateinit var adapter: CarrierAdapter
     private lateinit var btnRandomAll: Button
     private lateinit var btnSave: Button
 
-    // Search
-    private lateinit var etSearch: TextInputEditText
+    // Selector
+    private lateinit var actvCarrierSelector: AutoCompleteTextView
 
     // Campos
     private lateinit var etSimOp: TextInputEditText; private lateinit var tilSimOp: TextInputLayout
@@ -48,8 +45,7 @@ class NetworkFragment : Fragment() {
 
         btnRandomAll = view.findViewById(R.id.btn_random_network)
         btnSave = view.findViewById(R.id.btn_save_network)
-        rvCarriers = view.findViewById(R.id.rv_carriers)
-        etSearch = view.findViewById(R.id.et_search_carrier)
+        actvCarrierSelector = view.findViewById(R.id.actv_carrier_selector)
 
         // Bind fields
         etSimOp = view.findViewById(R.id.et_sim_operator); tilSimOp = view.findViewById(R.id.til_sim_operator)
@@ -70,29 +66,31 @@ class NetworkFragment : Fragment() {
     }
 
     private fun setupCarrierList() {
-        adapter = CarrierAdapter(DeviceData.getUsCarriers()) { carrier ->
-            val ctx = requireContext()
-            // Set context fields (read-only base)
-            etSimOp.setText("${carrier.name} (${carrier.mccMnc})")
-            etSimCountry.setText("us") // Always US for these carriers
+        val carriers = DeviceData.getUsCarriers()
+        val carrierNames = carriers.map { "${it.name} (${it.mccMnc})" }
 
-            // Save context immediately
-            PrefsManager.saveString(ctx, "mcc_mnc", carrier.mccMnc)
-            PrefsManager.saveString(ctx, "carrier_name", carrier.name)
-            PrefsManager.saveString(ctx, "sim_country", "us")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, carrierNames)
+        actvCarrierSelector.setAdapter(adapter)
 
-            Toast.makeText(ctx, "Carrier Context Set: ${carrier.name}. Now use Randomize.", Toast.LENGTH_SHORT).show()
-        }
-        rvCarriers.layoutManager = LinearLayoutManager(context)
-        rvCarriers.adapter = adapter
+        actvCarrierSelector.setOnItemClickListener { parent, _, position, _ ->
+            val selection = parent.getItemAtPosition(position) as String
+            // Find carrier by string matching
+            val carrier = carriers.find { "${it.name} (${it.mccMnc})" == selection }
 
-        etSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter.filter(s.toString())
+            carrier?.let { c ->
+                val ctx = requireContext()
+                // Set context fields (read-only base)
+                etSimOp.setText("${c.name} (${c.mccMnc})")
+                etSimCountry.setText("us") // Always US for these carriers
+
+                // Save context immediately
+                PrefsManager.saveString(ctx, "mcc_mnc", c.mccMnc)
+                PrefsManager.saveString(ctx, "carrier_name", c.name)
+                PrefsManager.saveString(ctx, "sim_country", "us")
+
+                Toast.makeText(ctx, "Carrier Context Set: ${c.name}. Now use Randomize.", Toast.LENGTH_SHORT).show()
             }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        }
     }
 
     private fun loadData() {
@@ -111,9 +109,10 @@ class NetworkFragment : Fragment() {
         etWifiMac.setText(PrefsManager.getString(ctx, "wifi_mac", ""))
         etBtMac.setText(PrefsManager.getString(ctx, "bluetooth_mac", ""))
 
-        // Restore selected carrier in list
-        val savedMcc = PrefsManager.getString(ctx, "mcc_mnc", "310260")
-        adapter.setSelected(savedMcc)
+        // Restore selected carrier in dropdown text (optional, but good UX)
+        if (mccMnc != "—" && carrierName != "Unknown") {
+             actvCarrierSelector.setText("$carrierName ($mccMnc)", false)
+        }
 
         val imsi = etImsi.text.toString()
         val iccid = etIccid.text.toString()
@@ -174,10 +173,13 @@ class NetworkFragment : Fragment() {
             val ctx = requireContext()
             // 1. Pick random carrier
             val carrier = DeviceData.getUsCarriers().random()
-            adapter.setSelected(carrier.mccMnc)
+
+            // Update Dropdown Selection UI
+            val selectionText = "${carrier.name} (${carrier.mccMnc})"
+            actvCarrierSelector.setText(selectionText, false) // false to filter
 
             // 2. Set context
-            etSimOp.setText("${carrier.name} (${carrier.mccMnc})")
+            etSimOp.setText(selectionText)
             etSimCountry.setText("us")
             PrefsManager.saveString(ctx, "mcc_mnc", carrier.mccMnc)
             PrefsManager.saveString(ctx, "carrier_name", carrier.name)

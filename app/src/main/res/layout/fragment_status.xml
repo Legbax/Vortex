@@ -43,12 +43,13 @@
                 android:layout_marginTop="2dp"/>
         </LinearLayout>
 
+        <!-- Evasion Score -->
         <FrameLayout
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="24dp">
 
             <!-- Background Track -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -100,7 +101,100 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Profile Summary -->
+        <!-- Proxy & IP Cards (New) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:baselineAligned="false">
+
+            <!-- Proxy Status -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                style="@style/Vortex.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PROXY STATUS"
+                        style="@style/Vortex.Text.SectionHeader"
+                        android:textSize="10sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_network"
+                        app:tint="@color/vortex_proxy_inactive"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Inactive"
+                        android:textColor="@color/vortex_proxy_inactive"
+                        style="@style/Vortex.Text.Title"
+                        android:textSize="14sp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- IP Address -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                style="@style/Vortex.Card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="IP ADDRESS"
+                        style="@style/Vortex.Text.SectionHeader"
+                        android:textSize="10sp"
+                        android:layout_marginBottom="8dp"/>
+
+                     <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_network"
+                        app:tint="@color/vortex_accent"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="127.0.0.1"
+                        android:textColor="@color/vortex_ip_text"
+                        style="@style/Vortex.Text.Title"
+                        android:textSize="14sp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+
+        <!-- Profile Summary (Existing) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
