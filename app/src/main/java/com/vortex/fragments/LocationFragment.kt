@@ -80,6 +80,8 @@ class LocationFragment : Fragment() {
         // Configuración del WebView
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
         webView.addJavascriptInterface(WebAppInterface(), "Android")
         
         // --- LA MAGIA ESTÁ AQUÍ ---
