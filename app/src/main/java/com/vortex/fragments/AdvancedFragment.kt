@@ -9,10 +9,14 @@ import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.vortex.PrefsManager
 import com.vortex.R
 import com.vortex.utils.RootUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AdvancedFragment : Fragment() {
 
@@ -94,20 +98,38 @@ class AdvancedFragment : Fragment() {
                 Toast.makeText(context, "Select at least one app", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            apps.forEach { RootUtils.forceStop(it) }
-            Toast.makeText(context, "Force Stop executed", Toast.LENGTH_SHORT).show()
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                var success = true
+                apps.forEach { if (!RootUtils.forceStop(it)) success = false }
+
+                withContext(Dispatchers.Main) {
+                    val msg = if (success) "Force Stop executed" else "Error executing Force Stop (Root?)"
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         btnClearData.setOnClickListener {
             val apps = getSelectedApps()
-            if (apps.isEmpty()) return@setOnClickListener
+            if (apps.isEmpty()) {
+                Toast.makeText(context, "Select at least one app", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             AlertDialog.Builder(context)
                 .setTitle("Clear Data?")
-                .setMessage("Irreversible action.")
+                .setMessage("Irreversible action. App data will be wiped.")
                 .setPositiveButton("WIPE") { _, _ ->
-                    apps.forEach { RootUtils.clearData(it) }
-                    Toast.makeText(context, "Data cleared", Toast.LENGTH_SHORT).show()
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        var success = true
+                        apps.forEach { if (!RootUtils.clearData(it)) success = false }
+
+                        withContext(Dispatchers.Main) {
+                            val msg = if (success) "Data cleared" else "Error clearing data (Root?)"
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -116,7 +138,11 @@ class AdvancedFragment : Fragment() {
         btnReboot.setOnClickListener {
              AlertDialog.Builder(context)
                 .setTitle("System Reboot")
-                .setPositiveButton("REBOOT") { _, _ -> RootUtils.rebootDevice() }
+                .setPositiveButton("REBOOT") { _, _ ->
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        RootUtils.rebootDevice()
+                    }
+                }
                 .setNegativeButton("Cancel", null)
                 .show()
         }

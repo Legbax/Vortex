@@ -11,8 +11,10 @@ object RootUtils {
             os.writeBytes(command + "\n")
             os.writeBytes("exit\n")
             os.flush()
-            process.waitFor() == 0
+            val exitCode = process.waitFor()
+            exitCode == 0
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
