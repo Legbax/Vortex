@@ -1,6 +1,7 @@
 package com.vortex.utils
 
 import java.io.DataOutputStream
+import com.vortex.BuildConfig
 
 object RootUtils {
 
@@ -11,8 +12,10 @@ object RootUtils {
             os.writeBytes(command + "\n")
             os.writeBytes("exit\n")
             os.flush()
-            process.waitFor() == 0
+            val exitCode = process.waitFor()
+            exitCode == 0
         } catch (e: Exception) {
+            if (BuildConfig.DEBUG) e.printStackTrace()
             false
         }
     }

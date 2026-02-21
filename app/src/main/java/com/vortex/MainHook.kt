@@ -18,12 +18,14 @@ class MainHook : IXposedHookLoadPackage {
         private const val PREFS_NAME = "vortex_prefs"
 
         fun log(message: String) {
-            XposedBridge.log("[$TAG] $message")
+            if (BuildConfig.DEBUG) XposedBridge.log("[$TAG] $message")
         }
 
         fun logError(message: String, throwable: Throwable? = null) {
-            XposedBridge.log("[$TAG][ERROR] $message")
-            throwable?.let { XposedBridge.log(it) }
+            if (BuildConfig.DEBUG) {
+                XposedBridge.log("[$TAG][ERROR] $message")
+                throwable?.let { XposedBridge.log(it) }
+            }
         }
 
         private val TARGET_APPS = setOf(
@@ -1292,7 +1294,8 @@ class MainHook : IXposedHookLoadPackage {
                              prefs: XSharedPreferences,
                              getStr: (String, String) -> String) {
         try {
-            mockLocationEnabled = prefs.getBoolean("mock_location_enabled", false)
+            // [FIX #1] Use getStr with decryption to read boolean
+            mockLocationEnabled = getStr("mock_location_enabled", "false").toBooleanStrictOrNull() ?: false
             if (!mockLocationEnabled) return
 
             mockLatitude  = getStr("mock_latitude",  "40.7128").toDoubleOrNull() ?: 40.7128
@@ -1465,11 +1468,27 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookFile(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val fileClass = XposedHelpers.findClass("java.io.File", lpparam.classLoader)
-            val rootPaths = setOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su")
+            // [FIX #4] Comprehensive root path list
+            val rootPaths = setOf(
+                // Standard SU binaries
+                "/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su",
+                "/data/local/tmp/su", "/data/local/su",
+                // Root Manager APKs
+                "/system/app/SuperSU.apk", "/system/app/Superuser.apk", "/system/app/SuperUser.apk",
+                // KernelSU
+                "/data/adb/ksu", "/data/adb/ksud",
+                // Magisk legacy & artifacts
+                "/data/adb/magisk", "/sbin/.magisk",
+                // Network indicators
+                "/proc/net/tcp"
+            )
+            val hiddenPrefixes = setOf("/data/adb")
+
             XposedHelpers.findAndHookMethod(fileClass, "exists", object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val file = param.thisObject as java.io.File
-                    if (rootPaths.contains(file.absolutePath)) {
+                    val path = file.absolutePath
+                    if (rootPaths.contains(path) || hiddenPrefixes.any { path.startsWith(it) }) {
                         param.result = false
                     }
                 }
@@ -1527,25 +1546,50 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookSensors(lpparam: XC_LoadPackage.LoadPackageParam, fp: DeviceFingerprint) {
         try {
             val sensorClass = android.hardware.Sensor::class.java
-            // Hook getters directamente para modificar la "lectura" de las specs del sensor
+            // [FIX #5] Complete sensor spoofing
             val spoofSpecs = object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val sensor = param.thisObject as android.hardware.Sensor
                     val type = sensor.type
-                    // Lógica de perfiles (Simplificada para ejemplo)
-                    if (type == android.hardware.Sensor.TYPE_ACCELEROMETER) {
-                        when (param.method.name) {
-                            "getMaximumRange" -> param.result = 19.6f // Xiaomi standard
-                            "getPower" -> param.result = 0.25f
-                            "getResolution" -> param.result = 0.01f
-                            "getVendor" -> param.result = when (fp.brand.lowercase()) {
-                                "xiaomi", "redmi", "poco" -> "STMicroelectronics"
-                                "samsung"                 -> "Samsung Electronics"
-                                "google"                  -> "Google"
-                                "asus"                    -> "AsusTek"
-                                "realme", "oppo", "vivo"  -> "Bosch Sensortec"
-                                else                      -> "QTI"
-                            }
+                    val brand = fp.brand.lowercase()
+
+                    val vendorStr = when (brand) {
+                        "xiaomi", "redmi", "poco" -> "STMicroelectronics"
+                        "samsung"                 -> "Samsung Electronics"
+                        "google"                  -> "Google"
+                        "asus"                    -> "AsusTek"
+                        "realme", "oppo", "vivo"  -> "Bosch Sensortec"
+                        else                      -> "QTI"
+                    }
+
+                    when (type) {
+                        android.hardware.Sensor.TYPE_ACCELEROMETER -> when (param.method.name) {
+                            "getMaximumRange" -> param.result = 19.6f
+                            "getPower"        -> param.result = 0.25f
+                            "getResolution"   -> param.result = 0.01f
+                            "getVendor"       -> param.result = vendorStr
+                        }
+                        android.hardware.Sensor.TYPE_GYROSCOPE -> when (param.method.name) {
+                            "getMaximumRange" -> param.result = 34.906f
+                            "getPower"        -> param.result = 0.9f
+                            "getResolution"   -> param.result = 0.001f
+                            "getVendor"       -> param.result = vendorStr
+                        }
+                        android.hardware.Sensor.TYPE_MAGNETIC_FIELD -> when (param.method.name) {
+                            "getMaximumRange" -> param.result = 4912.0f
+                            "getPower"        -> param.result = 0.5f
+                            "getResolution"   -> param.result = 0.15f
+                            "getVendor"       -> param.result = vendorStr
+                        }
+                        android.hardware.Sensor.TYPE_GRAVITY -> when (param.method.name) {
+                            "getMaximumRange" -> param.result = 19.6f
+                            "getPower"        -> param.result = 0.25f
+                            "getVendor"       -> param.result = vendorStr
+                        }
+                        android.hardware.Sensor.TYPE_PROXIMITY -> when (param.method.name) {
+                            "getMaximumRange" -> param.result = 5.0f
+                            "getPower"        -> param.result = 0.75f
+                            "getVendor"       -> param.result = vendorStr
                         }
                     }
                 }
