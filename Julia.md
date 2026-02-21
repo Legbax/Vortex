@@ -177,3 +177,19 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 - **Network Tab:** Cleaned up. Confirmed Dropdown usage. Replaced "Search" icon on dropdown with `ic_nav_network` to prevent confusion.
 - **App Icon:** Updated `ic_launcher` (Manifest & Resource) with user-provided `App Icon.png`.
 - **Note to Next Agent:** The UI is now significantly more "Dalí-esque" and modern. The App Icon is a single high-res asset in `drawable` and `mipmap-xxxhdpi`; consider generating proper densities if build size becomes an issue.
+
+### [v2.0] Transparent Proxy SOCKS5 (v4 Final) (21 Feb 2026)
+- **Agent:** Jules
+- **Prompt:** "Implementación de Transparent Proxy SOCKS5 (v4 Final)... Nivel 11/10 OpSec... Estética Dalí... Kernel NAT..."
+- **Core:** Implemented `ProxyManager.kt` using `libsu` for root `iptables` management. Supports `redsocks` for SOCKS5 redirect.
+- **OpSec:**
+  - IPv6 Kill-Switch via `ip6tables`.
+  - DNS Leak Mitigation via UDP redirection to `redsocks`.
+  - Secure AES-GCM storage for proxy credentials in `CryptoUtils`.
+  - `WEBVIEW_PACKAGES` added to `DeviceData` for advanced targeting.
+- **UI:**
+  - Refactored `NetworkFragment` to host `CarrierFragment` (Identity) and `ProxyFragment` (SOCKS5) via `ViewPager2`.
+  - `ProxyFragment` adheres to "Dalí" aesthetics (Neon accents, Cards).
+- **Dependencies:** Added `com.github.topjohnwu.libsu:core:5.2.0`.
+- **Assets:** Added dummy `redsocks` binary (Agent must verify binary architecture before production).
+- **Note to Next Agent:** The `redsocks` binary in assets is a dummy. Ideally, this should be replaced with a real ARM64 static binary for functionality testing. The build system is standard (MavenCentral) so `libsu` should resolve fine.
