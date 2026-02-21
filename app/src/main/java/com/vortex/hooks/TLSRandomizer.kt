@@ -6,6 +6,7 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.XSharedPreferences
 import com.vortex.utils.CryptoUtils
+import com.vortex.BuildConfig
 import java.util.Random
 
 object TLSRandomizer {
@@ -54,9 +55,13 @@ object TLSRandomizer {
                     }
                 }
             )
-            XposedBridge.log("[Vortex] JA3/TLS Randomizer v8.0 ACTIVATED (Seed: $seed)")
+            if (BuildConfig.DEBUG) {
+                XposedBridge.log("[Vortex] JA3/TLS Randomizer v8.0 ACTIVATED (Seed: $seed)")
+            }
         } catch (e: Throwable) {
-            XposedBridge.log("[Vortex] TLSRandomizer init failed: ${e.message}")
+            if (BuildConfig.DEBUG) {
+                XposedBridge.log("[Vortex] TLSRandomizer init failed: ${e.message}")
+            }
         }
     }
 }
