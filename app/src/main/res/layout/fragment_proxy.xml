@@ -35,15 +35,15 @@
 
                 <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_global"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Modo Global (Todas las apps)" android:textColor="@color/vortex_text_secondary" android:textSize="14sp"
+                    android:text="Global Mode" android:textColor="@color/vortex_text_secondary" android:textSize="14sp"
                     app:thumbTint="@color/vortex_text_secondary" android:layout_marginTop="12dp"/>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/sw_proxy_webview"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Proxy Android WebView (OpSec Avanzado)" android:textColor="@color/vortex_accent" android:textSize="14sp"
+                    android:text="Proxy Android WebView (OpSec)" android:textColor="@color/vortex_accent" android:textSize="14sp"
                     app:thumbTint="@color/vortex_accent" android:layout_marginTop="12dp"/>
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="Atrapa fugas de renderers aislados. Recomendado para Snapchat Discover. Afectará otros navegadores web internos."
+                    android:text="Affects the intern WebBrowser of Apps"
                     android:textColor="#F44336" android:textSize="11sp" android:layout_marginBottom="8dp"/>
 
             </LinearLayout>
