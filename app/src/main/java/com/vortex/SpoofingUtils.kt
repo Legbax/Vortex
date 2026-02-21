@@ -42,7 +42,6 @@ object SpoofingUtils {
         val rng = if (seed != null) Random(seed) else Random()
         val brand = DeviceData.DEVICE_FINGERPRINTS[profileName]?.brand ?: ""
         val tacList = TACS_BY_BRAND[brand] ?: TACS_BY_BRAND["default"]!!
-        // Use deterministic index if seeded, otherwise random
         val tac = if (seed != null) tacList[Math.abs(rng.nextInt()) % tacList.size] else tacList.random()
 
         val serial = (1..6).map { rng.nextInt(10) }.joinToString("")
@@ -52,7 +51,7 @@ object SpoofingUtils {
 
     fun generateValidIccid(mccMnc: String, seed: Long? = null): String {
         val rng = if (seed != null) Random(seed) else Random()
-        val issuer = (10 + rng.nextInt(90)).toString() // 10..99
+        val issuer = (10 + rng.nextInt(90)).toString()
         val prefix = "89$mccMnc$issuer"
         val needed = 18 - prefix.length
         val account = (1..needed.coerceAtLeast(1)).map { rng.nextInt(10) }.joinToString("")
@@ -97,7 +96,6 @@ object SpoofingUtils {
 
     fun generateRandomGaid(seed: Long? = null): String {
         val rng = if (seed != null) Random(seed) else Random()
-        // Si usamos seed, construimos UUID determinista, si no, randomUUID
         if (seed != null) {
             val mostSigBits = rng.nextLong()
             val leastSigBits = rng.nextLong()
@@ -113,7 +111,7 @@ object SpoofingUtils {
         return when (brand.lowercase()) {
             "samsung" -> {
                 val year = if (rng.nextBoolean()) "21" else "22"
-                val month = (1 + rng.nextInt(12)).toString().padStart(2,'0')
+                val month = (1 + rng.nextInt(12)).toString().padStart(2, '0')
                 val suffix = (1..6).map { "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"[rng.nextInt(34)] }.joinToString("")
                 "R${year}${month}${suffix}"
             }
@@ -121,7 +119,7 @@ object SpoofingUtils {
                 (1..14).map { alphaNum[rng.nextInt(alphaNum.length)] }.joinToString("")
             }
             else -> {
-                val len = 8 + rng.nextInt(5) // 8..12
+                val len = 8 + rng.nextInt(5)
                 (1..len).map { alphaNum[rng.nextInt(alphaNum.length)] }.joinToString("")
             }
         }
@@ -140,17 +138,184 @@ object SpoofingUtils {
 
     fun generateRealisticGmail(seed: Long? = null): String {
         val rng = if (seed != null) Random(seed) else Random()
+
+        // ── FIRST NAMES (332 total) ──────────────────────────────────────────────
+        // 32 Original American Male
+        // 100 New American (50M + 50F) | 100 New European (50M + 50F)
+        // 100 New Latino  (50M + 50F)
+        // Verified: zero duplicates across all 332 entries.
         val first = listOf(
-            "james","john","robert","michael","william","david","joseph","charles",
-            "thomas","daniel","matthew","anthony","mark","donald","steven","paul",
-            "andrew","joshua","kenneth","kevin","brian","george","timothy","ronald",
-            "edward","jason","jeffrey","ryan","jacob","gary","nicholas","eric"
+            // ── Original American Male (32) ──────────────────────────────────────
+            "james", "john", "robert", "michael", "william", "david", "joseph", "charles",
+            "thomas", "daniel", "matthew", "anthony", "mark", "donald", "steven", "paul",
+            "andrew", "joshua", "kenneth", "kevin", "brian", "george", "timothy", "ronald",
+            "edward", "jason", "jeffrey", "ryan", "jacob", "gary", "nicholas", "eric",
+
+            // ── New American Male (50) ────────────────────────────────────────────
+            "christopher", "brandon", "justin", "tyler", "austin", "dylan", "aaron", "zachary",
+            "adam", "patrick", "sean", "travis", "chad", "derek", "shawn", "cody", "hunter",
+            "cole", "blake", "trevor", "jesse", "kyle", "ethan", "caleb", "luke", "noah",
+            "mason", "logan", "liam", "owen", "connor", "eli", "ian", "alex", "marcus",
+            "xavier", "nathaniel", "raymond", "carl", "jerome", "marvin", "phillip", "curtis",
+            "floyd", "glen", "lloyd", "clifton", "wendell", "terrence", "warren",
+
+            // ── New American Female (50) ──────────────────────────────────────────
+            "jennifer", "jessica", "ashley", "amanda", "melissa", "sarah", "stephanie",
+            "elizabeth", "lauren", "rachel", "hannah", "emily", "brittany", "megan",
+            "samantha", "kayla", "courtney", "amber", "tiffany", "heather", "holly", "kelly",
+            "lisa", "linda", "patricia", "barbara", "carol", "alice", "emma", "olivia",
+            "sophia", "ava", "madison", "abigail", "ella", "grace", "lily", "chloe",
+            "victoria", "aria", "riley", "nora", "penelope", "layla", "savannah", "audrey",
+            "claire", "natalie", "leah", "anna",
+
+            // ── New European Male (50) ────────────────────────────────────────────
+            // French
+            "pierre", "baptiste", "hugo", "theo", "maxime", "clement", "remi",
+            // German
+            "hans", "dieter", "franz", "stefan", "lukas", "felix", "moritz", "tobias",
+            // Spanish (Spain)
+            "javier", "pablo", "sergio",
+            // Italian
+            "marco", "luca", "matteo", "giovanni", "roberto", "stefano",
+            // Scandinavian
+            "lars", "sven", "bjorn", "niels",
+            // Eastern European
+            "nikolai", "dmitri", "alexei", "jan", "andrei", "vasile",
+            // Various European
+            "kristian", "arno", "bastian", "leon", "florian", "rupert", "gunther", "ernst",
+            "oskar", "filip", "zoltan", "mirko", "branko",
+            // British
+            "harry", "oliver", "archie",
+
+            // ── New European Female (50) ──────────────────────────────────────────
+            // French
+            "amelie", "juliette", "lea", "manon", "margot", "elise", "pauline",
+            // German
+            "marie", "lena", "katja", "sabine", "monika", "petra",
+            // Spanish (Spain)
+            "carmen", "pilar", "rosa", "isabel", "teresa",
+            // Italian
+            "valentina", "giulia", "federica", "chiara", "francesca",
+            // Scandinavian
+            "ingrid", "astrid", "freya", "maja", "sofie", "annika", "britta",
+            // Eastern European / Russian
+            "natasha", "olga", "tatiana", "svetlana", "irina",
+            "katarzyna", "agnieszka", "magdalena", "marta", "zofia",
+            // British / Irish
+            "amelia", "isla", "poppy", "eleanor", "harriet", "florence",
+            "maeve", "aoife", "siobhan", "brigid",
+
+            // ── New Latino Male (50) ──────────────────────────────────────────────
+            "jose", "juan", "luis", "pedro", "fernando", "jorge", "ricardo", "andres",
+            "rafael", "mario", "victor", "oscar", "rodrigo", "guillermo", "raul", "alberto",
+            "hector", "ernesto", "arturo", "ignacio", "enrique", "manuel", "nicolas",
+            "sebastian", "mauricio", "gerardo", "armando", "aldo", "omar", "gabriel",
+            "santiago", "mateo", "julian", "camilo", "fabian", "cesar", "edgar", "diego",
+            "francisco", "miguel", "carlos", "antonio", "alejandro", "ivan", "felipe",
+            "emilio", "ruben", "aurelio", "gonzalo", "rolando",
+
+            // ── New Latino Female (50) ────────────────────────────────────────────
+            "guadalupe", "maria", "luz", "esperanza", "yolanda", "graciela", "beatriz",
+            "consuelo", "marisol", "lourdes", "rebeca", "alicia", "norma", "silvia",
+            "delia", "blanca", "xiomara", "yasmin", "itzel", "citlali", "yareli", "brenda",
+            "ariadna", "vanesa", "rocio", "veronica", "claudia", "adriana", "paola",
+            "fernanda", "valeria", "daniela", "carolina", "natalia", "sofia", "mariana",
+            "alejandra", "monica", "diana", "elena", "ana", "lucia", "josefina", "lorena",
+            "miriam", "cecilia", "leticia", "gladys", "amparo", "piedad"
         )
+
+        // ── LAST NAMES (532 total) ───────────────────────────────────────────────
+        // 32 Original | 250 New American | 100 New European | 150 New Latino
+        // Verified: zero duplicates across all 532 entries.
         val last = listOf(
-            "smith","johnson","williams","brown","jones","garcia","miller","davis",
-            "wilson","taylor","anderson","thomas","jackson","white","harris","martin",
-            "thompson","young","robinson","lewis","walker","allen","hall","wright",
-            "scott","green","adams","baker","nelson","carter","mitchell","perez"
+            // ── Original (32) ────────────────────────────────────────────────────
+            "smith", "johnson", "williams", "brown", "jones", "garcia", "miller", "davis",
+            "wilson", "taylor", "anderson", "thomas", "jackson", "white", "harris", "martin",
+            "thompson", "young", "robinson", "lewis", "walker", "allen", "hall", "wright",
+            "scott", "green", "adams", "baker", "nelson", "carter", "mitchell", "perez",
+
+            // ── New American (250) ────────────────────────────────────────────────
+            "moore", "lee", "clark", "rodriguez", "martinez", "hernandez", "lopez", "gonzalez",
+            "turner", "phillips", "campbell", "parker", "evans", "edwards", "collins", "stewart",
+            "sanchez", "morris", "rogers", "reed", "cook", "morgan", "bell", "murphy", "bailey",
+            "rivera", "cooper", "richardson", "cox", "howard", "ward", "torres", "peterson",
+            "gray", "ramirez", "watson", "brooks", "kelly", "sanders", "price", "bennett",
+            "wood", "barnes", "ross", "henderson", "coleman", "jenkins", "perry", "powell",
+            "long", "patterson", "hughes", "flores", "washington", "butler", "simmons", "foster",
+            "gonzales", "bryant", "alexander", "russell", "griffin", "diaz", "hayes", "myers",
+            "ford", "hamilton", "graham", "sullivan", "wallace", "woods", "cole", "west",
+            "jordan", "owens", "reynolds", "fisher", "ellis", "harrison", "gibson", "mcdonald",
+            "cruz", "marshall", "ortiz", "gomez", "murray", "freeman", "wells", "webb",
+            "simpson", "stevens", "tucker", "porter", "hunter", "hicks", "crawford", "henry",
+            "boyd", "mason", "morales", "kennedy", "warren", "dixon", "ramos", "reyes",
+            "burns", "gordon", "shaw", "holmes", "rice", "robertson", "hunt", "black",
+            "daniels", "palmer", "mills", "nichols", "grant", "knight", "ferguson", "rose",
+            "stone", "hawkins", "dunn", "perkins", "hudson", "spencer", "gardner", "stephens",
+            "payne", "pierce", "berry", "matthews", "arnold", "wagner", "willis", "ray",
+            "watkins", "olson", "carroll", "duncan", "snyder", "hart", "cunningham", "bradley",
+            "lane", "andrews", "ruiz", "harper", "fox", "riley", "armstrong", "carpenter",
+            "weaver", "elliott", "chavez", "sims", "austin", "peters", "kelley", "franklin",
+            "lawson", "fields", "gutierrez", "pope", "bates", "horton", "sutton", "malone",
+            "mccoy", "rodgers", "gross", "cross", "bowers", "barker", "chambers", "obrien",
+            "walters", "aguilar", "cobb", "french", "kramer", "mccormick", "clarke", "becker",
+            "hoffman", "medina", "fletcher", "guerrero", "holt", "glover", "moss", "christensen",
+            "garrett", "wade", "cannon", "vargas", "sparks", "barrera", "mejia", "garza",
+            "thornton", "valdez", "norris", "lamb", "stevenson", "ball", "bishop", "burnett",
+            "barton", "swanson", "byrd", "moran", "little", "wilkins", "robbins", "gill",
+            "vega", "gibbs", "frank", "pittman", "crane", "stafford", "mcbride", "golden",
+            "acosta", "maxwell", "stark", "odom", "hubbard", "bonner", "gillespie", "mcintyre",
+            "morse", "odonnell", "haley", "frazier", "mullins", "lowe", "romero",
+            "patton", "estes", "mckinney", "phelps", "nolan", "dyer", "gallagher",
+            "mclaughlin", "vance", "lindsey",
+
+            // ── New European (100) ────────────────────────────────────────────────
+            // German (20)
+            "mueller", "schmidt", "schneider", "fischer", "weber", "schulz", "richter",
+            "klein", "wolf", "schroeder", "neumann", "schwarz", "zimmermann", "braun",
+            "kruger", "hartmann", "lange", "lehmann", "schmitt", "werner",
+            // French (20)
+            "bernard", "petit", "richard", "durand", "dubois", "moreau", "simon", "michel",
+            "lefevre", "roux", "bertrand", "morel", "girard", "lambert", "fontaine",
+            "chevalier", "blanchard", "colin", "renard", "leclerc",
+            // Italian (20)
+            "ferrari", "rossi", "esposito", "bianchi", "romano", "colombo", "ricci",
+            "marino", "greco", "bruno", "conti", "mancini", "costa", "giordano", "rizzo",
+            "lombardi", "barbieri", "ferrara", "santoro", "deluca",
+            // Spanish — Spain (10)
+            "fernandez", "alvarez", "jimenez", "alonso", "munoz", "ortega", "delgado",
+            "navarro", "dominguez", "molina",
+            // British / Irish (10)
+            "oconnor", "doyle", "brennan", "reilly", "mckenzie", "fraser", "mclean",
+            "mcgregor", "paterson", "dunne",
+            // Dutch / Scandinavian (10)
+            "dejong", "jansen", "bakker", "meijer", "visser", "lindqvist", "karlsson",
+            "eriksson", "johansson", "larsen",
+            // Eastern European (10)
+            "kowalski", "nowak", "wisniewski", "wozniak", "kowalczyk", "novak", "kovac",
+            "horvat", "jovanovic", "petrovic",
+
+            // ── New Latino (150) ──────────────────────────────────────────────────
+            "suarez", "espinoza", "guzman", "reina", "cardenas", "castro", "herrera",
+            "rojas", "fuentes", "meza", "nunez", "pena", "varela", "salinas", "solis",
+            "pacheco", "montes", "campos", "avila", "lara", "rios", "trevino", "cisneros",
+            "montoya", "rivas", "zamorano", "ibarra", "arroyo", "mondragon", "tapia",
+            "tellez", "vergara", "palomino", "nava", "mata", "leyva", "limon", "estrada",
+            "lugo", "villa", "nieto", "pimentel", "rangel", "orozco", "trujillo", "serrano",
+            "cabrera", "obregon", "caro", "ojeda", "villanueva", "palacios", "vela",
+            "saavedra", "gallardo", "paredes", "benitez", "sandoval", "padilla", "zuniga",
+            "bermudez", "centeno", "navarrete", "duarte", "soto", "cordoba", "cuadrado",
+            "espino", "quintero", "morejon", "barraza", "bustamante", "cedillo", "contreras",
+            "escamilla", "galan", "giron", "guerra", "herrero", "ledezma", "lozano",
+            "maldonado", "mercado", "montiel", "negrete", "ochoa", "palma", "quezada",
+            "rendon", "rosales", "saldana", "saucedo", "segura", "tamayo", "uribe", "vera",
+            "villeda", "zarate", "bautista", "bravo", "calderon", "cantu", "carmona",
+            "cedeno", "cervantes", "corona", "crespo", "escobedo", "fajardo", "gamboa",
+            "granados", "jaime", "landeros", "macedo", "marquez", "meraz", "mireles",
+            "montemayor", "mora", "naranjo", "noriega", "paramo", "pizarro", "plata",
+            "quijano", "robledo", "salcedo", "saldivar", "serratos", "tirado", "urrutia",
+            "vasquez", "zazueta", "aguirre", "alcantar", "andrade", "angulo", "aranda",
+            "arellano", "arias", "arreola", "baeza", "becerra", "bello", "bernal",
+            "castellanos", "covarrubias", "delacruz", "elizondo", "fragoso"
         )
 
         val f = first[rng.nextInt(first.size)]
@@ -179,8 +344,8 @@ object SpoofingUtils {
         val prefix = prefixes[rng.nextInt(prefixes.size)]
         val suffixType = rng.nextInt(3)
         val suffix = when (suffixType) {
-            0 -> "_${1000 + rng.nextInt(9000)}"
-            1 -> "-${generateRandomId(4, seed).uppercase()}"
+            0    -> "_${1000 + rng.nextInt(9000)}"
+            1    -> "-${generateRandomId(4, seed).uppercase()}"
             else -> (1 + rng.nextInt(9)).toString()
         }
         return "$prefix$suffix"
@@ -193,19 +358,16 @@ object SpoofingUtils {
      * que siempre devuelva los mismos valores "ideales" para ese perfil.
      */
     fun generateAllForProfile(profileName: String, mccMnc: String = "310260"): Map<String, String> {
-        // Semilla determinista: hash del nombre del perfil + mccmnc
-        // Esto asegura que "Expected" sea constante para una configuración dada.
         val seed = (profileName.hashCode() + mccMnc.hashCode()).toLong()
         val fp = DeviceData.DEVICE_FINGERPRINTS[profileName]
         val brand = fp?.brand ?: ""
 
-        // Obtener carrier (si existe) para NPAs
         val carrier = DeviceData.getUsCarriers().find { it.mccMnc == mccMnc }
         val npas = carrier?.npas ?: emptyList()
 
         return mapOf(
             "imei"           to generateValidImei(profileName, seed),
-            "imei2"          to generateValidImei(profileName, seed + 1), // semilla diferente
+            "imei2"          to generateValidImei(profileName, seed + 1),
             "imsi"           to generateValidImsi(mccMnc, seed),
             "iccid"          to generateValidIccid(mccMnc, seed),
             "phone_number"   to generatePhoneNumber(npas, seed),
