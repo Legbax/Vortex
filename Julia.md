@@ -3,7 +3,7 @@
 **Este documento es el contexto persistente obligatorio para todos los agentes (Julia, Grok, Claude, etc.).**  
 Debe leerse al inicio de cada sesión.
 
-## 📦 Current Release State: v1.5 (UI/UX Overhaul)
+## 📦 Current Release State: v1.6 (Stealth Hardening)
 **Date:** 20 de febrero de 2026  
 **Agent:** Dalí (Jules)
 **Target Environment:** Redmi 9 Lancelot (Android 11) + KernelSU Next + SusFS + Tricky Store + Shamiko + PIF Next.
@@ -28,7 +28,13 @@ La app proporciona identidad coherente y control al usuario; el kernel (KSU/SusF
 
 ## 📅 Changelog / Journal
 
-### [v1.5] UI/UX Overhaul - Dalí Edition (Current)
+### [v1.6] Stealth Hardening & Audit (Current)
+- **Security:** Hardened `MainHook` logging to strictly respect `BuildConfig.DEBUG`. Removed unconditional "Vortex" logs in release builds to prevent log-based detection.
+- **Stealth:** Added `/data/adb` to `hookFile` sensitive paths list to better hide KernelSU/Magisk indicators.
+- **UX:** Added feedback toasts to `AdvancedFragment` app selection switches to clarify they control the "Force Stop" / "Clear Data" actions.
+- **Audit:** Verified synchronization between `DeviceData.kt` and `MainHook.kt` fingerprints. Verified `RootUtils` implementation.
+
+### [v1.5] UI/UX Overhaul - Dalí Edition
 - **Design:** Created high-fidelity `UI_PREVIEW.html` using TailwindCSS + Alpine.js.
 - **UI Port:** Ported design to Android XML layouts (`fragment_status`, `fragment_device`, `fragment_network`, `fragment_ids`, `fragment_location`, `fragment_advanced`).
 - **Assets:** Created missing vector drawables (`ic_snapchat`, `ic_gms`, `bg_border_bottom`).

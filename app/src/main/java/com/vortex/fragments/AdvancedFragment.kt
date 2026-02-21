@@ -79,6 +79,14 @@ class AdvancedFragment : Fragment() {
         swPackages.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "hook_packages", isChecked) }
         swWebView.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "hook_webview", isChecked) }
 
+        // App Selection Feedback
+        val selectionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            if (isChecked) Toast.makeText(ctx, "Selected for Force Stop / Clear Data", Toast.LENGTH_SHORT).show()
+        }
+        cbSnapchat.setOnCheckedChangeListener(selectionListener)
+        cbPlayStore.setOnCheckedChangeListener(selectionListener)
+        cbGms.setOnCheckedChangeListener(selectionListener)
+
         // Root Utils Listeners
         btnForceStop.setOnClickListener {
             val apps = getSelectedApps()

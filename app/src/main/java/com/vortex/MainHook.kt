@@ -18,12 +18,14 @@ class MainHook : IXposedHookLoadPackage {
         private const val PREFS_NAME = "vortex_prefs"
 
         fun log(message: String) {
-            XposedBridge.log("[$TAG] $message")
+            if (BuildConfig.DEBUG) XposedBridge.log("[$TAG] $message")
         }
 
         fun logError(message: String, throwable: Throwable? = null) {
-            XposedBridge.log("[$TAG][ERROR] $message")
-            throwable?.let { XposedBridge.log(it) }
+            if (BuildConfig.DEBUG) {
+                XposedBridge.log("[$TAG][ERROR] $message")
+                throwable?.let { XposedBridge.log(it) }
+            }
         }
 
         private val TARGET_APPS = setOf(
@@ -1465,11 +1467,14 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookFile(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val fileClass = XposedHelpers.findClass("java.io.File", lpparam.classLoader)
-            val rootPaths = setOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su")
+            val rootBinaries = setOf("/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su")
+            val hiddenDirs = setOf("/data/adb")
+
             XposedHelpers.findAndHookMethod(fileClass, "exists", object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
                     val file = param.thisObject as java.io.File
-                    if (rootPaths.contains(file.absolutePath)) {
+                    val path = file.absolutePath
+                    if (rootBinaries.contains(path) || hiddenDirs.any { path.startsWith(it) }) {
                         param.result = false
                     }
                 }
