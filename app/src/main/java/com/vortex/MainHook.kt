@@ -1199,21 +1199,38 @@ class MainHook : IXposedHookLoadPackage {
     private fun hookSettingsSecure(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
             val cls = XposedHelpers.findClass("android.provider.Settings\$Secure", lpparam.classLoader)
+
             XposedHelpers.findAndHookMethod(cls, "getString",
                 android.content.ContentResolver::class.java, String::class.java,
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         when (param.args[1] as String) {
-                            Settings.Secure.ANDROID_ID   -> {
-                                // [FIX D5] SSAID Uniforme (eliminar logica Snapchat especifica para evitar mismatch con GMS)
-                                param.result = cachedAndroidId
+                            Settings.Secure.ANDROID_ID -> {
+                                val baseId = cachedAndroidId ?: "0000000000000000"
+                                val packageName = lpparam.packageName
+
+                                // Semilla maestra + paquete = SSAID único por app
+                                val input = (baseId + packageName).toByteArray(Charsets.UTF_8)
+
+                                val digest = java.security.MessageDigest.getInstance("SHA-256")
+                                val hashBytes = digest.digest(input)
+
+                                // Primeros 16 caracteres hex = SSAID válido de 16 bytes
+                                val appSpecificSsaid = hashBytes.joinToString("") { "%02x".format(it) }.take(16)
+
+                                param.result = appSpecificSsaid
+
+                                // MainHook.log ya encapsula el if(BuildConfig.DEBUG)
+                                MainHook.log("SSAID for $packageName = $appSpecificSsaid")
                             }
                             "advertising_id"             -> param.result = cachedGaid
                             "gsf_id", "android_id_gsf"  -> param.result = cachedGsfId
                         }
                     }
                 })
-        } catch (_: Throwable) {}
+        } catch (e: Throwable) {
+            MainHook.logError("Error in hookSettingsSecure", e)
+        }
     }
 
     private fun hookNetworkInterfaces(lpparam: XC_LoadPackage.LoadPackageParam) {
