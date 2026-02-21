@@ -248,7 +248,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="SIM Country"
+                        android:text="SIM Operator"
                         android:drawablePadding="12dp"
                         app:drawableStartCompat="@drawable/ic_nav_network"
                         app:drawableTint="@color/vortex_text_secondary"

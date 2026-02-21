@@ -1,14 +1,18 @@
 package com.vortex.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.Toast
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.webkit.JavascriptInterface
+import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
@@ -25,13 +29,18 @@ class LocationFragment : Fragment() {
     private lateinit var btnRandom: Button
     private lateinit var btnSave:   Button
     private lateinit var webView:   WebView
+    
+    // Bandera para evitar bucles infinitos al actualizar texto vs mapa
+    private var isUpdatingFromMap = false
 
     inner class WebAppInterface {
         @JavascriptInterface
         fun setCoordinates(lat: Double, lng: Double) {
             activity?.runOnUiThread {
+                isUpdatingFromMap = true
                 etLat.setText(lat.toString())
                 etLon.setText(lng.toString())
+                isUpdatingFromMap = false
             }
         }
     }
@@ -49,6 +58,7 @@ class LocationFragment : Fragment() {
         Pair(25.7617, -80.1918)    // Miami
     )
 
+    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_location, container, false)
         swMock   = view.findViewById(R.id.sw_mock_location)
@@ -67,30 +77,57 @@ class LocationFragment : Fragment() {
         etAlt.setText(PrefsManager.getString(ctx, "mock_altitude",  "10.0"))
         etAcc.setText(PrefsManager.getString(ctx, "mock_accuracy",  "5.0"))
 
+        // Configuración del WebView
         webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
         webView.addJavascriptInterface(WebAppInterface(), "Android")
+        
+        // --- LA MAGIA ESTÁ AQUÍ ---
+        // Prevenir que el NestedScrollView robe los eventos táctiles del mapa
+        webView.setOnTouchListener { v, event ->
+            v.parent.requestDisallowInterceptTouchEvent(true)
+            when (event.action and MotionEvent.ACTION_MASK) {
+                MotionEvent.ACTION_UP -> v.parent.requestDisallowInterceptTouchEvent(false)
+            }
+            false
+        }
+
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                val lat = etLat.text.toString().toDoubleOrNull() ?: 40.7128
-                val lon = etLon.text.toString().toDoubleOrNull() ?: -74.0060
-                webView.evaluateJavascript("setView($lat, $lon)", null)
+                updateMapFromInputs()
             }
         }
         webView.loadUrl("file:///android_asset/map.html")
 
+        // Listeners para actualizar el mapa si el usuario edita los textos manualmente
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                if (!isUpdatingFromMap) {
+                    updateMapFromInputs()
+                }
+            }
+        }
+        etLat.addTextChangedListener(textWatcher)
+        etLon.addTextChangedListener(textWatcher)
+
+        // Botón Random City
         btnRandom.setOnClickListener {
             val city = usCities.random()
             val lat = city.first  + (Math.random() - 0.5) * 0.05
             val lon = city.second + (Math.random() - 0.5) * 0.05
 
+            // El TextWatcher se encargará de llamar a updateMapFromInputs()
             etLat.setText(lat.toString())
             etLon.setText(lon.toString())
-            etAlt.setText(((Math.random() * 80) + 5).toString())
-            etAcc.setText(((Math.random() * 15) + 3).toString())
-
-            webView.evaluateJavascript("setView($lat, $lon)", null)
+            etAlt.setText(String.format("%.1f", (Math.random() * 80) + 5).replace(",", "."))
+            etAcc.setText(String.format("%.1f", (Math.random() * 15) + 3).replace(",", "."))
         }
 
+        // Botón Guardar
         btnSave.setOnClickListener {
             PrefsManager.saveBoolean(ctx, "mock_location_enabled", swMock.isChecked)
             PrefsManager.saveString(ctx, "mock_latitude",  etLat.text.toString())
@@ -101,5 +138,11 @@ class LocationFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun updateMapFromInputs() {
+        val lat = etLat.text.toString().toDoubleOrNull() ?: 40.7128
+        val lon = etLon.text.toString().toDoubleOrNull() ?: -74.0060
+        webView.evaluateJavascript("setView($lat, $lon)", null)
     }
 }
