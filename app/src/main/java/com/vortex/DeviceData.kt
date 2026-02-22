@@ -39,6 +39,31 @@ object DeviceData {
         val buildVersionCodename: String, val buildVersionPreviewSdk: String
     )
 
+    data class GPUProfile(val renderer: String, val vendor: String)
+
+    fun getGPUProfile(profileName: String): GPUProfile {
+        val fp = DEVICE_FINGERPRINTS[profileName] ?: DEVICE_FINGERPRINTS["Redmi 9"]!!
+        val platform = fp.boardPlatform.lowercase()
+        val hardware = fp.hardware.lowercase()
+
+        // Lógica replicada de GPUSpoofer.kt para la UI
+        return when {
+            platform == "lahaina" -> GPUProfile("Adreno (TM) 660", "Qualcomm")
+            platform == "kona" -> GPUProfile("Adreno (TM) 650", "Qualcomm")
+            platform == "msmnile" -> GPUProfile("Adreno (TM) 640", "Qualcomm")
+            platform == "lito" || platform == "holi" -> GPUProfile("Adreno (TM) 620", "Qualcomm")
+            platform == "atoll" || hardware.contains("sm7150") -> GPUProfile("Adreno (TM) 618", "Qualcomm")
+            platform == "bengal" || platform == "trinket" -> GPUProfile("Adreno (TM) 610", "Qualcomm")
+            platform.contains("mt6833") || hardware == "mt6833" -> GPUProfile("Mali-G57 MC2", "ARM")
+            platform.contains("mt6768") || platform.contains("mt6769") || hardware == "mt6768" -> GPUProfile("Mali-G52 MC2", "ARM")
+            platform.contains("mt6785") || hardware == "mt6785" -> GPUProfile("Mali-G76 MC4", "ARM")
+            platform == "exynos9610" -> GPUProfile("Mali-G72 MP3", "ARM")
+            platform == "exynos850" -> GPUProfile("Mali-G52", "ARM")
+            platform == "exynos9825" -> GPUProfile("Mali-G76 MP12", "ARM")
+            else -> GPUProfile("Adreno (TM) 660", "Qualcomm") // Default fallback
+        }
+    }
+
     val DEVICE_FINGERPRINTS = mapOf(
 
         // =========================================================
