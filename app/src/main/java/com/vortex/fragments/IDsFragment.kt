@@ -34,6 +34,9 @@ class IDsFragment : Fragment() {
     private lateinit var btnRandomize: Button
     private lateinit var btnSave:      Button
 
+    private lateinit var tvCurrentGPU: android.widget.TextView
+    private lateinit var tvCurrentJA3: android.widget.TextView
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_ids, container, false)
 
@@ -59,8 +62,14 @@ class IDsFragment : Fragment() {
         swGPUSpoof.isChecked = PrefsManager.getBoolean(ctx, "gpu_spoof_enabled", false)
         swJA3.isChecked = PrefsManager.getBoolean(ctx, "ja3_randomizer_enabled", false)
 
-        swGPUSpoof.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "gpu_spoof_enabled", isChecked) }
-        swJA3.setOnCheckedChangeListener { _, isChecked -> PrefsManager.saveBoolean(ctx, "ja3_randomizer_enabled", isChecked) }
+        swGPUSpoof.setOnCheckedChangeListener { _, isChecked ->
+            PrefsManager.saveBoolean(ctx, "gpu_spoof_enabled", isChecked)
+            updateSpoofValues()
+        }
+        swJA3.setOnCheckedChangeListener { _, isChecked ->
+            PrefsManager.saveBoolean(ctx, "ja3_randomizer_enabled", isChecked)
+            updateSpoofValues()
+        }
 
         btnRefreshGPU.setOnClickListener {
             AlertDialog.Builder(ctx)
@@ -69,6 +78,7 @@ class IDsFragment : Fragment() {
                 .setPositiveButton("Sí, Refresh") { _, _ ->
                     val newSeed = java.util.UUID.randomUUID().toString()
                     PrefsManager.saveString(ctx, "gpu_seed", newSeed)
+                    updateSpoofValues()
                     Toast.makeText(ctx, "Nueva semilla GPU generada. Reinicia Snapchat.", Toast.LENGTH_LONG).show()
                 }.setNegativeButton("Cancelar", null).show()
         }
@@ -80,6 +90,7 @@ class IDsFragment : Fragment() {
                 .setPositiveButton("Sí, Refresh") { _, _ ->
                     val newSeed = java.util.UUID.randomUUID().toString()
                     PrefsManager.saveString(ctx, "ja3_seed", newSeed)
+                    updateSpoofValues()
                     Toast.makeText(ctx, "Nueva semilla JA3 generada. Reinicia Snapchat.", Toast.LENGTH_LONG).show()
                 }.setNegativeButton("Cancelar", null).show()
         }
@@ -140,6 +151,50 @@ class IDsFragment : Fragment() {
         }
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        tvCurrentGPU = view.findViewById(R.id.tv_current_gpu)
+        tvCurrentJA3 = view.findViewById(R.id.tv_current_ja3)
+
+        // Carga inicial del estado
+        updateSpoofValues()
+    }
+
+    private fun updateSpoofValues() {
+        val ctx = requireContext()
+        val profile = PrefsManager.getString(ctx, "profile", "Redmi 9")
+
+        // Estado GPU
+        val isGpuOn = PrefsManager.getBoolean(ctx, "gpu_spoof_enabled", false)
+        if (isGpuOn) {
+            val gpuProfile = DeviceData.getGPUProfile(profile)
+            tvCurrentGPU.text = "Render: ${gpuProfile.renderer}\nVendor: ${gpuProfile.vendor}"
+            tvCurrentGPU.setTextColor(ContextCompat.getColor(ctx, R.color.vortex_accent))
+        } else {
+            tvCurrentGPU.text = "Estado: Inactivo (GPU Real)"
+            tvCurrentGPU.setTextColor(ContextCompat.getColor(ctx, R.color.vortex_text_secondary))
+        }
+
+        // Estado JA3
+        val isJa3On = PrefsManager.getBoolean(ctx, "ja3_randomizer_enabled", false)
+        if (isJa3On) {
+            val ja3Seed = PrefsManager.getString(ctx, "ja3_seed", profile)
+            // [OpSec]: Truncado visual de la semilla para evitar fugas completas en capturas de pantalla
+            val displaySeed = if (ja3Seed.length >= 8) ja3Seed.take(8) else ja3Seed
+            tvCurrentJA3.text = "Semilla: $displaySeed... (Determinística)"
+            tvCurrentJA3.setTextColor(ContextCompat.getColor(ctx, R.color.vortex_accent))
+        } else {
+            tvCurrentJA3.text = "Estado: Inactivo (Firma Original)"
+            tvCurrentJA3.setTextColor(ContextCompat.getColor(ctx, R.color.vortex_text_secondary))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::tvCurrentGPU.isInitialized) updateSpoofValues()
     }
 
     private fun loadData() {

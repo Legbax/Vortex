@@ -2,6 +2,7 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@color/vortex_background" android:fillViewport="true">
 
@@ -150,6 +151,15 @@
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Force Refresh GPU Identity" android:layout_marginTop="8dp"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#F44336" android:textColor="#F44336"/>
+                <TextView
+                    android:id="@+id/tv_current_gpu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/vortex_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:layout_marginTop="8dp"
+                    tools:text="Estado: Inactivo (GPU Real)" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -170,6 +180,15 @@
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="Force Refresh JA3 Seed" android:layout_marginTop="8dp"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton" app:strokeColor="#F44336" android:textColor="#F44336"/>
+                <TextView
+                    android:id="@+id/tv_current_ja3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/vortex_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:layout_marginTop="8dp"
+                    tools:text="Estado: Inactivo (Firma Original)" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
